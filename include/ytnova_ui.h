@@ -116,6 +116,22 @@ extern void ToggleDotFiles(ViewContext *ctx, YtreeNovaPanel *p);
 extern BOOL HandleDirMakeFile(ViewContext *ctx, DirEntry *dir_entry);
 extern void HandleDirMakeDirectory(ViewContext *ctx, DirEntry *dir_entry,
                                    Statistic *s);
+extern int ArchiveDirectoryTransferProgress(int status, const char *message,
+                                            void *user_data);
+extern void ArchiveDirectoryTransferRemoveTemporary(const char *path);
+typedef enum {
+  ARCHIVE_DIRECTORY_COPY,
+  ARCHIVE_DIRECTORY_MOVE
+} ArchiveDirectoryTransferMode;
+
+extern void ArchiveDirectoryTransfer(ViewContext *ctx, DirEntry **dir_entry_ptr,
+                                     ArchiveDirectoryTransferMode mode,
+                                     const char *src_path,
+                                     const char *dest_dir_path,
+                                     const char *dest_path);
+extern int FilesystemDirectoryTransferToArchive(
+    ViewContext *ctx, ArchiveDirectoryTransferMode mode, const char *src_path,
+    const char *dest_dir_path, const char *dest_path);
 extern DirEntry *HandleDirDeleteDirectory(ViewContext *ctx,
                                           DirEntry *dir_entry);
 extern DirEntry *HandleDirRenameDirectory(ViewContext *ctx,
@@ -682,6 +698,7 @@ extern void FileList_ChangeFileEntry(ViewContext *ctx);
 extern void Progress_Start(ViewContext *ctx, const char *operation,
                            const char *source_path, const char *dest_path,
                            long long bytes_total, unsigned int items_total);
+extern BOOL Progress_ShouldRender(ViewContext *ctx);
 extern BOOL Progress_Update(ViewContext *ctx, long long bytes_done,
                             unsigned int items_done);
 extern void Progress_Finish(ViewContext *ctx);

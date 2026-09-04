@@ -42,7 +42,8 @@ static DirEntry *MakeArchiveDirEntry(const ViewContext *ctx,
 static int ArchiveUICallback(int status, const char *msg, void *user_data) {
   ViewContext *ctx = (ViewContext *)user_data;
 
-  if (status == ARCHIVE_STATUS_PROGRESS && ctx && ctx->hook_draw_spinner)
+  if (status == ARCHIVE_STATUS_PROGRESS && ctx && ctx->hook_draw_spinner &&
+      Progress_ShouldRender(ctx))
     ctx->hook_draw_spinner(ctx);
   (void)status;
   (void)msg;
@@ -56,6 +57,9 @@ int MakeDirectory(const ViewContext *ctx, YtreeNovaPanel *panel,
   int result = -1;
 
   if (!dir_name || !*dir_name)
+    return -1;
+  if (panel && panel->vol && panel->vol->vol_stats.log_mode == ARCHIVE_MODE &&
+      !(panel->vol->vol_stats.archive_capabilities & ARCHIVE_CAP_ADD))
     return -1;
 
   if (MakeDirEntry(ctx, panel, father_dir_entry, dir_name, s) != NULL) {

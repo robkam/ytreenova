@@ -125,6 +125,7 @@ def test_internal_viewer_return_in_archive_mode_restores_full_ui_frame(
         tui.send_keystroke(Keys.ENTER, wait=0.9)
         assert tui.wait_for_content("ARCHIVE", timeout=2.0), _screen_text(tui)
 
+        assert tui.send_and_wait_for_screen_change(Keys.DOWN, timeout=2.0)
         tui.send_keystroke(Keys.ENTER, wait=0.4)
         assert "file" in _footer_text(tui).lower(), _screen_text(tui)
 

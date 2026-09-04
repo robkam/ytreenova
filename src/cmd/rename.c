@@ -23,7 +23,8 @@
 static int ArchiveUICallback(int status, const char *msg, void *user_data) {
   ViewContext *ctx = (ViewContext *)user_data;
 
-  if (status == ARCHIVE_STATUS_PROGRESS && ctx && ctx->hook_draw_spinner)
+  if (status == ARCHIVE_STATUS_PROGRESS && ctx && ctx->hook_draw_spinner &&
+      Progress_ShouldRender(ctx))
     ctx->hook_draw_spinner(ctx);
   (void)status;
   (void)msg;
@@ -54,6 +55,11 @@ int RenameDirectory(ViewContext *ctx, DirEntry *de_ptr, const char *new_name) {
 /* ARCHIVE MODE HANDLER */
 #ifdef HAVE_LIBARCHIVE
   if (ctx->active->vol->vol_stats.log_mode == ARCHIVE_MODE) {
+    if (!(ctx->active->vol->vol_stats.archive_capabilities &
+          ARCHIVE_CAP_RENAME))
+      return -1;
+    if (ctx->hook_draw_spinner)
+      ctx->hook_draw_spinner(ctx);
     if (Archive_RenameEntry(ctx->active->vol->vol_stats.log_path, from_path,
                             new_name, ArchiveUICallback, ctx) == 0) {
       return 0;
@@ -170,8 +176,13 @@ int RenameFile(ViewContext *ctx, FileEntry *fe_ptr, const char *new_name,
 /* ARCHIVE MODE HANDLER */
 #ifdef HAVE_LIBARCHIVE
   if (ctx->active->vol->vol_stats.log_mode == ARCHIVE_MODE) {
+    if (!(ctx->active->vol->vol_stats.archive_capabilities &
+          ARCHIVE_CAP_RENAME))
+      return -1;
+    if (ctx->hook_draw_spinner)
+      ctx->hook_draw_spinner(ctx);
     if (Archive_RenameEntry(ctx->active->vol->vol_stats.log_path, from_path,
-                            new_name, ArchiveUICallback, NULL) == 0) {
+                            new_name, ArchiveUICallback, ctx) == 0) {
       return 0;
     }
     return -1;

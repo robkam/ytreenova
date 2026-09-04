@@ -714,6 +714,7 @@ typedef struct {
   unsigned int disk_total_directories;
   int kind_of_sort;
   int log_mode;
+  unsigned int archive_capabilities;
   char log_path[PATH_LENGTH + 1];
   char path[PATH_LENGTH + 1];
   char file_spec[FILE_SPEC_LENGTH + 1];
@@ -926,6 +927,7 @@ typedef struct {
 
   /* ETA Calculation */
   time_t start_time;
+  time_t last_render_time;
   double bytes_per_sec; /* Rolling average transfer rate */
   int eta_seconds;      /* Estimated time remaining */
 

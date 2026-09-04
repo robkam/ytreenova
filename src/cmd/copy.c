@@ -386,7 +386,7 @@ static int CopyTryArchiveDestination(CopyOperation *op) {
       return -1;
     }
 
-    if (Archive_AddFile(archive_log_path, (char *)archive_src_path,
+    if (Archive_AddFile(archive_log_path, archive_src_path,
                         archive_entry_path, FALSE, UI_ArchiveCallback,
                         op->ctx) != 0) {
       DEBUG_LOG("CopyFile Archive_AddFile failed: archive=%s entry=%s",

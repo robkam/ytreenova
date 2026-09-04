@@ -4441,7 +4441,7 @@ def test_f8_release_inactive_disk_volume_while_active_archive_keeps_split_stable
         cwd=str(disk_vol),
         args=[str(archive_path)],
     )
-    assert tui.wait_for_text("inside.txt", timeout=2.0), _screen_text(tui)
+    assert tui.wait_for_text("inside_dir", timeout=2.0), _screen_text(tui)
 
     try:
         # Move active context to the archive volume by its visible identity.
@@ -4451,6 +4451,8 @@ def test_f8_release_inactive_disk_volume_while_active_archive_keeps_split_stable
             lambda lines: lines if "sample.tar" in next(iter(lines), "") else False,
             max_actions=32,
         ), _screen_text(tui)
+        assert tui.send_and_wait_for_screen_change(Keys.DOWN, timeout=2.0)
+        assert tui.wait_for_text("inside.txt", timeout=2.0), _screen_text(tui)
 
         tui.send_keystroke(Keys.F8, wait=0.5)
         tui.send_keystroke("k", wait=0.3)

@@ -25,11 +25,22 @@ static int DeleteSingleDirectory(ViewContext *ctx, DirEntry *dir_entry,
 static int RmdirProgressCallback(int status, const char *msg, void *user_data) {
   ViewContext *ctx = (ViewContext *)user_data;
 
-  if (status == ARCHIVE_STATUS_PROGRESS && ctx && ctx->hook_draw_spinner)
+  if (status == ARCHIVE_STATUS_PROGRESS && ctx && ctx->hook_draw_spinner &&
+      Progress_ShouldRender(ctx))
     ctx->hook_draw_spinner(ctx);
   (void)status;
   (void)msg;
   return ARCHIVE_CB_CONTINUE;
+}
+
+static int CountDirectoryTree(const DirEntry *dir_entry) {
+  const DirEntry *child;
+  int count = 1;
+
+  for (child = dir_entry ? dir_entry->sub_tree : NULL; child != NULL;
+       child = child->next)
+    count += CountDirectoryTree(child);
+  return count;
 }
 
 int DeleteDirectory(ViewContext *ctx, DirEntry *dir_entry,
@@ -44,19 +55,17 @@ int DeleteDirectory(ViewContext *ctx, DirEntry *dir_entry,
   }
 #ifdef HAVE_LIBARCHIVE
   else if (ctx->active->vol->vol_stats.log_mode == ARCHIVE_MODE) {
-    if (dir_entry->file || dir_entry->sub_tree) {
+    if (!(ctx->active->vol->vol_stats.archive_capabilities & ARCHIVE_CAP_DELETE))
       return -1;
-    } else if (choice_cb && choice_cb(ctx, "Delete this directory (Y/N) ? ",
-                                      "YN\033") == 'Y') {
+    if (choice_cb && choice_cb(ctx, "Delete this directory (Y/N) ? ",
+                               "YN\033") == 'Y') {
       RefreshView(ctx, dir_entry);
       if (ctx->hook_draw_spinner)
         ctx->hook_draw_spinner(ctx);
       GetPath(dir_entry, buffer);
 
-      if (Archive_DeleteEntry(ctx->active->vol->vol_stats.log_path, buffer,
-                              RmdirProgressCallback, ctx) == 0) {
-        ctx->active->vol->vol_stats.disk_total_directories--;
-
+      if (Archive_DeleteTree(ctx->active->vol->vol_stats.log_path, buffer,
+                             RmdirProgressCallback, ctx) == 0) {
         if (dir_entry->prev)
           dir_entry->prev->next = dir_entry->next;
         else
@@ -65,7 +74,9 @@ int DeleteDirectory(ViewContext *ctx, DirEntry *dir_entry,
         if (dir_entry->next)
           dir_entry->next->prev = dir_entry->prev;
 
-        free(dir_entry);
+        ctx->active->vol->vol_stats.disk_total_directories -=
+            CountDirectoryTree(dir_entry);
+        DeleteTree(dir_entry);
         result = 0;
       }
     }

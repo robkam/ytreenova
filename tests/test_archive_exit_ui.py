@@ -530,6 +530,7 @@ def test_archive_file_backslash_is_silent_noop(tmp_path, ytnova_binary):
     tui.send_keystroke(Keys.ENTER, wait=0.8)
     assert tui.wait_for_content("ARCHIVE", timeout=2.0), _screen_text(tui)
 
+    assert tui.send_and_wait_for_screen_change(Keys.DOWN, timeout=2.0)
     tui.send_keystroke(Keys.ENTER, wait=0.4)
     before = _screen_text(tui)
     before_footer = _footer_text(tui)

@@ -904,6 +904,33 @@ static size_t BuildDetailRows(RuntimeHelpPopupState *state,
   return row_count;
 }
 
+static BOOL HelpLineIsUnavailableCommand(
+    const RuntimeHelpPopupState *state, const char *line) {
+  size_t index;
+  const char *label_start;
+  const char *label_end;
+
+  if (state == NULL || line == NULL || line[0] != '`')
+    return FALSE;
+  label_start = line + 1;
+  label_end = strchr(label_start, '`');
+  if (label_end == NULL || label_end[1] != ':')
+    return FALSE;
+
+  for (index = 0; index < state->label_override_count; ++index) {
+    const UIHelpLabelOverride *override = &state->label_overrides[index];
+    size_t label_len;
+
+    if (override->canonical_label == NULL)
+      continue;
+    label_len = strlen(override->canonical_label);
+    if ((size_t)(label_end - label_start) == label_len &&
+        strncmp(label_start, override->canonical_label, label_len) == 0)
+      return override->display_label == NULL;
+  }
+  return FALSE;
+}
+
 static size_t BuildTextRows(RuntimeHelpPopupState *state,
                             const UIHelpPopupRow *prefix_rows,
                             size_t prefix_row_count) {
@@ -946,9 +973,11 @@ static size_t BuildTextRows(RuntimeHelpPopupState *state,
         len = sizeof(line) - 1;
       memcpy(line, cursor, len);
       line[len] = '\0';
-      ParseHelpMarkdown(state, line, &parsed_line);
-      AppendWrappedParsedHelpLine(state, &row_count, &line_index,
-                                  &parsed_line);
+      if (!HelpLineIsUnavailableCommand(state, line)) {
+        ParseHelpMarkdown(state, line, &parsed_line);
+        AppendWrappedParsedHelpLine(state, &row_count, &line_index,
+                                    &parsed_line);
+      }
     } else {
       AppendHelpText(state, &row_count, &line_index, "");
     }

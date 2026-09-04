@@ -2084,7 +2084,7 @@ DirEntry *RefreshTreeSafe(ViewContext *ctx, YtreeNovaPanel *p, DirEntry *entry) 
   BOOL saved_global_all_volumes = entry->global_all_volumes;
   BOOL saved_tagged_flag = entry->tagged_flag;
 
-  if (ctx->view_mode != ARCHIVE_MODE) {
+  if (s->log_mode != ARCHIVE_MODE) {
     PathList *expanded = NULL;
     PathList *collapsed = NULL;
     PathList *tagged = NULL;

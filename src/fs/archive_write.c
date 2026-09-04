@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "ytnova_fs.h"
+#include <dirent.h>
 
 #ifdef HAVE_LIBARCHIVE
 
@@ -20,6 +21,8 @@ typedef struct {
 typedef struct {
   const char *old_path;
   const char *new_name;
+  ArchiveProgressCallback progress_cb;
+  void *progress_data;
 } RenameContext;
 
 /* Helper macros for callback reporting */
@@ -337,7 +340,8 @@ clone_entry_for_write(struct archive_entry *in_entry) {
   return out_entry;
 }
 
-static int copy_data_stream(struct archive *in, struct archive *out) {
+static int copy_data_stream(struct archive *in, struct archive *out,
+                            ArchiveProgressCallback cb, void *user_data) {
   char *buf;
   int ret = ARCHIVE_OK;
 
@@ -353,6 +357,10 @@ static int copy_data_stream(struct archive *in, struct archive *out) {
       break; /* EOF */
 
     if (archive_write_data(out, buf, len) < 0) {
+      ret = ARCHIVE_FATAL;
+      break;
+    }
+    if (cb && cb(ARCHIVE_STATUS_PROGRESS, NULL, user_data) == ARCHIVE_CB_ABORT) {
       ret = ARCHIVE_FATAL;
       break;
     }
@@ -372,7 +380,6 @@ static int process_rewrite_loop(struct archive *a_in, struct archive *a_out,
   int r, res;
   int success = 1; /* Assume success unless error occurs */
   int writer_initialized = 0;
-  int spin_counter = 0;
 
   while ((r = archive_read_next_header(a_in, &entry)) == ARCHIVE_OK) {
 
@@ -393,13 +400,9 @@ static int process_rewrite_loop(struct archive *a_in, struct archive *a_out,
       writer_initialized = 1;
     }
 
-    if ((++spin_counter % 50) == 0) {
-      if (prog_cb && prog_cb(ARCHIVE_STATUS_PROGRESS, NULL, prog_data) ==
-                         ARCHIVE_CB_ABORT) {
-        res = AR_ABORT;
-      } else {
-        res = rw_cb(a_in, a_out, entry, rw_data);
-      }
+    if (prog_cb && prog_cb(ARCHIVE_STATUS_PROGRESS, NULL, prog_data) ==
+                       ARCHIVE_CB_ABORT) {
+      res = AR_ABORT;
     } else {
       res = rw_cb(a_in, a_out, entry, rw_data);
     }
@@ -428,7 +431,7 @@ static int process_rewrite_loop(struct archive *a_in, struct archive *a_out,
     archive_entry_free(cloned);
 
     if (archive_entry_size(entry) > 0) {
-      if (copy_data_stream(a_in, a_out) != ARCHIVE_OK) {
+      if (copy_data_stream(a_in, a_out, prog_cb, prog_data) != ARCHIVE_OK) {
         REPORT_ERROR(prog_cb, prog_data, "Error writing archive data");
         success = 0;
         break;
@@ -552,11 +555,16 @@ static int cb_delete_file(struct archive *r, struct archive *w,
 int Archive_DeleteEntry(char *archive_path, char *file_path,
                         ArchiveProgressCallback cb, void *user_data) {
   char internal_path[PATH_LENGTH];
+  char canonical_path[PATH_LENGTH];
   size_t arch_len;
   size_t file_len;
 
   if (!archive_path || !file_path)
     return -1;
+  if (!(Archive_ProbeCapabilities(archive_path) & ARCHIVE_CAP_DELETE)) {
+    REPORT_ERROR(cb, user_data, "Archive does not support deletion");
+    return -1;
+  }
 
   arch_len = strlen(archive_path);
   file_len = strlen(file_path);
@@ -572,7 +580,12 @@ int Archive_DeleteEntry(char *archive_path, char *file_path,
     internal_path[sizeof(internal_path) - 1] = '\0';
   }
 
-  return Archive_Rewrite(archive_path, cb_delete_file, internal_path, cb,
+  if (Archive_ValidateInternalPath(internal_path, canonical_path,
+                                  sizeof(canonical_path)) != 0) {
+    REPORT_ERROR(cb, user_data, "Unsafe archive internal path requested");
+    return -1;
+  }
+  return Archive_Rewrite(archive_path, cb_delete_file, canonical_path, cb,
                          user_data);
 }
 
@@ -595,67 +608,107 @@ static int cb_add_skip(struct archive *r, struct archive *w,
   return AR_KEEP;
 }
 
-int Archive_AddFile(char *archive_path, char *src_path, char *dest_name,
-                    BOOL is_dir, ArchiveProgressCallback cb, void *user_data) {
+static int ArchiveWriteFilesystemEntry(struct archive *writer,
+                                       const char *src_path,
+                                       const char *dest_name, BOOL is_dir,
+                                       ArchiveProgressCallback cb,
+                                       void *user_data) {
+  struct archive_entry *entry;
+  struct stat st;
+  int src_fd = -1;
+  int success = 0;
+
+  if (is_dir && !src_path) {
+    memset(&st, 0, sizeof(st));
+    st.st_mode = 0755;
+    st.st_mtime = time(NULL);
+    st.st_uid = getuid();
+    st.st_gid = getgid();
+  } else if (!src_path || lstat(src_path, &st) != 0 ||
+             (is_dir ? !S_ISDIR(st.st_mode) : !S_ISREG(st.st_mode))) {
+    return -1;
+  }
+  if (!is_dir) {
+    src_fd = open(src_path, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
+    if (src_fd < 0 || fstat(src_fd, &st) != 0 || !S_ISREG(st.st_mode)) {
+      if (src_fd >= 0)
+        close(src_fd);
+      return -1;
+    }
+  }
+
+  entry = archive_entry_new();
+  if (!entry) {
+    if (src_fd >= 0)
+      close(src_fd);
+    return -1;
+  }
+  archive_entry_set_pathname(entry, dest_name);
+  archive_entry_set_mtime(entry, st.st_mtime, 0);
+  archive_entry_set_uid(entry, st.st_uid);
+  archive_entry_set_gid(entry, st.st_gid);
+  archive_entry_set_perm(entry, st.st_mode & 07777);
+  archive_entry_set_filetype(entry, is_dir ? AE_IFDIR : AE_IFREG);
+  archive_entry_set_size(entry, is_dir ? 0 : st.st_size);
+
+  if (archive_write_header(writer, entry) == ARCHIVE_OK) {
+    success = 1;
+    if (cb && cb(ARCHIVE_STATUS_PROGRESS, NULL, user_data) == ARCHIVE_CB_ABORT)
+      success = 0;
+  }
+  archive_entry_free(entry);
+
+  if (success && !is_dir) {
+    char *buf = xmalloc(COPY_BUF_SIZE);
+    ssize_t len;
+
+    while ((len = read(src_fd, buf, COPY_BUF_SIZE)) > 0) {
+      if (archive_write_data(writer, buf, (size_t)len) < 0 ||
+          (cb && cb(ARCHIVE_STATUS_PROGRESS, NULL, user_data) ==
+                     ARCHIVE_CB_ABORT)) {
+        success = 0;
+        break;
+      }
+    }
+    if (len < 0)
+      success = 0;
+    free(buf);
+  }
+  if (src_fd >= 0)
+    close(src_fd);
+  return success ? 0 : -1;
+}
+
+int Archive_AddFile(char *archive_path, const char *src_path,
+                    const char *dest_name, BOOL is_dir,
+                    ArchiveProgressCallback cb, void *user_data) {
   struct archive *a_in = NULL, *a_out = NULL;
   struct stat st;
   char tmp_path[PATH_LENGTH];
   int fd_tmp = -1;
   int success;
+  char canonical_path[PATH_LENGTH];
 
+  if (!(Archive_ProbeCapabilities(archive_path) & ARCHIVE_CAP_ADD)) {
+    REPORT_ERROR(cb, user_data, "Archive does not support adding entries");
+    return -1;
+  }
+  if (!dest_name || Archive_ValidateInternalPath(dest_name, canonical_path,
+                                                 sizeof(canonical_path)) != 0) {
+    REPORT_ERROR(cb, user_data, "Unsafe archive internal path requested");
+    return -1;
+  }
   if (setup_rewrite(archive_path, tmp_path, &st, &fd_tmp, &a_in, &a_out) != 0) {
     return -1;
   }
 
-  success = process_rewrite_loop(a_in, a_out, cb_add_skip, dest_name, cb,
+  success = process_rewrite_loop(a_in, a_out, cb_add_skip, canonical_path, cb,
                                  user_data, &fd_tmp);
-
-  if (success) {
-    struct archive_entry *new_e = archive_entry_new();
-    struct stat src_st;
-    int src_fd;
-
-    archive_entry_set_pathname(new_e, dest_name);
-    archive_entry_set_mtime(new_e, time(NULL), 0);
-    archive_entry_set_uid(new_e, getuid());
-    archive_entry_set_gid(new_e, getgid());
-
-    if (is_dir) {
-      archive_entry_set_filetype(new_e, AE_IFDIR);
-      archive_entry_set_perm(new_e, 0755);
-      archive_entry_set_size(new_e, 0);
-      if (archive_write_header(a_out, new_e) != ARCHIVE_OK)
-        success = 0;
-    } else {
-      if (stat(src_path, &src_st) == 0) {
-        archive_entry_set_filetype(new_e, AE_IFREG);
-        archive_entry_set_perm(new_e, src_st.st_mode);
-        archive_entry_set_size(new_e, src_st.st_size);
-        archive_entry_set_mtime(new_e, src_st.st_mtime, 0);
-
-        if (archive_write_header(a_out, new_e) == ARCHIVE_OK) {
-          src_fd = open(src_path, O_RDONLY);
-          if (src_fd >= 0) {
-            char *buf = xmalloc(COPY_BUF_SIZE);
-            ssize_t len;
-            while ((len = read(src_fd, buf, COPY_BUF_SIZE)) > 0) {
-              if (archive_write_data(a_out, buf, len) < 0) {
-                REPORT_ERROR(cb, user_data, "Error writing new entry data");
-                success = 0;
-                break;
-              }
-            }
-            free(buf);
-            close(src_fd);
-          }
-        } else {
-          success = 0;
-        }
-      } else {
-        success = 0;
-      }
-    }
-    archive_entry_free(new_e);
+  if (success &&
+      ArchiveWriteFilesystemEntry(a_out, src_path, canonical_path, is_dir, cb,
+                                  user_data) != 0) {
+    REPORT_ERROR(cb, user_data, "Error writing new archive entry");
+    success = 0;
   }
 
   archive_read_free(a_in);
@@ -718,7 +771,8 @@ static int cb_rename(struct archive *r, struct archive *w,
       archive_entry_free(cloned);
 
       if (archive_entry_size(entry) > 0) {
-        if (copy_data_stream(r, w) != ARCHIVE_OK)
+        if (copy_data_stream(r, w, ctx->progress_cb, ctx->progress_data) !=
+            ARCHIVE_OK)
           return AR_ABORT;
       }
 
@@ -728,15 +782,22 @@ static int cb_rename(struct archive *r, struct archive *w,
   return AR_KEEP;
 }
 
-int Archive_RenameEntry(char *archive_path, char *old_path, char *new_name,
-                        ArchiveProgressCallback cb, void *user_data) {
+int Archive_RenameEntry(char *archive_path, char *old_path,
+                        const char *new_name, ArchiveProgressCallback cb,
+                        void *user_data) {
   char internal_old_path[PATH_LENGTH];
+  char canonical_old_path[PATH_LENGTH];
+  char canonical_new_path[PATH_LENGTH];
   size_t arch_len;
   size_t old_len;
   RenameContext ctx;
 
   if (!archive_path || !old_path || !new_name)
     return -1;
+  if (!(Archive_ProbeCapabilities(archive_path) & ARCHIVE_CAP_RENAME)) {
+    REPORT_ERROR(cb, user_data, "Archive does not support renaming entries");
+    return -1;
+  }
 
   arch_len = strlen(archive_path);
   old_len = strlen(old_path);
@@ -752,10 +813,196 @@ int Archive_RenameEntry(char *archive_path, char *old_path, char *new_name,
     internal_old_path[sizeof(internal_old_path) - 1] = '\0';
   }
 
-  ctx.old_path = internal_old_path;
-  ctx.new_name = new_name;
+  if (Archive_ValidateInternalPath(internal_old_path, canonical_old_path,
+                                  sizeof(canonical_old_path)) != 0 ||
+      Archive_ValidateInternalPath(new_name, canonical_new_path,
+                                  sizeof(canonical_new_path)) != 0) {
+    REPORT_ERROR(cb, user_data, "Unsafe archive internal path requested");
+    return -1;
+  }
+  ctx.old_path = canonical_old_path;
+  ctx.new_name = canonical_new_path;
+  ctx.progress_cb = cb;
+  ctx.progress_data = user_data;
 
   return Archive_Rewrite(archive_path, cb_rename, &ctx, cb, user_data);
+}
+
+typedef struct {
+  const char *tree_path;
+  size_t tree_len;
+} ArchiveTreeDeleteContext;
+
+static int cb_delete_tree(struct archive *in, struct archive *out,
+                          struct archive_entry *entry, void *user_data) {
+  const ArchiveTreeDeleteContext *ctx =
+      (const ArchiveTreeDeleteContext *)user_data;
+  char canonical_path[PATH_LENGTH + 1];
+  const char *path = archive_entry_pathname(entry);
+
+  (void)in;
+  (void)out;
+  if (!path || Archive_ValidateInternalPath(path, canonical_path,
+                                            sizeof(canonical_path)) != 0)
+    return AR_SKIP;
+  if (strcmp(canonical_path, ctx->tree_path) == 0 ||
+      (strncmp(canonical_path, ctx->tree_path, ctx->tree_len) == 0 &&
+       canonical_path[ctx->tree_len] == FILE_SEPARATOR_CHAR))
+    return AR_SKIP;
+  return AR_KEEP;
+}
+
+int Archive_DeleteTree(char *archive_path, const char *tree_path,
+                       ArchiveProgressCallback cb, void *user_data) {
+  ArchiveTreeDeleteContext ctx;
+  char canonical_path[PATH_LENGTH + 1];
+  const char *internal_path = tree_path;
+
+  if (!archive_path || !tree_path ||
+      !(Archive_ProbeCapabilities(archive_path) & ARCHIVE_CAP_DELETE) ||
+      (strncmp(tree_path, archive_path, strlen(archive_path)) == 0 &&
+       tree_path[strlen(archive_path)] != '\0' &&
+       tree_path[strlen(archive_path)] != FILE_SEPARATOR_CHAR)) {
+    REPORT_ERROR(cb, user_data, "Archive does not support deleting this directory");
+    return -1;
+  }
+  if (strncmp(tree_path, archive_path, strlen(archive_path)) == 0) {
+    internal_path += strlen(archive_path);
+    while (*internal_path == FILE_SEPARATOR_CHAR)
+      internal_path++;
+  }
+  if (Archive_ValidateInternalPath(internal_path, canonical_path,
+                                  sizeof(canonical_path)) != 0) {
+    REPORT_ERROR(cb, user_data, "Unsafe archive internal path requested");
+    return -1;
+  }
+  ctx.tree_path = canonical_path;
+  ctx.tree_len = strlen(canonical_path);
+  return Archive_Rewrite(archive_path, cb_delete_tree, &ctx, cb, user_data);
+}
+
+static int Archive_AddTreeRecursive(struct archive *writer,
+                                    const char *src_path,
+                                    const char *dest_path,
+                                    ArchiveProgressCallback cb, void *user_data) {
+  DIR *dir;
+  const struct dirent *item;
+
+  if (ArchiveWriteFilesystemEntry(writer, src_path, dest_path, TRUE, cb,
+                                  user_data) != 0)
+    return -1;
+  dir = opendir(src_path);
+  if (!dir)
+    return -1;
+  while ((item = readdir(dir)) != NULL) {
+    char child_src[PATH_LENGTH + 1];
+    char child_dest[PATH_LENGTH + 1];
+    struct stat st;
+
+    if (strcmp(item->d_name, ".") == 0 || strcmp(item->d_name, "..") == 0)
+      continue;
+    if (Path_Join(child_src, sizeof(child_src), src_path, item->d_name) != 0 ||
+        Path_Join(child_dest, sizeof(child_dest), dest_path, item->d_name) != 0 ||
+        lstat(child_src, &st) != 0) {
+      closedir(dir);
+      return -1;
+    }
+    if (S_ISDIR(st.st_mode)) {
+      if (Archive_AddTreeRecursive(writer, child_src, child_dest, cb,
+                                   user_data) != 0) {
+        closedir(dir);
+        return -1;
+      }
+    } else if (S_ISREG(st.st_mode)) {
+      if (ArchiveWriteFilesystemEntry(writer, child_src, child_dest, FALSE, cb,
+                                      user_data) != 0) {
+        closedir(dir);
+        return -1;
+      }
+    } else {
+      REPORT_ERROR(cb, user_data, "Unsupported directory member");
+      closedir(dir);
+      return -1;
+    }
+  }
+  closedir(dir);
+  return 0;
+}
+
+typedef struct {
+  const char *dest_path;
+  size_t dest_len;
+  BOOL collision;
+} ArchiveTreeAddContext;
+
+static int cb_add_tree(struct archive *reader, struct archive *writer,
+                       struct archive_entry *entry, void *user_data) {
+  ArchiveTreeAddContext *ctx = (ArchiveTreeAddContext *)user_data;
+  char canonical_path[PATH_LENGTH + 1];
+  const char *entry_path = archive_entry_pathname(entry);
+  (void)reader;
+  (void)writer;
+
+  if (entry_path &&
+      Archive_ValidateInternalPath(entry_path, canonical_path,
+                                   sizeof(canonical_path)) == 0 &&
+      (strcmp(canonical_path, ctx->dest_path) == 0 ||
+       (strncmp(canonical_path, ctx->dest_path, ctx->dest_len) == 0 &&
+        canonical_path[ctx->dest_len] == FILE_SEPARATOR_CHAR))) {
+    ctx->collision = TRUE;
+    return AR_ABORT;
+  }
+  return AR_KEEP;
+}
+
+int Archive_AddTree(char *archive_path, const char *src_path,
+                    const char *dest_path, ArchiveProgressCallback cb,
+                    void *user_data) {
+  struct archive *a_in = NULL, *a_out = NULL;
+  ArchiveTreeAddContext add_ctx;
+  struct stat archive_st;
+  struct stat source_st;
+  char canonical_path[PATH_LENGTH + 1];
+  char tmp_path[PATH_LENGTH];
+  int fd_tmp = -1;
+  int success;
+
+  if (!archive_path || !src_path || !dest_path ||
+      !(Archive_ProbeCapabilities(archive_path) & ARCHIVE_CAP_ADD) ||
+      Archive_ValidateInternalPath(dest_path, canonical_path,
+                                   sizeof(canonical_path)) != 0 ||
+      lstat(src_path, &source_st) != 0 || !S_ISDIR(source_st.st_mode)) {
+    REPORT_ERROR(cb, user_data, "Archive does not support adding this directory");
+    return -1;
+  }
+  if (setup_rewrite(archive_path, tmp_path, &archive_st, &fd_tmp, &a_in,
+                    &a_out) != 0) {
+    REPORT_ERROR(cb, user_data, "Failed to setup directory archive transfer");
+    return -1;
+  }
+
+  add_ctx.dest_path = canonical_path;
+  add_ctx.dest_len = strlen(canonical_path);
+  add_ctx.collision = FALSE;
+  success = process_rewrite_loop(a_in, a_out, cb_add_tree, &add_ctx, cb,
+                                 user_data, &fd_tmp);
+  if (add_ctx.collision) {
+    REPORT_ERROR(cb, user_data,
+                 "Archive destination already contains this directory");
+    success = 0;
+  } else if (success &&
+             Archive_AddTreeRecursive(a_out, src_path, canonical_path, cb,
+                                      user_data) != 0) {
+    REPORT_ERROR(cb, user_data, "Error writing directory archive entries");
+    success = 0;
+  }
+
+  archive_read_free(a_in);
+  archive_write_close(a_out);
+  archive_write_free(a_out);
+  close(fd_tmp);
+  return finalize_rewrite(archive_path, tmp_path, &archive_st, success, cb,
+                          user_data);
 }
 
 #else
@@ -774,11 +1021,13 @@ int Archive_DeleteEntry(char *archive_path, char *file_path,
                         ArchiveProgressCallback cb, void *user_data) {
   return -1;
 }
-int Archive_AddFile(char *archive_path, char *src_path, char *dest_name,
-                    BOOL is_dir, ArchiveProgressCallback cb, void *user_data) {
+int Archive_AddFile(char *archive_path, const char *src_path,
+                    const char *dest_name, BOOL is_dir,
+                    ArchiveProgressCallback cb, void *user_data) {
   return -1;
 }
-int Archive_RenameEntry(char *archive_path, char *old_path, char *new_name,
+int Archive_RenameEntry(char *archive_path, char *old_path,
+                        const char *new_name,
                         ArchiveProgressCallback cb, void *user_data) {
   return -1;
 }
