@@ -397,7 +397,7 @@ It mirrors directory work where the archive format permits it.
 #### Archive directory command families
 
 * **Presentation and scope**: `1..9 view` still selects the base directory/file presentation, except `9` stays inert in archives. `Filter`, `Showall`, `Global`, and `Jump` still operate on the archive-backed visible set.
-* **Archive-aware edits**: `Delete`, `Rename`, and `Makedir` only work when the current archive format and access path support write-back semantics.
+* **Archive-aware edits**: `Copy`, `Pathcopy`, `Move`, `Delete`, `Rename`, and `Makedir` only work when the current archive format and access path support write-back semantics. Directory transfers are recursive and reject a destination inside the source subtree. Common writable formats include `.tar`, `.tar.gz`, `.tar.bz2`, `.tar.xz`, and `.zip`; actual availability depends on the installed libarchive and archive properties.
 * **Working-set control**: `Tag` and `Untag` operate on the current virtual directory scope.
 * **Transfers and export**: `Output`, `Pipe`, and `Compare` use archive-backed paths. `Log` and `Volume` switch away to other logged roots or volumes when needed.
 * **Session controls**: `Dotfiles` toggles hidden archive entries where the format exposes them, and `Quit` exits ytnova.

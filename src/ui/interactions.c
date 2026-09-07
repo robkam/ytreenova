@@ -718,7 +718,7 @@ int GetRenameParameter(ViewContext *ctx, const char *old_name, char *new_name) {
 int UI_ArchiveCallback(int status, const char *msg, void *user_data) {
   ViewContext *ctx = (ViewContext *)user_data;
   if (status == ARCHIVE_STATUS_PROGRESS) {
-    if (ctx)
+    if (ctx && Progress_ShouldRender(ctx))
       DrawSpinner(ctx);
     if (EscapeKeyPressed()) {
       return ARCHIVE_CB_ABORT;

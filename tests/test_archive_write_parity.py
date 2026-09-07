@@ -1,6 +1,7 @@
 import io
 from pathlib import Path
 import pexpect
+import pytest
 import tarfile
 import time
 
@@ -394,3 +395,164 @@ def test_archive_delete_parity(ytnova_binary, tmp_path):
     assert "delete_me.txt" not in _archive_names(archive_path)
 
     yt.quit()
+
+
+@pytest.mark.parametrize(
+    ("action", "destination_name", "source_retained"),
+    [
+        (Keys.COPY, "copied_bundle", True),
+        (Keys.PATHCOPY, "pathcopied_bundle", True),
+        ("V", "moved_bundle", False),
+    ],
+)
+def test_archive_directory_transfer_matrix_vfs_to_vfs(
+    ytnova_binary, tmp_path, action, destination_name, source_retained
+):
+    root = tmp_path / "directory_vfs_to_vfs"
+    root.mkdir()
+    src_archive = root / "src.tar"
+    dst_archive = root / "dst.tar"
+    source_entries = {
+        "bundle/nested/value.txt": "recursive archive payload",
+        "bundle/peer.txt": "peer payload",
+    }
+    if action == "V":
+        source_entries["sibling/anchor.txt"] = "selection anchor"
+    _create_archive(src_archive, source_entries)
+    _create_archive(dst_archive, {"keep.txt": "keep"})
+
+    yt = YtreeNovaController(ytnova_binary, str(root))
+    try:
+        yt.wait_for_startup()
+        _log_archive(yt, dst_archive)
+        _exit_archive_keep_volume(yt)
+        _log_archive(yt, src_archive)
+        assert yt.send_and_wait_for_screen_change(Keys.DOWN)
+        yt.child.send(action)
+        yt.child.expect(
+            "PATHCOPY"
+            if action == Keys.PATHCOPY
+            else "COPY"
+            if action == Keys.COPY
+            else "MOVE"
+        )
+        yt.input_text(destination_name)
+        yt.child.expect("To Directory")
+        yt.input_text(str(dst_archive))
+
+        destination_names = _wait_for_archive_names(
+            yt,
+            dst_archive,
+            lambda names: (
+                f"{destination_name}/nested/value.txt" in names
+                and f"{destination_name}/peer.txt" in names
+            ),
+            "recursive archive destination members",
+        )
+        assert "keep.txt" in destination_names
+        assert _archive_read_text(
+            dst_archive, f"{destination_name}/nested/value.txt"
+        ) == "recursive archive payload"
+        assert (
+            _archive_read_text(dst_archive, f"{destination_name}/peer.txt")
+            == "peer payload"
+        )
+
+        source_names = _archive_names(src_archive)
+        assert ("bundle/nested/value.txt" in source_names) == source_retained
+        assert ("bundle/peer.txt" in source_names) == source_retained
+
+        _exit_archive_keep_volume(yt)
+        _log_archive(yt, dst_archive)
+        yt.child.expect(destination_name)
+    finally:
+        yt.quit()
+
+
+def test_archive_directory_transfer_rejects_destination_collision(
+    ytnova_binary, tmp_path
+):
+    root = tmp_path / "directory_vfs_collision"
+    root.mkdir()
+    src_archive = root / "src.tar"
+    dst_archive = root / "dst.tar"
+    _create_archive(src_archive, {"bundle/nested/value.txt": "source payload"})
+    _create_archive(
+        dst_archive,
+        {
+            "bundle/nested/value.txt": "destination payload",
+            "keep.txt": "keep",
+        },
+    )
+
+    yt = YtreeNovaController(ytnova_binary, str(root))
+    try:
+        yt.wait_for_startup()
+        _log_archive(yt, dst_archive)
+        _exit_archive_keep_volume(yt)
+        _log_archive(yt, src_archive)
+        yt.child.send(Keys.COPY)
+        yt.child.expect("COPY")
+        yt.input_text("bundle")
+        yt.child.expect("To Directory")
+        yt.input_text(str(dst_archive))
+
+        assert (
+            _archive_read_text(dst_archive, "bundle/nested/value.txt")
+            == "destination payload"
+        )
+        assert (
+            _archive_read_text(src_archive, "bundle/nested/value.txt")
+            == "source payload"
+        )
+    finally:
+        yt.quit()
+
+
+def test_archive_directory_move_preserves_source_when_source_delete_fails(
+    ytnova_binary, tmp_path
+):
+    root = tmp_path / "directory_move_delete_failure"
+    root.mkdir()
+    source_parent = root / "source_volume"
+    source_parent.mkdir()
+    src_archive = source_parent / "src.tar"
+    dst_archive = root / "dst.tar"
+    entries = {
+        "bundle/nested/value.txt": "source payload",
+        "sibling/anchor.txt": "anchor",
+    }
+    _create_archive(src_archive, entries)
+    _create_archive(dst_archive, {"keep.txt": "keep"})
+
+    yt = YtreeNovaController(ytnova_binary, str(root))
+    try:
+        yt.wait_for_startup()
+        _log_archive(yt, dst_archive)
+        _exit_archive_keep_volume(yt)
+        _log_archive(yt, src_archive)
+        assert yt.send_and_wait_for_screen_change(Keys.DOWN)
+        source_parent.chmod(0o555)
+        yt.child.send("V")
+        yt.child.expect("MOVE")
+        yt.input_text("moved_bundle")
+        yt.child.expect("To Directory")
+        yt.input_text(str(dst_archive))
+
+        _wait_for_archive_names(
+            yt,
+            dst_archive,
+            lambda names: "moved_bundle/nested/value.txt" in names,
+            "destination write before injected source removal failure",
+        )
+        assert (
+            _archive_read_text(dst_archive, "moved_bundle/nested/value.txt")
+            == "source payload"
+        )
+        assert (
+            _archive_read_text(src_archive, "bundle/nested/value.txt")
+            == "source payload"
+        )
+    finally:
+        source_parent.chmod(0o755)
+        yt.quit()

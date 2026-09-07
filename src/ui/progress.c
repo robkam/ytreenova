@@ -42,9 +42,22 @@ void Progress_Start(ViewContext *ctx, const char *operation,
   ctx->progress.items_done = 0;
 
   ctx->progress.start_time = time(NULL);
+  ctx->progress.last_render_time = ctx->progress.start_time;
   ctx->progress.bytes_per_sec = 0.0;
   ctx->progress.eta_seconds = 0;
   ctx->progress.cancel_requested = FALSE;
+}
+
+BOOL Progress_ShouldRender(ViewContext *ctx) {
+  time_t now;
+
+  if (!ctx)
+    return FALSE;
+  now = time(NULL);
+  if (now <= ctx->progress.last_render_time)
+    return FALSE;
+  ctx->progress.last_render_time = now;
+  return TRUE;
 }
 
 /*

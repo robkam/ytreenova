@@ -26,7 +26,8 @@
 static int ArchiveUICallback(int status, const char *msg, void *user_data) {
   ViewContext *ctx = (ViewContext *)user_data;
 
-  if (status == ARCHIVE_STATUS_PROGRESS && ctx && ctx->hook_draw_spinner)
+  if (status == ARCHIVE_STATUS_PROGRESS && ctx && ctx->hook_draw_spinner &&
+      Progress_ShouldRender(ctx))
     ctx->hook_draw_spinner(ctx);
   (void)status;
   (void)msg;

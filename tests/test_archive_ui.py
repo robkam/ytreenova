@@ -1,8 +1,11 @@
 import io
 import os
 import re
+import subprocess
 import tarfile
 import zipfile
+
+import pytest
 
 from helpers_ui import dismiss_archive_unsafe_warnings
 from helpers_ui import footer_lines as _footer_lines
@@ -77,6 +80,7 @@ def test_archive_output_flow_writes_selected_entry_to_file(ytnova_binary, tmp_pa
         _enter_archive_from_selected_file(tui)
         assert tui.wait_for_content("ARCHIVE", timeout=2.0)
 
+        assert tui.send_and_wait_for_screen_change(Keys.DOWN, timeout=2.0)
         tui.send_keystroke(Keys.ENTER, wait=0.5)
         assert tui.wait_for_content("inside.txt", timeout=2.0), "\n".join(
             tui.get_screen_dump()
@@ -318,6 +322,26 @@ def test_archive_root_dot_member_is_ignored_without_warning(ytnova_binary, tmp_p
 
         assert not tui.wait_for_content("Skipped unsafe archive member path", timeout=1.0)
         assert tui.wait_for_content("safe_member.txt", timeout=3.0)
+    finally:
+        tui.quit()
+
+
+def test_archive_single_directory_keeps_archive_container_as_tree_root(
+    ytnova_binary, tmp_path
+):
+    root = tmp_path / "archive_root_projection"
+    root.mkdir()
+    archive_path = root / "single.tar"
+    _create_tar(archive_path, {"only/nested/value.txt": "payload"})
+
+    tui = YtreeNovaTUI(executable=ytnova_binary, cwd=str(root))
+    try:
+        _enter_archive_from_selected_file(tui)
+        assert tui.wait_for_content("ARCHIVE", timeout=2.0)
+        assert tui.wait_for_content("single.tar", timeout=2.0)
+        assert tui.wait_for_content("only", timeout=2.0)
+        screen = "\n".join(tui.get_screen_dump())
+        assert "single.tar/only" not in screen
     finally:
         tui.quit()
 
@@ -633,7 +657,7 @@ def test_archive_makedir_updates_visible_view_without_manual_refresh(
 
 
 
-def test_archive_delete_directory_restores_footer_shows_spinner_and_updates_view(
+def test_archive_delete_nested_directory_restores_footer_shows_spinner_and_updates_view(
     ytnova_binary, tmp_path
 ):
     root = tmp_path / "archive_delete_dir_refresh"
@@ -644,6 +668,11 @@ def test_archive_delete_directory_restores_footer_shows_spinner_and_updates_view
         dir_info.type = tarfile.DIRTYPE
         dir_info.mode = 0o755
         tf.addfile(dir_info)
+        payload = b"nested payload"
+        nested = tarfile.TarInfo(name="emptydir/nested.txt")
+        nested.size = len(payload)
+        nested.mode = 0o644
+        tf.addfile(nested, io.BytesIO(payload))
 
         sibling_dir = tarfile.TarInfo(name="otherdir/")
         sibling_dir.type = tarfile.DIRTYPE
@@ -676,8 +705,356 @@ def test_archive_delete_directory_restores_footer_shows_spinner_and_updates_view
             poll_interval=0.05,
         ), "\n".join(tui.get_screen_dump())
 
+        with tarfile.open(archive_path, "r") as tf:
+            assert not any(name.startswith("emptydir/") for name in tf.getnames())
+
         footer_lines = [line.lower() for line in _footer_lines(tui)]
         assert footer_lines[0].strip(), "\n".join(footer_lines)
         assert "archive" in footer_lines[0], "\n".join(footer_lines)
+    finally:
+        tui.quit()
+
+
+def test_archive_directory_copy_recursively_preserves_source(ytnova_binary, tmp_path):
+    root = tmp_path / "archive_directory_copy"
+    root.mkdir()
+    destination = root / "destination"
+    destination.mkdir()
+    archive_path = root / "source.tar"
+    with tarfile.open(archive_path, "w") as tf:
+        for directory in ("bundle/", "bundle/nested/"):
+            info = tarfile.TarInfo(directory)
+            info.type = tarfile.DIRTYPE
+            tf.addfile(info)
+        payload = b"payload"
+        info = tarfile.TarInfo("bundle/nested/value.txt")
+        info.size = len(payload)
+        tf.addfile(info, io.BytesIO(payload))
+
+    tui = YtreeNovaTUI(executable=ytnova_binary, cwd=str(root))
+    try:
+        _enter_archive_from_selected_file(tui)
+        assert tui.wait_for_content("bundle", timeout=3.0)
+        assert tui.send_and_wait_for_screen_change(Keys.DOWN, timeout=2.0)
+        tui.send_keystroke(Keys.COPY, wait=0.1)
+        assert tui.wait_for_content("COPY:", timeout=2.0)
+        tui.send_keystroke("\x15bundle_copy\r", wait=0.1)
+        assert tui.wait_for_content("To Directory", timeout=2.0)
+        tui.send_keystroke(f"\x15{destination}\r", wait=0.1)
+        copied = destination / "bundle_copy" / "nested" / "value.txt"
+        assert tui.wait_for_condition(
+            lambda _lines: copied.exists() and copied.read_text() == "payload",
+            timeout=5.0,
+            description="recursive archive directory copy",
+        )
+        with tarfile.open(archive_path, "r") as tf:
+            assert tf.extractfile("bundle/nested/value.txt").read() == b"payload"
+    finally:
+        tui.quit()
+
+def test_archive_directory_move_to_filesystem_removes_source(ytnova_binary, tmp_path):
+    root = tmp_path / "archive_directory_copy"
+    root.mkdir()
+    destination = root / "destination"
+    destination.mkdir()
+    archive_path = root / "source.tar"
+    with tarfile.open(archive_path, "w") as tf:
+        for directory in ("bundle/", "bundle/nested/"):
+            info = tarfile.TarInfo(directory)
+            info.type = tarfile.DIRTYPE
+            tf.addfile(info)
+        sibling = tarfile.TarInfo("sibling/")
+        sibling.type = tarfile.DIRTYPE
+        tf.addfile(sibling)
+        payload = b"payload"
+        info = tarfile.TarInfo("bundle/nested/value.txt")
+        info.size = len(payload)
+        tf.addfile(info, io.BytesIO(payload))
+
+    tui = YtreeNovaTUI(executable=ytnova_binary, cwd=str(root))
+    try:
+        _enter_archive_from_selected_file(tui)
+        assert tui.wait_for_content("bundle", timeout=3.0)
+        tui.send_keystroke(Keys.DOWN, wait=0.1)
+        tui.send_keystroke("V", wait=0.1)
+        assert tui.wait_for_content("MOVE:", timeout=2.0)
+        tui.send_keystroke("\x15bundle_move\r", wait=0.1)
+        assert tui.wait_for_content("To Directory", timeout=2.0)
+        tui.send_keystroke(f"\x15{destination}\r", wait=0.1)
+        copied = destination / "bundle_move" / "nested" / "value.txt"
+        assert tui.wait_for_condition(
+            lambda _lines: copied.exists() and copied.read_text() == "payload",
+            timeout=5.0,
+            description="recursive archive directory copy",
+        )
+        with tarfile.open(archive_path, "r") as tf:
+            assert "bundle/nested/value.txt" not in tf.getnames()
+    finally:
+        tui.quit()
+
+def test_archive_directory_pathcopy_recursively_preserves_source(ytnova_binary, tmp_path):
+    root = tmp_path / "archive_directory_copy"
+    root.mkdir()
+    destination = root / "destination"
+    destination.mkdir()
+    archive_path = root / "source.tar"
+    with tarfile.open(archive_path, "w") as tf:
+        for directory in ("bundle/", "bundle/nested/"):
+            info = tarfile.TarInfo(directory)
+            info.type = tarfile.DIRTYPE
+            tf.addfile(info)
+        payload = b"payload"
+        info = tarfile.TarInfo("bundle/nested/value.txt")
+        info.size = len(payload)
+        tf.addfile(info, io.BytesIO(payload))
+
+    tui = YtreeNovaTUI(executable=ytnova_binary, cwd=str(root))
+    try:
+        _enter_archive_from_selected_file(tui)
+        assert tui.wait_for_content("bundle", timeout=3.0)
+        assert tui.send_and_wait_for_screen_change(Keys.DOWN, timeout=2.0)
+        tui.send_keystroke(Keys.PATHCOPY, wait=0.1)
+        assert tui.wait_for_content("PATHCOPY:", timeout=2.0)
+        tui.send_keystroke("\x15bundle_pathcopy\r", wait=0.1)
+        assert tui.wait_for_content("To Directory", timeout=2.0)
+        tui.send_keystroke(f"\x15{destination}\r", wait=0.1)
+        copied = destination / "bundle_pathcopy" / "nested" / "value.txt"
+        assert tui.wait_for_condition(
+            lambda _lines: copied.exists() and copied.read_text() == "payload",
+            timeout=5.0,
+            description="recursive archive directory copy",
+        )
+        with tarfile.open(archive_path, "r") as tf:
+            assert tf.extractfile("bundle/nested/value.txt").read() == b"payload"
+    finally:
+        tui.quit()
+
+
+def test_read_only_archive_hides_mutations_and_rejects_move(ytnova_binary, tmp_path):
+    root = tmp_path / "read_only_archive"
+    root.mkdir()
+    member = root / "member.txt"
+    member.write_text("payload", encoding="utf-8")
+    archive_path = root / "readonly.a"
+    subprocess.run(["ar", "rcs", str(archive_path), str(member)], check=True)
+    member.unlink()
+
+    tui = YtreeNovaTUI(executable=ytnova_binary, cwd=str(root))
+    try:
+        _enter_archive_from_selected_file(tui)
+        assert tui.wait_for_content("ARCHIVE", timeout=3.0)
+        footer = " ".join(_footer_lines(tui)).lower()
+        assert "delete" not in footer and "rename" not in footer and "movedir" not in footer
+        tui.send_keystroke(Keys.F1, wait=0.1)
+        assert tui.wait_for_content("Archive Directory Help", timeout=2.0)
+        help_text = "\n".join(tui.get_screen_dump()).lower()
+        unavailable_descriptions = (
+            "delete" + " the selected archive directory",
+            "rename" + " the selected archive directory",
+        )
+        assert all(description not in help_text for description in unavailable_descriptions)
+        tui.send_keystroke("\033", wait=0.1)
+        tui.send_keystroke("V", wait=0.1)
+        assert tui.wait_for_content(
+            "This archive does not support directory transfer", timeout=2.0
+        ), "\n".join(tui.get_screen_dump())
+    finally:
+        tui.quit()
+
+
+def test_split_panels_keep_footer_context_with_archive_and_filesystem_volumes(
+    ytnova_binary, tmp_path
+):
+    root = tmp_path / "archive_footer_panel_isolation"
+    root.mkdir()
+    archive_path = root / "panel.tar"
+    _create_tar(archive_path, {"member.txt": "archive payload"})
+    (root / "filesystem_child").mkdir()
+
+    tui = YtreeNovaTUI(executable=ytnova_binary, cwd=str(root))
+    try:
+        assert tui.send_and_wait_for_screen_change(Keys.F8, timeout=2.0)
+        assert tui.send_and_wait_for_screen_change(Keys.TAB, timeout=2.0)
+        _enter_archive_from_selected_file(tui)
+        assert tui.wait_for_content("ARCHIVE", timeout=2.0)
+
+        assert tui.send_and_wait_for_screen_change(Keys.TAB, timeout=2.0)
+
+        filesystem_footer_lines = _footer_lines(tui)
+        filesystem_footer = "\n".join(filesystem_footer_lines).upper()
+        assert re.match(r"\s*DIR\b", filesystem_footer_lines[0]), filesystem_footer
+        tui.send_keystroke("m", wait=0.1)
+        assert tui.wait_for_content("MAKE DIRECTORY", timeout=2.0)
+        tui.send_keystroke("\033", wait=0.1)
+
+        assert tui.send_and_wait_for_screen_change(Keys.TAB, timeout=2.0)
+        archive_footer_lines = _footer_lines(tui)
+        archive_footer = "\n".join(archive_footer_lines).upper()
+        assert re.match(r"\s*ARCHIVE\b", archive_footer_lines[0]), archive_footer
+    finally:
+        tui.quit()
+
+
+@pytest.mark.parametrize("key, copied_name, removes_source", [
+    (Keys.COPY, "copied", False),
+    (Keys.PATHCOPY, "pathcopied", False),
+    ("V", "moved", True),
+])
+def test_filesystem_directory_transfer_to_logged_archive(
+    ytnova_binary, tmp_path, key, copied_name, removes_source
+):
+    root = tmp_path / "filesystem_to_archive_directory"
+    root.mkdir()
+    source = root / "source"
+    source.mkdir()
+    (source / "payload.txt").write_text("payload", encoding="utf-8")
+    nested = source / "nested"
+    nested.mkdir()
+    (nested / "leaf.txt").write_text("nested payload", encoding="utf-8")
+    archive_path = root / "target.tar"
+    _create_tar(archive_path, {})
+
+    tui = YtreeNovaTUI(executable=ytnova_binary, cwd=str(root))
+    try:
+        assert tui.send_and_wait_for_screen_change(Keys.LOG, timeout=2.0)
+        tui.send_keystroke(f"\x15{archive_path}\r", wait=0.1)
+        assert tui.wait_for_content("ARCHIVE", timeout=2.0)
+        assert tui.send_and_wait_for_screen_change("\\", timeout=2.0)
+        assert tui.send_and_wait_for_screen_change(Keys.ESC, timeout=2.0)
+        assert tui.send_and_wait_for_screen_change(Keys.DOWN, timeout=2.0)
+        tui.send_keystroke(key, wait=0.1)
+        assert tui.wait_for_content("MOVE:" if removes_source else "COPY:", timeout=2.0)
+        tui.send_keystroke(f"\x15{copied_name}\r", wait=0.1)
+        assert tui.wait_for_content("To Directory", timeout=2.0)
+        tui.send_keystroke(f"\x15{archive_path}\r", wait=0.1)
+        def archive_contains_tree(_lines):
+            with tarfile.open(archive_path) as archive:
+                names = archive.getnames()
+                return (f"{copied_name}/payload.txt" in names and
+                        f"{copied_name}/nested/leaf.txt" in names)
+
+        assert tui.wait_for_condition(archive_contains_tree, timeout=4.0,
+                                      description="archive directory insertion"), "\n".join(tui.get_screen_dump())
+        assert source.exists() is not removes_source
+
+        assert tui.send_and_wait_for_screen_change(Keys.LOG, timeout=2.0)
+        tui.child.send(f"\x15{archive_path}\r")
+        assert tui.wait_for_content("ARCHIVE", timeout=2.0)
+        assert tui.wait_for_content(copied_name, timeout=3.0), "\n".join(
+            tui.get_screen_dump()
+        )
+    finally:
+        tui.quit()
+
+
+def test_filesystem_directory_archive_transfer_shows_progress_while_rewriting(
+    ytnova_binary, tmp_path
+):
+    root = tmp_path / "filesystem_to_archive_progress"
+    root.mkdir()
+    source = root / "source"
+    source.mkdir()
+    for index in range(32):
+        (source / f"item_{index:02d}.txt").write_bytes(b"x" * 65536)
+    archive_path = root / "target.tar"
+    _create_tar(archive_path, {})
+
+    tui = YtreeNovaTUI(executable=ytnova_binary, cwd=str(root))
+    try:
+        assert tui.send_and_wait_for_screen_change(Keys.LOG, timeout=2.0)
+        tui.child.send(f"\x15{archive_path}\r")
+        assert tui.wait_for_content("ARCHIVE", timeout=2.0)
+        assert tui.send_and_wait_for_screen_change("\\", timeout=2.0)
+        assert tui.send_and_wait_for_screen_change(Keys.ESC, timeout=2.0)
+        assert tui.send_and_wait_for_screen_change(Keys.DOWN, timeout=2.0)
+        tui.child.send(Keys.COPY)
+        assert tui.wait_for_content("COPY:", timeout=2.0)
+        tui.child.send("\x15copied\r")
+        assert tui.wait_for_content("To Directory", timeout=2.0)
+        tui.child.send(f"\x15{archive_path}\r")
+
+        assert tui.wait_for_content("ARCHIVE COPY:", timeout=3.0), "\n".join(
+            tui.get_screen_dump()
+        )
+
+        def archive_rewrite_finished(_lines):
+            with tarfile.open(archive_path) as archive:
+                return "copied/item_31.txt" in archive.getnames()
+
+        assert tui.wait_for_condition(
+            archive_rewrite_finished,
+            timeout=10.0,
+            poll_interval=0.05,
+            description="archive rewrite completion",
+        )
+    finally:
+        tui.quit()
+
+
+def test_split_directory_copy_refreshes_inactive_archive_panel(
+    ytnova_binary, tmp_path
+):
+    root = tmp_path / "split_directory_archive_refresh"
+    root.mkdir()
+    source = root / "source"
+    source.mkdir()
+    (source / "payload.txt").write_text("payload", encoding="utf-8")
+    archive_path = root / "target.tar"
+    _create_tar(archive_path, {})
+
+    tui = YtreeNovaTUI(executable=ytnova_binary, cwd=str(root))
+    try:
+        assert tui.send_and_wait_for_screen_change(Keys.F8, timeout=2.0)
+        assert tui.send_and_wait_for_screen_change(Keys.TAB, timeout=2.0)
+        _enter_archive_from_selected_file(tui)
+        assert tui.wait_for_content("ARCHIVE", timeout=2.0)
+
+        assert tui.send_and_wait_for_screen_change(Keys.TAB, timeout=2.0)
+        assert tui.send_and_wait_for_screen_change(Keys.DOWN, timeout=2.0)
+        tui.child.send(Keys.COPY)
+        assert tui.wait_for_content("COPY:", timeout=2.0)
+        tui.child.send("\x15copied\r")
+        assert tui.wait_for_content("To Directory", timeout=2.0)
+        tui.child.send(f"\x15{archive_path}\r")
+
+        assert tui.wait_for_content("copied", timeout=4.0), "\n".join(
+            tui.get_screen_dump()
+        )
+        assert tui.send_and_wait_for_screen_change(Keys.TAB, timeout=2.0)
+        assert tui.wait_for_content("copied", timeout=2.0)
+    finally:
+        tui.quit()
+
+
+def test_filesystem_directory_move_to_logged_archive_collision_preserves_source(
+    ytnova_binary, tmp_path
+):
+    root = tmp_path / "filesystem_to_archive_directory_collision"
+    root.mkdir()
+    source = root / "source"
+    source.mkdir()
+    (source / "payload.txt").write_text("payload", encoding="utf-8")
+    archive_path = root / "target.tar"
+    _create_tar(archive_path, {"moved": "existing destination"})
+
+    tui = YtreeNovaTUI(executable=ytnova_binary, cwd=str(root))
+    try:
+        assert tui.send_and_wait_for_screen_change(Keys.LOG, timeout=2.0)
+        tui.send_keystroke(f"\x15{archive_path}\r", wait=0.1)
+        assert tui.wait_for_content("ARCHIVE", timeout=2.0)
+        assert tui.send_and_wait_for_screen_change("\\", timeout=2.0)
+        assert tui.send_and_wait_for_screen_change(Keys.ESC, timeout=2.0)
+        assert tui.send_and_wait_for_screen_change(Keys.DOWN, timeout=2.0)
+        tui.send_keystroke("V", wait=0.1)
+        assert tui.wait_for_content("MOVE:", timeout=2.0)
+        tui.send_keystroke("\x15moved\r", wait=0.1)
+        assert tui.wait_for_content("To Directory", timeout=2.0)
+        assert tui.send_and_wait_for_screen_change(
+            f"\x15{archive_path}\r", timeout=2.0
+        )
+        assert source.is_dir()
+        assert (source / "payload.txt").read_text(encoding="utf-8") == "payload"
+        with tarfile.open(archive_path) as archive:
+            assert archive.getnames() == ["moved"]
     finally:
         tui.quit()

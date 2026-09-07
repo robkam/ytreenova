@@ -263,6 +263,8 @@ extern int DeleteDirectory(ViewContext *ctx, DirEntry *dir_entry,
 extern int UI_ChoiceResolver(ViewContext *ctx, const char *prompt,
                              const char *choices);
 extern int UI_ArchiveCallback(int status, const char *msg, void *user_data);
+
+extern BOOL Progress_ShouldRender(ViewContext *ctx);
 extern void RefreshView(ViewContext *ctx, DirEntry *dir_entry);
 extern int GetCommandLine(ViewContext *ctx, char *command_line);
 extern int GetTaggedCommandLine(ViewContext *ctx, char *command_line);

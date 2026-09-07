@@ -445,7 +445,7 @@ Ordering policy (for all editors, including AI editors):
 *   Capability UI and contextual help never promise unavailable mutations.
 *   Canonical-path collision, traversal, and self-target cases are rejected safely.
 *   Cross-archive move failure preserves the source until destination success and never loses data after a source-side failure.
-*   - [ ] **Status:** Not Started.
+*   - [ ] **Status:** In Progress.
 
 ### **Task 14: Path Message Formatting Audit (`//` Artifact Prevention)**
 *   **Goal:** Audit user-facing message/path rendering and eliminate accidental double-slash artifacts in status/error/footer output.

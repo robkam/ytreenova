@@ -88,6 +88,9 @@ typedef struct {
 #define FOOTER_ACTION_ALT_KEY(layout, label, key1, key2, action_id)              \
   { { layout, label, key1, key2, NULL }, action_id, NULL }
 
+static BOOL ArchiveFooterCommandAvailable(const ViewContext *ctx, BOOL is_dir,
+                                          const FooterCommandSpec *spec);
+
 static int FooterCommandKeyClass(const UICommandStripCommand *command) {
   const char *key;
 
@@ -396,6 +399,8 @@ static const FooterCommandSpec dir_footer_ll_specs[] = {
 
 static const FooterCommandSpec dir_footer_archive_to_root_specs[] = {
     FOOTER_STATIC(UI_COMMAND_LAYOUT_KEY_PREFIX, "dir view", "1..9", NULL),
+    FOOTER_ACTION(UI_COMMAND_LAYOUT_MNEMONIC, "copy", "C", NULL,
+                  "ACTION_CMD_C"),
     FOOTER_ACTION(UI_COMMAND_LAYOUT_MNEMONIC, "Delete", "D", NULL,
                   "ACTION_CMD_D"),
     FOOTER_ACTION(UI_COMMAND_LAYOUT_MNEMONIC, "Filter", "F", NULL,
@@ -413,6 +418,10 @@ static const FooterCommandSpec dir_footer_archive_to_root_specs[] = {
                   "ACTION_CMD_P"),
     FOOTER_ACTION(UI_COMMAND_LAYOUT_MNEMONIC, "Output", "O", NULL,
                   "ACTION_CMD_PRINT"),
+    FOOTER_ACTION(UI_COMMAND_LAYOUT_MNEMONIC, "move", "V", NULL,
+                  "ACTION_CMD_V"),
+    FOOTER_ACTION(UI_COMMAND_LAYOUT_MNEMONIC, "pathcopy", "Y", NULL,
+                  "ACTION_CMD_Y"),
     FOOTER_ACTION(UI_COMMAND_LAYOUT_MNEMONIC, "Quit", "Q", NULL,
                   "ACTION_QUIT"),
     FOOTER_ACTION(UI_COMMAND_LAYOUT_MNEMONIC, "Rename", "R", NULL,
@@ -431,6 +440,8 @@ static const FooterCommandSpec dir_footer_archive_to_root_specs[] = {
 
 static const FooterCommandSpec dir_footer_archive_exit_specs[] = {
     FOOTER_STATIC(UI_COMMAND_LAYOUT_KEY_PREFIX, "dir view", "1..9", NULL),
+    FOOTER_ACTION(UI_COMMAND_LAYOUT_MNEMONIC, "copy", "C", NULL,
+                  "ACTION_CMD_C"),
     FOOTER_ACTION(UI_COMMAND_LAYOUT_MNEMONIC, "Delete", "D", NULL,
                   "ACTION_CMD_D"),
     FOOTER_ACTION(UI_COMMAND_LAYOUT_MNEMONIC, "Filter", "F", NULL,
@@ -448,6 +459,10 @@ static const FooterCommandSpec dir_footer_archive_exit_specs[] = {
                   "ACTION_CMD_P"),
     FOOTER_ACTION(UI_COMMAND_LAYOUT_MNEMONIC, "Output", "O", NULL,
                   "ACTION_CMD_PRINT"),
+    FOOTER_ACTION(UI_COMMAND_LAYOUT_MNEMONIC, "move", "V", NULL,
+                  "ACTION_CMD_V"),
+    FOOTER_ACTION(UI_COMMAND_LAYOUT_MNEMONIC, "pathcopy", "Y", NULL,
+                  "ACTION_CMD_Y"),
     FOOTER_ACTION(UI_COMMAND_LAYOUT_MNEMONIC, "Quit", "Q", NULL,
                   "ACTION_QUIT"),
     FOOTER_ACTION(UI_COMMAND_LAYOUT_MNEMONIC, "Rename", "R", NULL,
@@ -658,8 +673,13 @@ static const FooterCommandSpec preview_footer_nav_specs[] = {
     FOOTER_STATIC(UI_COMMAND_LAYOUT_KEY_PREFIX, "applications", "F9", NULL),
     FOOTER_STATIC(UI_COMMAND_LAYOUT_KEY_PREFIX, "cancel", "Esc", NULL)};
 
-static const char *FooterContextName(BOOL is_dir, int view_mode) {
-  if (view_mode == ARCHIVE_MODE)
+static BOOL ActiveFooterVolumeIsArchive(const ViewContext *ctx) {
+  return ctx != NULL && ctx->active != NULL && ctx->active->vol != NULL &&
+         ctx->active->vol->vol_stats.log_mode == ARCHIVE_MODE;
+}
+
+static const char *FooterContextName(const ViewContext *ctx, BOOL is_dir) {
+  if (ActiveFooterVolumeIsArchive(ctx))
     return is_dir ? "archive_dir" : "archive_file";
   return is_dir ? "dir" : "file";
 }
@@ -670,7 +690,7 @@ static int CommandPresentationEntriesForFooter(
   if (ctx == NULL || entries == NULL || entry_count == NULL)
     return -1;
 
-  if (ctx->view_mode == ARCHIVE_MODE) {
+  if (ActiveFooterVolumeIsArchive(ctx)) {
     if (is_dir) {
       *entries = ctx->archive_dir_command_presentations;
       *entry_count = ctx->archive_dir_command_presentation_count;
@@ -739,8 +759,7 @@ static void ResolveFooterActionKey(const ViewContext *ctx, BOOL is_dir,
     }
     {
       int default_key =
-          CommandActionDefaultKeyCode(FooterContextName(is_dir, ctx->view_mode),
-                                      action_id);
+          CommandActionDefaultKeyCode(FooterContextName(ctx, is_dir), action_id);
 
       if (default_key >= 0) {
         int effective_key = ResolveUserActionBindingKey(ctx, is_dir, default_key);
@@ -840,17 +859,18 @@ static size_t BuildHelpLabelOverrides(
     const FooterCommandSpec *spec = FindFooterSpecByPrimaryAction(
         plan->specs, plan->spec_count, plan->override_specs[index].action_id);
 
-    if (spec != NULL) {
+    overrides[count].canonical_label =
+        plan->override_specs[index].canonical_label;
+    overrides[count].display_label = NULL;
+    if (spec != NULL && ArchiveFooterCommandAvailable(ctx, is_dir, spec)) {
       ResolvedFooterCommand resolved;
 
       ResolveFooterCommandSpec(ctx, is_dir, spec, &resolved);
       snprintf(labels[count], sizeof(labels[count]), "%s",
                resolved.rendered_text);
-      overrides[count].canonical_label =
-          plan->override_specs[index].canonical_label;
       overrides[count].display_label = labels[count];
-      count++;
     }
+    count++;
   }
 
   return count;
@@ -1062,7 +1082,7 @@ static const FooterCommandSpec *GetDirFooterSpecs(const ViewContext *ctx,
     *line1_signpost = "";
     return dir_footer_ll_specs;
   }
-  if (ctx->view_mode == ARCHIVE_MODE) {
+  if (ActiveFooterVolumeIsArchive(ctx)) {
     *line0_signpost = "ARCHIVE";
     *line1_signpost = "COMMANDS";
     if (dir_entry != NULL && dir_entry->up_tree != NULL) {
@@ -1102,7 +1122,7 @@ static const FooterCommandSpec *GetFileFooterSpecs(const ViewContext *ctx,
     *line1_signpost = "";
     return file_footer_ll_specs;
   }
-  if (ctx->view_mode == ARCHIVE_MODE) {
+  if (ActiveFooterVolumeIsArchive(ctx)) {
     *command_count = sizeof(file_footer_archive_specs) /
                      sizeof(file_footer_archive_specs[0]);
     *line0_signpost = "ARCHIVE";
@@ -1132,18 +1152,63 @@ GetFileFooterNavSpecs(const DirEntry *dir_entry, size_t *command_count,
   return file_footer_nav_specs;
 }
 
-static void ResolveFooterCommandList(const ViewContext *ctx, BOOL is_dir,
-                                     const FooterCommandSpec *specs,
-                                     size_t spec_count,
-                                     ResolvedFooterCommand *resolved,
-                                     UICommandStripCommand *commands) {
+static unsigned int ArchiveCapabilityForFooterAction(const char *action_id,
+                                                     BOOL is_dir) {
+  if (action_id == NULL)
+    return 0;
+  if (strcmp(action_id, "ACTION_CMD_C") == 0 ||
+      strcmp(action_id, "ACTION_CMD_Y") == 0 ||
+      strcmp(action_id, "ACTION_CMD_TAGGED_C") == 0 ||
+      strcmp(action_id, "ACTION_CMD_TAGGED_Y") == 0)
+    return ARCHIVE_CAP_COPY_OUT;
+  if (strcmp(action_id, "ACTION_CMD_D") == 0 ||
+      strcmp(action_id, "ACTION_CMD_TAGGED_D") == 0)
+    return ARCHIVE_CAP_DELETE;
+  if (strcmp(action_id, "ACTION_CMD_R") == 0 ||
+      strcmp(action_id, "ACTION_CMD_TAGGED_R") == 0)
+    return ARCHIVE_CAP_RENAME;
+  if (strcmp(action_id, "ACTION_CMD_M") == 0)
+    return is_dir ? ARCHIVE_CAP_ADD : ARCHIVE_CAP_MOVE;
+  if (strcmp(action_id, "ACTION_CMD_V") == 0 ||
+      strcmp(action_id, "ACTION_CMD_TAGGED_M") == 0)
+    return ARCHIVE_CAP_MOVE;
+  return 0;
+}
+
+static BOOL ArchiveFooterCommandAvailable(const ViewContext *ctx, BOOL is_dir,
+                                          const FooterCommandSpec *spec) {
+  unsigned int primary;
+  unsigned int secondary;
+
+  if (!ActiveFooterVolumeIsArchive(ctx))
+    return TRUE;
+
+  primary = ArchiveCapabilityForFooterAction(spec->primary_action_id, is_dir);
+  secondary =
+      ArchiveCapabilityForFooterAction(spec->secondary_action_id, is_dir);
+  return (primary == 0 ||
+          (ctx->active->vol->vol_stats.archive_capabilities & primary)) &&
+         (secondary == 0 ||
+          (ctx->active->vol->vol_stats.archive_capabilities & secondary));
+}
+
+static size_t ResolveFooterCommandList(const ViewContext *ctx, BOOL is_dir,
+                                       const FooterCommandSpec *specs,
+                                       size_t spec_count,
+                                       ResolvedFooterCommand *resolved,
+                                       UICommandStripCommand *commands) {
   size_t index;
+  size_t count = 0;
 
   for (index = 0; index < spec_count; ++index) {
-    ResolveFooterCommandSpec(ctx, is_dir, &specs[index], &resolved[index]);
-    commands[index] = resolved[index].command;
+    if (!ArchiveFooterCommandAvailable(ctx, is_dir, &specs[index]))
+      continue;
+    ResolveFooterCommandSpec(ctx, is_dir, &specs[index], &resolved[count]);
+    commands[count] = resolved[count].command;
+    count++;
   }
-  SortResolvedFooterCommands(resolved, commands, spec_count);
+  SortResolvedFooterCommands(resolved, commands, count);
+  return count;
 }
 
 static void RenderFooterTopRowsWithSplitPreference(
@@ -1187,8 +1252,9 @@ static void RenderFooterNavRow(ViewContext *ctx, const char *signpost,
   FooterPackResult pack;
   int available_width;
 
-  ResolveFooterCommandList(ctx, AppStateResolveActivePanelFocus(ctx) == FOCUS_TREE,
-                           specs, spec_count, resolved, commands);
+  spec_count = ResolveFooterCommandList(
+      ctx, AppStateResolveActivePanelFocus(ctx) == FOCUS_TREE, specs,
+      spec_count, resolved, commands);
   available_width = getmaxx(ctx->ctx_menu_window) - FOOTER_COMMAND_COLUMN;
   if (available_width < 0)
     available_width = 0;
@@ -1245,7 +1311,8 @@ void DisplayDirHelp(ViewContext *ctx, const DirEntry *dir_entry) {
   werase(ctx->ctx_menu_window);
   specs = GetDirFooterSpecs(ctx, dir_entry, &spec_count, &line0_signpost,
                             &line1_signpost);
-  ResolveFooterCommandList(ctx, TRUE, specs, spec_count, resolved, commands);
+  spec_count = ResolveFooterCommandList(ctx, TRUE, specs, spec_count, resolved,
+                                        commands);
   RenderFooterTopRows(ctx, line0_signpost, line1_signpost, commands, spec_count);
   nav_specs = GetDirFooterNavSpecs(ctx, dir_entry, &nav_count, &nav_signpost);
   RenderFooterNavRow(ctx, nav_signpost, nav_specs, nav_count);
@@ -1271,7 +1338,8 @@ void DisplayFileHelp(ViewContext *ctx, const DirEntry *dir_entry) {
   werase(ctx->ctx_menu_window);
   specs =
       GetFileFooterSpecs(ctx, &spec_count, &line0_signpost, &line1_signpost);
-  ResolveFooterCommandList(ctx, FALSE, specs, spec_count, resolved, commands);
+  spec_count = ResolveFooterCommandList(ctx, FALSE, specs, spec_count, resolved,
+                                        commands);
   if (dir_entry != NULL && dir_entry->global_flag) {
     RenderFooterTopRowsWithSplitPreference(ctx, line0_signpost,
                                            line1_signpost, commands, spec_count,
@@ -1406,6 +1474,7 @@ static const HelpLabelOverridePlan dir_help_label_plan = {
     sizeof(dir_help_label_specs) / sizeof(dir_help_label_specs[0])};
 
 static const HelpLabelOverrideSpec archive_dir_help_label_specs[] = {
+    {"Copy", "ACTION_CMD_C"},
     {"Delete", "ACTION_CMD_D"},
     {"Filter", "ACTION_FILTER"},
     {"Global", "ACTION_CMD_G"},
@@ -1415,6 +1484,8 @@ static const HelpLabelOverrideSpec archive_dir_help_label_specs[] = {
     {"Makedir", "ACTION_CMD_M"},
     {"Pipe", "ACTION_CMD_P"},
     {"Output", "ACTION_CMD_PRINT"},
+    {"Move", "ACTION_CMD_V"},
+    {"Pathcopy", "ACTION_CMD_Y"},
     {"Quit", "ACTION_QUIT"},
     {"Rename", "ACTION_CMD_R"},
     {"Showall", "ACTION_CMD_S"},
@@ -1557,33 +1628,28 @@ int UI_ShowIntegratedHelp(ViewContext *ctx, const DirEntry *dir_entry) {
         &preview_help_label_plan);
 
   if (active_focus == FOCUS_TREE) {
+    if (ActiveFooterVolumeIsArchive(ctx))
+      return ShowGeneratedHelpForPlan(ctx, TRUE, "main.archive-dir",
+                                      &archive_dir_help_label_plan);
     if (ctx->is_split_screen)
       return ShowGeneratedHelpForPlan(ctx, TRUE, "overlay.f8-dir",
                                       &dir_help_label_plan);
-    if (ctx->view_mode == ARCHIVE_MODE)
-      return ShowGeneratedHelpForPlan(ctx, TRUE, "main.archive-dir",
-                                      &archive_dir_help_label_plan);
     return ShowGeneratedHelpForPlan(ctx, TRUE, "main.dir",
                                     &dir_help_label_plan);
   }
 
-  if (!ctx->is_split_screen && ctx->view_mode != ARCHIVE_MODE &&
-      (dir_entry == NULL || !dir_entry->global_flag))
-    return ShowGeneratedHelpForPlan(ctx, FALSE, "main.file",
-                                    &file_help_label_plan);
-
-  if (ctx->view_mode == ARCHIVE_MODE)
+  if (ActiveFooterVolumeIsArchive(ctx))
     return ShowGeneratedHelpForPlan(ctx, FALSE, "main.archive-file",
                                     &archive_file_help_label_plan);
   if (ctx->is_split_screen)
     return ShowGeneratedHelpForPlan(ctx, FALSE, "overlay.f8-file",
                                     &file_help_label_plan);
-  if (dir_entry != NULL && dir_entry->global_flag)
-    return ShowGeneratedHelpForPlan(
-        ctx, FALSE, dir_entry->global_all_volumes ? "main.global" : "main.showall",
-        &file_help_label_plan);
-  return ShowGeneratedHelpForPlan(ctx, FALSE, "main.file",
-                                  &file_help_label_plan);
+  if (dir_entry == NULL || !dir_entry->global_flag)
+    return ShowGeneratedHelpForPlan(ctx, FALSE, "main.file",
+                                    &file_help_label_plan);
+  return ShowGeneratedHelpForPlan(
+      ctx, FALSE, dir_entry->global_all_volumes ? "main.global" : "main.showall",
+      &file_help_label_plan);
 }
 
 void ClearHelp(ViewContext *ctx) {

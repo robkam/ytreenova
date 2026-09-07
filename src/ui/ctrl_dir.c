@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 /* TREEDEPTH uses GetProfileValue which is 2-arg in NO_YTNOVA_MACROS context */
 #undef TREEDEPTH
@@ -95,35 +96,40 @@ static BOOL BuildDirOpCommand(BOOL move_dir, const char *quoted_src,
   return TRUE;
 }
 
-static int ResolveDirTargetPath(DirEntry *dir_entry, const char *to_dir_in,
-                                const char *to_file, char *src_path,
-                                char *dest_dir_path, char *dest_path) {
+typedef struct {
+  char src_path[PATH_LENGTH + 1];
+  char dest_dir_path[PATH_LENGTH + 1];
+  char dest_path[PATH_LENGTH + 1];
+} DirTransferPaths;
+
+static int ResolveDirTargetPath(const ViewContext *ctx, DirEntry *dir_entry,
+                                const char *to_dir_in, const char *to_file,
+                                BOOL path_copy, DirTransferPaths *paths) {
   char resolved_dir[PATH_LENGTH + 1];
   const char *leaf;
 
-  if (!dir_entry || !to_dir_in || !to_file || !*to_file || !src_path ||
-      !dest_dir_path || !dest_path)
+  if (!dir_entry || !to_dir_in || !to_file || !*to_file || !paths)
     return -1;
 
-  GetPath(dir_entry, src_path);
-  src_path[PATH_LENGTH] = '\0';
+  GetPath(dir_entry, paths->src_path);
+  paths->src_path[PATH_LENGTH] = '\0';
 
   if (to_dir_in[0] == FILE_SEPARATOR_CHAR) {
     (void)snprintf(resolved_dir, sizeof(resolved_dir), "%s", to_dir_in);
   } else {
     char parent_path[PATH_LENGTH + 1];
     const char *sep;
-    sep = strrchr(src_path, FILE_SEPARATOR_CHAR);
+    sep = strrchr(paths->src_path, FILE_SEPARATOR_CHAR);
     if (!sep) {
       return -1;
-    } else if (sep == src_path) {
+    } else if (sep == paths->src_path) {
       parent_path[0] = FILE_SEPARATOR_CHAR;
       parent_path[1] = '\0';
     } else {
-      size_t parent_len = (size_t)(sep - src_path);
+      size_t parent_len = (size_t)(sep - paths->src_path);
       if (parent_len >= sizeof(parent_path))
         return -1;
-      memcpy(parent_path, src_path, parent_len);
+      memcpy(parent_path, paths->src_path, parent_len);
       parent_path[parent_len] = '\0';
     }
 
@@ -136,19 +142,48 @@ static int ResolveDirTargetPath(DirEntry *dir_entry, const char *to_dir_in,
   if (!leaf || !*leaf)
     return -1;
 
-  (void)snprintf(dest_dir_path, PATH_LENGTH + 1, "%s", resolved_dir);
-  if (Path_Join(dest_path, PATH_LENGTH + 1, resolved_dir, leaf) != 0)
+  if (path_copy && ctx && ctx->active && ctx->active->vol &&
+      ctx->active->vol->vol_stats.tree) {
+    char source_root[PATH_LENGTH + 1];
+    const char *relative;
+    const char *last_separator;
+
+    GetPath(ctx->active->vol->vol_stats.tree, source_root);
+    relative = paths->src_path;
+    if (strncmp(relative, source_root, strlen(source_root)) == 0) {
+      relative += strlen(source_root);
+      while (*relative == FILE_SEPARATOR_CHAR)
+        relative++;
+    }
+    last_separator = strrchr(relative, FILE_SEPARATOR_CHAR);
+    if (last_separator) {
+      char relative_parent[PATH_LENGTH + 1];
+      size_t parent_len = (size_t)(last_separator - relative);
+
+      if (parent_len >= sizeof(relative_parent))
+        return -1;
+      memcpy(relative_parent, relative, parent_len);
+      relative_parent[parent_len] = '\0';
+      if (relative_parent[0] != '\0' &&
+          Path_Join(resolved_dir, sizeof(resolved_dir), resolved_dir,
+                    relative_parent) != 0)
+        return -1;
+    }
+  }
+
+  (void)snprintf(paths->dest_dir_path, sizeof(paths->dest_dir_path), "%s",
+                 resolved_dir);
+  if (Path_Join(paths->dest_path, sizeof(paths->dest_path), resolved_dir, leaf) != 0)
     return -1;
   return 0;
 }
 
 static DirEntry *HandleDirCopyMove(ViewContext *ctx, DirEntry *dir_entry,
-                                   BOOL move_dir, BOOL *need_dsp_help) {
+                                   BOOL move_dir, BOOL path_copy,
+                                   BOOL *need_dsp_help) {
   char to_file[PATH_LENGTH + 1];
   char to_dir[PATH_LENGTH + 1];
-  char src_path[PATH_LENGTH + 1];
-  char dest_dir_path[PATH_LENGTH + 1];
-  char dest_path[PATH_LENGTH + 1];
+  DirTransferPaths paths;
   char quoted_src[PATH_LENGTH * 4 + 8];
   char quoted_dst[PATH_LENGTH * 4 + 8];
   char command_line[COMMAND_LINE_LENGTH + 1];
@@ -158,17 +193,37 @@ static DirEntry *HandleDirCopyMove(ViewContext *ctx, DirEntry *dir_entry,
   int cmd_res;
   DirEntry *anchor;
   DirEntry *source_entry = NULL;
+  int active_log_mode;
+#ifdef HAVE_LIBARCHIVE
+  struct Volume *destination_vol = NULL;
+#endif
 
   if (!ctx || !ctx->active || !ctx->active->vol || !dir_entry)
     return dir_entry;
+  active_log_mode = ctx->active->vol->vol_stats.log_mode;
 
-  if (ctx->view_mode != DISK_MODE && ctx->view_mode != USER_MODE) {
+  if (active_log_mode != DISK_MODE && active_log_mode != USER_MODE &&
+      active_log_mode != ARCHIVE_MODE) {
     UI_ShowStatusLineError(
         ctx, "Directory copy/move is only supported in filesystem mode");
     if (need_dsp_help)
       *need_dsp_help = TRUE;
     return dir_entry;
   }
+
+#ifdef HAVE_LIBARCHIVE
+  if (active_log_mode == ARCHIVE_MODE) {
+    const Statistic *source_stats = &ctx->active->vol->vol_stats;
+    unsigned int required = move_dir ? ARCHIVE_CAP_MOVE : ARCHIVE_CAP_COPY_OUT;
+
+    if (!(source_stats->archive_capabilities & required)) {
+      UI_ShowStatusLineError(ctx, "This archive does not support directory transfer");
+      if (need_dsp_help)
+        *need_dsp_help = TRUE;
+      return dir_entry;
+    }
+  }
+#endif
 
   if (move_dir && dir_entry == ctx->active->vol->vol_stats.tree) {
     UI_ShowStatusLineError(ctx, "Cannot move the logged root directory");
@@ -186,37 +241,63 @@ static DirEntry *HandleDirCopyMove(ViewContext *ctx, DirEntry *dir_entry,
       return dir_entry;
     }
   } else {
-    if (GetCopyParameter(ctx, dir_entry->name, FALSE, to_file, to_dir) != 0) {
+    if (GetCopyParameter(ctx, dir_entry->name, path_copy, to_file, to_dir) != 0) {
       if (need_dsp_help)
         *need_dsp_help = TRUE;
       return dir_entry;
     }
   }
 
-  if (ResolveDirTargetPath(dir_entry, to_dir, to_file, src_path, dest_dir_path,
-                           dest_path) != 0) {
+  if (ResolveDirTargetPath(ctx, dir_entry, to_dir, to_file, path_copy,
+                           &paths) != 0) {
     UI_ShowStatusLineError(ctx, "Invalid destination path");
     if (need_dsp_help)
       *need_dsp_help = TRUE;
     return dir_entry;
   }
 
-  if (strcmp(src_path, dest_path) == 0) {
+#ifdef HAVE_LIBARCHIVE
+  destination_vol = Volume_GetByPath(ctx, paths.dest_dir_path);
+  if (active_log_mode != ARCHIVE_MODE && destination_vol != NULL &&
+      destination_vol->vol_stats.log_mode == ARCHIVE_MODE) {
+    (void)FilesystemDirectoryTransferToArchive(
+        ctx, move_dir ? ARCHIVE_DIRECTORY_MOVE : ARCHIVE_DIRECTORY_COPY,
+        paths.src_path, paths.dest_dir_path, paths.dest_path);
+    if (need_dsp_help)
+      *need_dsp_help = TRUE;
+    return RefreshTreeSafe(ctx, ctx->active, dir_entry);
+  }
+#endif
+
+  if (strcmp(paths.src_path, paths.dest_path) == 0) {
     UI_ShowStatusLineError(ctx, "Source and destination are the same");
     if (need_dsp_help)
       *need_dsp_help = TRUE;
     return dir_entry;
   }
-  if (IsPathInside(src_path, dest_path)) {
+  if (IsPathInside(paths.src_path, paths.dest_path)) {
     UI_ShowStatusLineError(ctx,
                            "Destination cannot be inside the source directory");
     if (need_dsp_help)
       *need_dsp_help = TRUE;
     return dir_entry;
   }
+
+#ifdef HAVE_LIBARCHIVE
+  if (active_log_mode == ARCHIVE_MODE) {
+    ArchiveDirectoryTransfer(ctx, &dir_entry,
+                             move_dir ? ARCHIVE_DIRECTORY_MOVE
+                                      : ARCHIVE_DIRECTORY_COPY,
+                             paths.src_path, paths.dest_dir_path,
+                             paths.dest_path);
+    if (need_dsp_help)
+      *need_dsp_help = TRUE;
+    return dir_entry;
+  }
+#endif
   while (1) {
     int ensure_result = UI_EnsureCopyMoveDestinationDirectory(
-        ctx, dest_dir_path, ctx->active->vol->vol_stats.tree, &dest_dir_entry,
+        ctx, paths.dest_dir_path, ctx->active->vol->vol_stats.tree, &dest_dir_entry,
         &dir_create_mode);
     if (ensure_result == 0)
       break;
@@ -232,7 +313,7 @@ static DirEntry *HandleDirCopyMove(ViewContext *ctx, DirEntry *dir_entry,
       *need_dsp_help = TRUE;
     return dir_entry;
   }
-  if (lstat(dest_path, &st) == 0) {
+  if (lstat(paths.dest_path, &st) == 0) {
     UI_ShowStatusLineError(ctx, "Destination already exists");
     if (need_dsp_help)
       *need_dsp_help = TRUE;
@@ -244,8 +325,8 @@ static DirEntry *HandleDirCopyMove(ViewContext *ctx, DirEntry *dir_entry,
     return dir_entry;
   }
 
-  if (!Path_ShellQuote(src_path, quoted_src, sizeof(quoted_src)) ||
-      !Path_ShellQuote(dest_path, quoted_dst, sizeof(quoted_dst))) {
+  if (!Path_ShellQuote(paths.src_path, quoted_src, sizeof(quoted_src)) ||
+      !Path_ShellQuote(paths.dest_path, quoted_dst, sizeof(quoted_dst))) {
     UI_ShowStatusLineError(ctx, "Path too long");
     if (need_dsp_help)
       *need_dsp_help = TRUE;
@@ -274,12 +355,12 @@ static DirEntry *HandleDirCopyMove(ViewContext *ctx, DirEntry *dir_entry,
     anchor = dest_dir_entry;
   } else {
     anchor = DirOps_ResolveCopyMoveRefreshAnchor(
-        ctx, src_path, dest_dir_path,
+        ctx, paths.src_path, paths.dest_dir_path,
         dir_entry->up_tree ? dir_entry->up_tree : ctx->active->vol->vol_stats.tree);
   }
   dir_entry = RefreshTreeSafe(ctx, ctx->active, anchor);
   if (!move_dir) {
-    source_entry = DirOps_FindDirEntryByPath(ctx, src_path);
+    source_entry = DirOps_FindDirEntryByPath(ctx, paths.src_path);
     if (source_entry != NULL) {
       (void)DirOps_SelectVisibleDirAndRefresh(ctx, ctx->active, source_entry,
                                               &dir_entry);
@@ -1028,10 +1109,13 @@ extern int HandleDirWindow(ViewContext *ctx, const DirEntry *start_dir_entry) {
                     ctx->active);
       break;
     case ACTION_CMD_C:
-      dir_entry = HandleDirCopyMove(ctx, dir_entry, FALSE, &need_dsp_help);
+      dir_entry = HandleDirCopyMove(ctx, dir_entry, FALSE, FALSE, &need_dsp_help);
+      break;
+    case ACTION_CMD_Y:
+      dir_entry = HandleDirCopyMove(ctx, dir_entry, FALSE, TRUE, &need_dsp_help);
       break;
     case ACTION_CMD_V:
-      dir_entry = HandleDirCopyMove(ctx, dir_entry, TRUE, &need_dsp_help);
+      dir_entry = HandleDirCopyMove(ctx, dir_entry, TRUE, FALSE, &need_dsp_help);
       break;
     case ACTION_CMD_O:
       UI_Beep(ctx, FALSE);

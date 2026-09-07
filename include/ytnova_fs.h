@@ -11,6 +11,13 @@
 
 #define UNSUPPORTED_FORMAT_ERROR -2
 
+#define ARCHIVE_CAP_BROWSE (1U << 0)
+#define ARCHIVE_CAP_COPY_OUT (1U << 1)
+#define ARCHIVE_CAP_ADD (1U << 2)
+#define ARCHIVE_CAP_DELETE (1U << 3)
+#define ARCHIVE_CAP_RENAME (1U << 4)
+#define ARCHIVE_CAP_MOVE (1U << 5)
+
 /* Define the progress callback type for Scans */
 typedef void (*ScanProgressCallback)(ViewContext *ctx, void *user_data);
 
@@ -68,6 +75,7 @@ extern BOOL Path_CreateTempFile(char *dest, size_t size,
 /* archive.c */
 extern int Archive_ValidateInternalPath(const char *path, char *canonical_path,
                                         size_t canonical_size);
+extern unsigned int Archive_ProbeCapabilities(const char *archive_path);
 extern int ExtractArchiveEntry(const char *archive_path, const char *entry_path,
                                int out_fd, ArchiveProgressCallback cb,
                                void *user_data);
@@ -90,12 +98,21 @@ extern int Archive_CreateFromPaths(const char *dest_path,
                                    size_t source_count);
 extern int Archive_DeleteEntry(char *archive_path, char *file_path,
                                ArchiveProgressCallback cb, void *user_data);
-extern int Archive_AddFile(char *archive_path, char *src_path, char *dest_name,
+extern int Archive_AddFile(char *archive_path, const char *src_path,
+                           const char *dest_name,
                            BOOL is_dir, ArchiveProgressCallback cb,
                            void *user_data);
 extern int Archive_RenameEntry(char *archive_path, char *old_path,
-                               char *new_name, ArchiveProgressCallback cb,
+                               const char *new_name, ArchiveProgressCallback cb,
                                void *user_data);
+extern int Archive_DeleteTree(char *archive_path, const char *tree_path,
+                              ArchiveProgressCallback cb, void *user_data);
+extern int Archive_AddTree(char *archive_path, const char *src_path,
+                           const char *dest_path, ArchiveProgressCallback cb,
+                           void *user_data);
+extern int ExtractArchiveTree(const char *archive_path, const char *tree_path,
+                              const char *dest_path, ArchiveProgressCallback cb,
+                              void *user_data);
 #endif
 
 /* readarchive.c */

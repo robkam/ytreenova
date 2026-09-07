@@ -9,6 +9,7 @@
 
 #include "ytnova_appstate_volume.h"
 #include "ytnova_cmd.h"
+#include "ytnova_fs.h"
 #include "ytnova_panel_anchor.h"
 #include "ytnova_ui.h"
 
@@ -664,10 +665,8 @@ static void DisplayDiskNameProjected(ViewContext *ctx,
   if (!s)
     return;
 
-  /* Recalculate layout based on current terminal height */
   RecalcLayout(ctx);
 
-  /* 1. Determine Volume Index */
   if (ctx->volumes_head) {
     struct Volume *vol_iter, *tmp;
     int i = 1;
@@ -709,20 +708,36 @@ static void DisplayDiskNameProjected(ViewContext *ctx,
   PrintStatsDynamicLine(ctx, projection, ctx->layout.stats_y_vol_info,
                         path_buf);
 
-  char fs_buf[64];
-  if (ctx->view_mode == ARCHIVE_MODE)
-    snprintf(fs_buf, sizeof(fs_buf), "ARCHIVE");
-  else
-    snprintf(fs_buf, sizeof(fs_buf), "%s", s->disk_name);
-  CutName(buf, fs_buf, INNER_W - 4);
-  PrintStatsLabelValue(ctx, projection, ctx->layout.stats_y_vol_info + 1,
-                       "FS: ", buf);
+  {
+    char fs_buf[64];
+
+    if (ctx->view_mode == ARCHIVE_MODE)
+      snprintf(fs_buf, sizeof(fs_buf), "ARCHIVE");
+    else
+      snprintf(fs_buf, sizeof(fs_buf), "%s", s->disk_name);
+    CutName(buf, fs_buf, INNER_W - 4);
+    PrintStatsLabelValue(ctx, projection, ctx->layout.stats_y_vol_info + 1,
+                         "FS: ", buf);
+  }
 
   if (ctx->view_mode == ARCHIVE_MODE) {
-    snprintf(fs_buf, sizeof(fs_buf), "-");
+    unsigned int caps = s->archive_capabilities;
+
+    snprintf(buf, sizeof(buf), "%s%s%s%s%s%s",
+             (caps & ARCHIVE_CAP_BROWSE) ? "browse " : "",
+             (caps & ARCHIVE_CAP_COPY_OUT) ? "copy " : "",
+             (caps & ARCHIVE_CAP_ADD) ? "add " : "",
+             (caps & ARCHIVE_CAP_DELETE) ? "delete " : "",
+             (caps & ARCHIVE_CAP_RENAME) ? "rename " : "",
+             (caps & ARCHIVE_CAP_MOVE) ? "move" : "");
+    CutName(buf, buf, INNER_W - 6);
+    PrintStatsLabelValue(ctx, projection, ctx->layout.stats_y_vol_info + 2,
+                         "Ops: ", buf);
   } else {
+    char fs_buf[64];
     char size_buf[32];
     int free_percent = -1;
+
     FormatDisplaySize(size_buf, sizeof(size_buf), s->disk_space);
     if (s->disk_capacity > 0) {
       double percent = ((double)s->disk_space * 100.0) / (double)s->disk_capacity;
@@ -736,9 +751,9 @@ static void DisplayDiskNameProjected(ViewContext *ctx,
       snprintf(fs_buf, sizeof(fs_buf), "%s (%d%%)", size_buf, free_percent);
     else
       snprintf(fs_buf, sizeof(fs_buf), "%s", size_buf);
+    PrintStatsLabelValue(ctx, projection, ctx->layout.stats_y_vol_info + 2,
+                         "Free: ", fs_buf);
   }
-  PrintStatsLabelValue(ctx, projection, ctx->layout.stats_y_vol_info + 2,
-                       "Free: ", fs_buf);
 }
 
 static void DisplayDiskStatisticProjected(ViewContext *ctx,

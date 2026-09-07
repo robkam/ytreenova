@@ -717,6 +717,32 @@ static BOOL HandleFileMutationDispatchAction(
     return FALSE;
 
   dir_entry = *dir_entry_ptr;
+  if (ctx->view_mode == ARCHIVE_MODE) {
+    unsigned int required = 0;
+    const char *operation = NULL;
+
+    switch (action) {
+    case ACTION_CMD_M:
+      required = ARCHIVE_CAP_MOVE;
+      operation = "moving entries";
+      break;
+    case ACTION_CMD_D:
+      required = ARCHIVE_CAP_DELETE;
+      operation = "deleting entries";
+      break;
+    case ACTION_CMD_R:
+      required = ARCHIVE_CAP_RENAME;
+      operation = "renaming entries";
+      break;
+    default:
+      break;
+    }
+    if (required != 0 && !(s->archive_capabilities & required)) {
+      UI_ShowStatusLineError(ctx, "This archive does not support %s", operation);
+      *need_dsp_help_ptr = TRUE;
+      return TRUE;
+    }
+  }
   switch (action) {
   case ACTION_CMD_Y:
   case ACTION_CMD_C:
