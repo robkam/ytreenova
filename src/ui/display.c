@@ -407,6 +407,8 @@ static const FooterCommandSpec dir_footer_archive_to_root_specs[] = {
                   "ACTION_FILTER"),
     FOOTER_ACTION(UI_COMMAND_LAYOUT_MNEMONIC, "Global", "G", NULL,
                   "ACTION_CMD_G"),
+    FOOTER_ACTION(UI_COMMAND_LAYOUT_MNEMONIC, "Invert", "I", NULL,
+                  "ACTION_INVERT"),
     FOOTER_ACTION(UI_COMMAND_LAYOUT_KEY_PREFIX, "compare", "J", NULL,
                   "ACTION_COMPARE_DIR"),
     FOOTER_ACTION(UI_COMMAND_LAYOUT_KEY_PREFIX, "volume", "K", NULL,
@@ -448,6 +450,8 @@ static const FooterCommandSpec dir_footer_archive_exit_specs[] = {
                   "ACTION_FILTER"),
     FOOTER_ACTION(UI_COMMAND_LAYOUT_MNEMONIC, "Global", "G", NULL,
                   "ACTION_CMD_G"),
+    FOOTER_ACTION(UI_COMMAND_LAYOUT_MNEMONIC, "Invert", "I", NULL,
+                  "ACTION_INVERT"),
     FOOTER_ACTION(UI_COMMAND_LAYOUT_KEY_PREFIX, "compare", "J", NULL,
                   "ACTION_COMPARE_DIR"),
     FOOTER_ACTION(UI_COMMAND_LAYOUT_KEY_PREFIX, "volume", "K", NULL,
@@ -676,6 +680,16 @@ static const FooterCommandSpec preview_footer_nav_specs[] = {
 static BOOL ActiveFooterVolumeIsArchive(const ViewContext *ctx) {
   return ctx != NULL && ctx->active != NULL && ctx->active->vol != NULL &&
          ctx->active->vol->vol_stats.log_mode == ARCHIVE_MODE;
+}
+
+static BOOL ActiveFooterArchiveIsReadOnly(const ViewContext *ctx) {
+  unsigned int mutation_capabilities =
+      ARCHIVE_CAP_ADD | ARCHIVE_CAP_DELETE | ARCHIVE_CAP_RENAME |
+      ARCHIVE_CAP_MOVE;
+
+  return ActiveFooterVolumeIsArchive(ctx) &&
+         !(ctx->active->vol->vol_stats.archive_capabilities &
+           mutation_capabilities);
 }
 
 static const char *FooterContextName(const ViewContext *ctx, BOOL is_dir) {
@@ -1084,7 +1098,8 @@ static const FooterCommandSpec *GetDirFooterSpecs(const ViewContext *ctx,
   }
   if (ActiveFooterVolumeIsArchive(ctx)) {
     *line0_signpost = "ARCHIVE";
-    *line1_signpost = "COMMANDS";
+    *line1_signpost =
+        ActiveFooterArchiveIsReadOnly(ctx) ? "READONLY" : "COMMANDS";
     if (dir_entry != NULL && dir_entry->up_tree != NULL) {
       *command_count = sizeof(dir_footer_archive_to_root_specs) /
                        sizeof(dir_footer_archive_to_root_specs[0]);
@@ -1126,7 +1141,8 @@ static const FooterCommandSpec *GetFileFooterSpecs(const ViewContext *ctx,
     *command_count = sizeof(file_footer_archive_specs) /
                      sizeof(file_footer_archive_specs[0]);
     *line0_signpost = "ARCHIVE";
-    *line1_signpost = "COMMANDS";
+    *line1_signpost =
+        ActiveFooterArchiveIsReadOnly(ctx) ? "READONLY" : "COMMANDS";
     return file_footer_archive_specs;
   }
 
@@ -1169,10 +1185,23 @@ static unsigned int ArchiveCapabilityForFooterAction(const char *action_id,
     return ARCHIVE_CAP_RENAME;
   if (strcmp(action_id, "ACTION_CMD_M") == 0)
     return is_dir ? ARCHIVE_CAP_ADD : ARCHIVE_CAP_MOVE;
-  if (strcmp(action_id, "ACTION_CMD_V") == 0 ||
-      strcmp(action_id, "ACTION_CMD_TAGGED_M") == 0)
+  if (strcmp(action_id, "ACTION_CMD_V") == 0)
+    return is_dir ? ARCHIVE_CAP_MOVE : 0;
+  if (strcmp(action_id, "ACTION_CMD_TAGGED_M") == 0)
     return ARCHIVE_CAP_MOVE;
   return 0;
+}
+
+static BOOL ArchiveFileFooterActionApplicable(const char *action_id) {
+  if (action_id == NULL)
+    return TRUE;
+  return strcmp(action_id, "ACTION_CMD_A") != 0 &&
+         strcmp(action_id, "ACTION_CMD_TAGGED_A") != 0 &&
+         strcmp(action_id, "ACTION_CMD_E") != 0 &&
+         strcmp(action_id, "ACTION_CMD_MKFILE") != 0 &&
+         strcmp(action_id, "ACTION_CMD_X") != 0 &&
+         strcmp(action_id, "ACTION_CMD_TAGGED_X") != 0 &&
+         strcmp(action_id, "ACTION_CMD_I") != 0;
 }
 
 static BOOL ArchiveFooterCommandAvailable(const ViewContext *ctx, BOOL is_dir,
@@ -1182,6 +1211,10 @@ static BOOL ArchiveFooterCommandAvailable(const ViewContext *ctx, BOOL is_dir,
 
   if (!ActiveFooterVolumeIsArchive(ctx))
     return TRUE;
+  if (!is_dir &&
+      (!ArchiveFileFooterActionApplicable(spec->primary_action_id) ||
+       !ArchiveFileFooterActionApplicable(spec->secondary_action_id)))
+    return FALSE;
 
   primary = ArchiveCapabilityForFooterAction(spec->primary_action_id, is_dir);
   secondary =
@@ -1400,6 +1433,7 @@ void DisplayPreviewHelp(ViewContext *ctx) {
   size_t nav_count =
       sizeof(preview_footer_nav_specs) / sizeof(preview_footer_nav_specs[0]);
   size_t line1_count;
+  const char *line1_signpost;
   const UICommandStripCommand *line0_truncated = NULL;
   const UICommandStripCommand *line1_truncated = NULL;
 
@@ -1410,8 +1444,8 @@ void DisplayPreviewHelp(ViewContext *ctx) {
   if (available_width < 0)
     available_width = 0;
 
-  ResolveFooterCommandList(ctx, FALSE, preview_footer_specs, spec_count, resolved,
-                           commands);
+  spec_count = ResolveFooterCommandList(ctx, FALSE, preview_footer_specs,
+                                        spec_count, resolved, commands);
   pack = PackFooterCommands(commands, spec_count, available_width, 2, FALSE);
   line1_count =
       pack.visible_count > pack.line_counts[0] ? pack.visible_count - pack.line_counts[0]
@@ -1423,15 +1457,17 @@ void DisplayPreviewHelp(ViewContext *ctx) {
       line1_truncated = &commands[pack.truncated_index];
   }
 
-  ResolveFooterCommandList(ctx, FALSE, preview_footer_nav_specs, nav_count,
-                           nav_resolved, nav_commands);
+  nav_count = ResolveFooterCommandList(ctx, FALSE, preview_footer_nav_specs,
+                                       nav_count, nav_resolved, nav_commands);
   nav_pack = PackFooterCommands(nav_commands, nav_count, available_width, 1, FALSE);
   base_y = Y_PROMPT(ctx) - 1;
+  line1_signpost =
+      ActiveFooterArchiveIsReadOnly(ctx) ? "READONLY" : "COMMANDS";
 
   RenderPackedFooterLine(ctx->ctx_border_window, base_y, "PREVIEW", commands,
                          pack.line_counts[0], line0_truncated,
                          (line0_truncated != NULL) ? pack.truncated_width : 0);
-  RenderPackedFooterLine(ctx->ctx_border_window, base_y + 1, "COMMANDS",
+  RenderPackedFooterLine(ctx->ctx_border_window, base_y + 1, line1_signpost,
                          commands + pack.line_counts[0], line1_count,
                          line1_truncated,
                          (line1_truncated != NULL) ? pack.truncated_width : 0);

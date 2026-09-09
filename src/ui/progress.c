@@ -137,7 +137,7 @@ static WINDOW *ProgressEnsureWindow(ViewContext *ctx, int height) {
   }
   ctx->progress.window = window;
   keypad(window, TRUE);
-  WbkgdSet(ctx, window, COLOR_PAIR(UI_ROLE_DIALOG));
+  WbkgdSet(ctx, window, COLOR_PAIR(UI_ROLE_PICKER));
   return window;
 }
 
@@ -332,7 +332,7 @@ void Progress_Render(ViewContext *ctx) {
   getmaxyx(window, window_height, window_width);
   content_width = window_width - 4;
   werase(window);
-  wattron(window, COLOR_PAIR(UI_ROLE_DIALOG) | A_ALTCHARSET);
+  wattron(window, COLOR_PAIR(UI_ROLE_PICKER) | A_ALTCHARSET);
   wborder(window, 0, 0, 0, 0, 0, 0, 0, 0);
   wattroff(window, A_ALTCHARSET);
   ProgressPrintTruncated(window, 1, content_width, line1);
