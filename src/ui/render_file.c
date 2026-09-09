@@ -355,7 +355,7 @@ static void BuildOverlayDetail(const ViewContext *ctx,
       snprintf(ratio_buf, sizeof(ratio_buf), "-");
     }
     (void)snprintf(buffer, buffer_size,
-                   " Size: %s Packed: %s Ratio: %s", size_buf, packed_buf,
+                   " Size: %-6s Packed: %-6s Ratio: %s", size_buf, packed_buf,
                    ratio_buf);
     return;
   }
@@ -1070,6 +1070,8 @@ static void RenderNameOnlyFileEntry(const FileRowRenderSpec *spec) {
     max_w = 16;
   if (max_w > spec->width - spec->pos_x - 3)
     max_w = spec->width - spec->pos_x - 3;
+  if (spec->uses_overlay_detail && max_w > spec->filename_width)
+    max_w = spec->filename_width;
 
   name_text = spec->primary_name;
   if (spec->align_name_col || spec->render_mode == MODE_3) {
@@ -1142,6 +1144,7 @@ void PrintFileEntry(ViewContext *ctx, YtreeNovaPanel *panel, int entry_no, int y
   FileEntry *fe_ptr;
   FileRowRenderSpec spec;
   char row_label[PATH_LENGTH * 2 + 8];
+  char clipped_row_label[PATH_LENGTH * 2 + 8];
   char plain_name[PATH_LENGTH * 2 + 8];
   int highlight_color_pair;
   BOOL is_active_panel;
@@ -1224,6 +1227,10 @@ void PrintFileEntry(ViewContext *ctx, YtreeNovaPanel *panel, int entry_no, int y
   if (spec.uses_overlay_detail) {
     spec.filename_width =
         OverlayNameColumnWidth(panel, spec.width, spec.filename_width);
+    if (StrVisualLength(spec.primary_name) > spec.filename_width) {
+      CutFilename(clipped_row_label, spec.primary_name, spec.filename_width);
+      spec.primary_name = clipped_row_label;
+    }
   }
 
   spec.pos_x = ComputeFileColumnOffset(&spec);

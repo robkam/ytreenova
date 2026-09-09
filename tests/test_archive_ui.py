@@ -1,5 +1,6 @@
 import io
 import os
+from pathlib import Path
 import re
 import subprocess
 import tarfile
@@ -1361,6 +1362,18 @@ def test_filesystem_copy_promotes_to_live_determinate_progress(
         tui.quit()
 
 
+def test_long_operation_progress_uses_picker_modal_style():
+    source = Path("src/ui/progress.c").read_text(encoding="utf-8")
+    ensure_window_start = source.index("static WINDOW *ProgressEnsureWindow(")
+    render_start = source.index("\nvoid Progress_Render(", ensure_window_start)
+    ensure_window = source[ensure_window_start:render_start]
+    render_end = source.index("\n}", render_start) + 2
+    render = source[render_start:render_end]
+
+    assert "WbkgdSet(ctx, window, COLOR_PAIR(UI_ROLE_PICKER));" in ensure_window
+    assert "wattron(window, COLOR_PAIR(UI_ROLE_PICKER) | A_ALTCHARSET);" in render
+
+
 def test_same_archive_directory_move_advances_live_progress_frames(
     ytnova_binary, tmp_path, archive_data_block_gate
 ):
@@ -1700,6 +1713,34 @@ def test_archive_zero_marks_unattributable_packed_sizes(ytnova_binary, tmp_path)
         screen = "\n".join(tui.get_screen_dump())
         member_row = next(line for line in screen.splitlines() if "payload.txt" in line)
         assert re.search(r"Packed:\s+-\s+Ratio:\s+-", member_row)
+    finally:
+        tui.quit()
+
+
+def test_archive_zero_truncates_long_names_and_aligns_size_columns(
+    ytnova_binary, tmp_path
+):
+    root = tmp_path / "archive_entry_information_layout"
+    root.mkdir()
+    archive_path = root / "information.zip"
+    long_name = "Twas brillig, and the slithy toves Did gyre and gimble in the wabe.txt"
+    with zipfile.ZipFile(archive_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        archive.writestr("short.txt", b"short archive payload\n" * 32)
+        archive.writestr(long_name, b"long archive payload\n" * 32)
+
+    tui = YtreeNovaTUI(executable=ytnova_binary, cwd=str(root))
+    try:
+        _enter_archive_from_selected_file(tui)
+        tui.child.send("0")
+        assert tui.wait_for_content("Packed:", timeout=2.0)
+        screen = tui.get_screen_dump()
+        long_row = next(line for line in screen if long_name[:20] in line)
+        short_row = next(line for line in screen if "short.txt" in line)
+
+        assert long_name not in long_row
+        assert "..." in long_row.split("Size:", maxsplit=1)[0]
+        for column in ("Size:", "Packed:", "Ratio:"):
+            assert long_row.index(column) == short_row.index(column)
     finally:
         tui.quit()
 

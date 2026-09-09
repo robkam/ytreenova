@@ -156,7 +156,7 @@ You can build a set, act on it, narrow it, then clear or invert it.
 #### Common tagged flows
 
 * **Tag** and **Untag**: Add or remove the current row from the working set.
-* **Invert Tags**: Flip the tag state inside the current visible scope.
+* **`I` / Invert Tags**: Flip tag state only for matching visible rows in the active list. Directory mode limits the action to the selected directory; Showall and Global limit it to their current result sets.
 * **Filter**: Press `F`, then `Tab` to switch the current file-list scope between all rows and tagged-only rows without changing tag state.
 * **Copy tagged** and **Move tagged**: Send the whole tagged set to one destination.
 * **View tagged**: Open the tagged files one after another. In the internal viewer, `n`/`p` change file, `Space`/page keys scroll only the current file, and `/`/`?` move between tagged-search hits in that file. `TAGGEDVIEWER=external` keeps pager-native search and hit navigation.
@@ -338,9 +338,9 @@ It owns directory navigation, tree expansion, and directory-scoped commands.
 
 #### Directory command families
 
-* **Presentation and scope**: `1..9 view` changes the panel presentation. `0` is a silent no-op on filesystem volumes; use `F6` to show or hide stats. `Filter`, `Showall`, `Global`, and `Jump` change which projected file set or visible subset you are inspecting.
+* **Presentation and scope**: `1..9 view` changes the panel presentation. `0` does nothing on filesystem volumes. `Filter`, `Showall`, `Global`, and `Jump` change which projected file set or visible subset you are inspecting.
 * **Filesystem changes**: `Attributes`, `Rename`, `Delete`, `Makedir`, and `New File` change metadata or create/remove entries. `Log` adds or reloads a logged root.
-* **Working-set control**: `Tag`, `Untag`, and `Invert Tags` define the set that later bulk commands consume.
+* **Working-set control**: `Tag`, `Untag`, and `I` / `Invert Tags` define the set that later bulk commands consume. `I` flips tags only on filter-matching visible files in the selected directory.
 * **Transfer and export**: `Copy`, `MoveDir`, `Output`, `Pipe`, and `Archive` act on the selected branch or on the tagged set, depending on the command.
 * **Cross-surface actions**: `Compare` hands off to the compare flow, `Execute` runs a shell command with the current path, `Volume` switches logged volumes, `Dotfiles` toggles hidden entries, and `Quit` leaves ytnova.
 
@@ -360,7 +360,7 @@ It owns file navigation, file-scoped commands, tagged actions, and export entry 
 
 #### File navigation
 
-* **Presentation**: `1..9 view` stays in file mode and changes Name, Attributes, Owner, and Times plus Compact, size units, Mini preview, File detail, and the Git band where they apply. `0` is a silent no-op on filesystem volumes; use `F6` to show or hide stats.
+* **Presentation**: `1..9 view` stays in file mode and changes Name, Attributes, Owner, and Times plus Compact, size units, Mini preview, File detail, and the Git band where they apply. `0` does nothing on filesystem volumes.
 * **Enter**: Switch between the embedded file window and full-screen file mode without leaving the same file list.
 * **Columns**: `Left` and `Right` move across visible file columns. In single-column layouts they page backward and forward through the same list.
 
@@ -368,7 +368,7 @@ It owns file navigation, file-scoped commands, tagged actions, and export entry 
 
 * **Inspection**: `View`, `Hex`, and `Edit` open the selected file through the configured pager, hex viewer, or editor.
 * **Transfer**: `Copy`, `Move`, and `Pathcopy` operate on the selected file. `Copy tagged` and `Move tagged` apply the same target rules to the tagged set.
-* **Working-set control**: `Tag`, `Untag`, `Tag all`, `Untag all`, and `Invert Tags` build or clear the set that later bulk commands consume.
+* **Working-set control**: `Tag`, `Untag`, `Tag all`, `Untag all`, and `I` / `Invert Tags` build or clear the set that later bulk commands consume. `I` flips tags only on matching visible files in the active list; Showall and Global limit it to their current result sets.
 * **List control**: `Filter`, `Sort`, `Jump`, and `Dotfiles` change how the current file list is projected. The filter prompt still owns the tagged-only scope toggle on `Tab`.
 * **Metadata and creation**: `Attributes`, `Rename`, `Delete`, `New File`, and `Log` edit file state or add/reload content sources.
 * **Output and shell handoff**: `Output`, `Pipe`, `Execute`, and `Archive` export the current file or tagged set. `Execute` expands the prefilled `{}` path, and `C-x` reruns the command once per tagged file.
@@ -396,9 +396,9 @@ It mirrors directory work where the archive format permits it.
 
 #### Archive directory command families
 
-* **Presentation and scope**: `1..9 view` still selects the base directory/file presentation, except `9` stays inert in archives. `0` adds Size, Packed, and Ratio to each visible archive file row. Size is the original file size, Packed is the space used inside the archive, and Ratio is the percentage of space saved. A dash means the format cannot provide a trustworthy packed size. Packed values are collected while the archive is loaded, so pressing `0` only changes the display; press it again to hide the columns. `Filter`, `Showall`, `Global`, and `Jump` still operate on the archive-backed visible set.
-* **Archive-aware edits**: `Copy`, `Pathcopy`, `Move`, `Delete`, `Rename`, and `Makedir` only work when the current archive format and access path support write-back semantics. Directory transfers are recursive and reject a destination inside the source subtree. Common writable formats include `.tar`, `.tar.gz`, `.tar.bz2`, `.tar.xz`, and `.zip`; actual availability depends on the installed libarchive and archive properties.
-* **Working-set control**: `Tag` and `Untag` operate on the current virtual directory scope.
+* **Presentation and scope**: `1..9 view` still selects the base directory/file presentation, except `9` stays inert in archives. `0` toggles Size, Packed, and Ratio for archive file rows. `Filter`, `Showall`, `Global`, and `Jump` still operate on the archive-backed visible set.
+* **Archive-aware transfers and edits**: `Copy` and `Pathcopy` remain available when the archive supports copy-out. `MoveDir`, `Delete`, `Rename`, and `Makedir` appear only when the current archive format and access path support the required write-back operation. Directory transfers are recursive and reject a destination inside the source subtree. Common writable formats include `.tar`, `.tar.gz`, `.tar.bz2`, `.tar.xz`, and `.zip`; actual availability depends on the installed libarchive and archive properties.
+* **Working-set control**: `Tag`, `Untag`, and `I` / `Invert Tags` operate on the current virtual directory scope. `I` flips tags only on filter-matching visible entries in the selected archive directory.
 * **Transfers and export**: `Output`, `Pipe`, and `Compare` use archive-backed paths. `Log` and `Volume` switch away to other logged roots or volumes when needed.
 * **Session controls**: `Dotfiles` toggles hidden archive entries where the format exposes them, and `Quit` exits ytnova.
 
@@ -418,16 +418,16 @@ Some filesystem commands are unavailable or become archive-aware here.
 
 #### Archive file navigation
 
-* **Presentation**: `1..8` keeps the usual file-view bands, while `9` remains a no-op because archive entries do not expose the Git band surface. `0` adds Size, Packed, and Ratio to each visible archive file row. Size is the original file size, Packed is the space used inside the archive, and Ratio is the percentage of space saved. A dash means the format cannot provide a trustworthy packed size. Packed values are collected while the archive is loaded, so pressing `0` only changes the display; press it again to hide the columns.
+* **Presentation**: `1..8` keeps the usual file-view bands, while `9` remains a no-op because archive entries do not expose the Git band surface. `0` toggles Size, Packed, and Ratio for archive file rows.
 * **Enter**: Return to Archive Directory Mode for the same archive.
 * **List control**: `Jump`, `Filter`, and `Sort` still operate on the archive-backed visible file list.
 
 #### Archive file command families
 
 * **Inspection**: `View` and `Hex` open the selected archive entry without first moving you into an ordinary file-mode session.
-* **Transfer**: `Copy`, `Move`, and `Pathcopy` use archive-aware extract/copy paths. `Copy tagged` and `Move tagged` apply the same rules to the tagged archive set.
-* **Working-set control**: `Tag`, `Untag`, and `Invert Tags` manage the current archive-backed working set.
-* **Mutation limits**: `Delete` and `Rename` exist only where the archive path supports write-back. `Execute` is not available in archive file mode.
+* **Transfer**: `Copy` and `Pathcopy` use archive-aware copy-out paths and remain available on readable archives. `Move` appears only with archive write-back support. `Copy tagged` and `Move tagged` apply the same capability rules to the tagged archive set.
+* **Working-set control**: `Tag`, `Untag`, and `I` / `Invert Tags` manage the current archive-backed working set. `I` flips tags only on matching visible entries in the current archive directory.
+* **Mutation limits**: `Move`, `Delete`, and `Rename` exist only where the archive path supports write-back. `Execute` is not available in archive file mode.
 * **Output and comparison**: `Output`, `Pipe`, `Compare`, `Search tagged`, and `View tagged` all stay scoped to the archive-backed list rather than a normal filesystem directory.
 * **Session controls**: `Log`, `Volume`, `Dotfiles`, and `Quit` behave like their file-mode counterparts, but they may take you out of the current archive session.
 
