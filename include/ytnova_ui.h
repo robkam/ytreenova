@@ -464,8 +464,8 @@ extern int UI_ShowGeneratedContextHelpWithOverrides(
 extern int UI_ShowGeneratedContextHelpCallback(ViewContext *ctx,
                                                void *help_data);
 
-extern BOOL KeyPressed(void);
-extern BOOL EscapeKeyPressed(void);
+extern BOOL KeyPressed(ViewContext *ctx);
+extern BOOL EscapeKeyPressed(ViewContext *ctx);
 extern char *StrLeft(const char *str, size_t visible_count);
 extern char *StrRight(const char *str, size_t visible_count);
 extern int StrVisualLength(const char *str);

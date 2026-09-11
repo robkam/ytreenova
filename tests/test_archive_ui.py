@@ -1811,3 +1811,69 @@ def _zip_names_if_ready(path):
         return _zip_names(path)
     except (FileNotFoundError, zipfile.BadZipFile):
         return []
+
+
+@pytest.mark.parametrize("nested_format", ["tar", "tar.gz", "zip"])
+def test_log_archive_member_loads_nested_archive(ytnova_binary, tmp_path, nested_format):
+    root = tmp_path / f"nested_archive_{nested_format}"
+    root.mkdir()
+    nested_payload = io.BytesIO()
+    if nested_format == "zip":
+        with zipfile.ZipFile(nested_payload, "w") as archive:
+            archive.writestr("nested.txt", "nested payload")
+    else:
+        mode = "w:gz" if nested_format == "tar.gz" else "w"
+        with tarfile.open(fileobj=nested_payload, mode=mode) as archive:
+            info = tarfile.TarInfo("nested.txt")
+            payload = b"nested payload"
+            info.size = len(payload)
+            archive.addfile(info, io.BytesIO(payload))
+
+    archive_path = root / "outer.tar"
+    with tarfile.open(archive_path, "w") as archive:
+        info = tarfile.TarInfo(f"nested.{nested_format}")
+        payload = nested_payload.getvalue()
+        info.size = len(payload)
+        archive.addfile(info, io.BytesIO(payload))
+
+    tui = YtreeNovaTUI(executable=ytnova_binary, cwd=str(root))
+    try:
+        _enter_archive_from_selected_file(tui)
+        assert tui.send_and_wait_for_screen_change(Keys.ENTER, timeout=2.0)
+        assert tui.send_and_wait_for_condition(
+            Keys.LOG,
+            lambda lines: "nested.txt" in "\n".join(lines),
+            timeout=2.0,
+        )
+    finally:
+        tui.quit()
+
+
+def test_nested_archive_log_displays_its_logical_source_path(ytnova_binary, tmp_path):
+    root = tmp_path / "logical_nested_archive_path"
+    root.mkdir()
+    nested_payload = io.BytesIO()
+    with tarfile.open(fileobj=nested_payload, mode="w:gz") as archive:
+        info = tarfile.TarInfo("nested.txt")
+        payload = b"nested payload"
+        info.size = len(payload)
+        archive.addfile(info, io.BytesIO(payload))
+
+    outer_path = root / "outer.zip"
+    with zipfile.ZipFile(outer_path, "w") as archive:
+        archive.writestr("nested.tar.gz", nested_payload.getvalue())
+
+    logical_path = f"{outer_path}/nested.tar.gz"
+    tui = YtreeNovaTUI(
+        executable=ytnova_binary, cwd=str(root), dimensions=(40, 240)
+    )
+    try:
+        _enter_archive_from_selected_file(tui)
+        assert tui.send_and_wait_for_screen_change(Keys.ENTER, timeout=2.0)
+        assert tui.send_and_wait_for_condition(
+            Keys.LOG,
+            lambda lines: logical_path in "\n".join(lines),
+            timeout=2.0,
+        )
+    finally:
+        tui.quit()

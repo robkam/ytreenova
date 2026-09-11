@@ -1808,15 +1808,29 @@ Ordering policy (for all editors, including AI editors):
 *   **Rationale:** For C/POSIX terminal software, GNU gettext is the most conventional and broadly understood approach. It has mature tooling, standard translator workflow, and broad ecosystem familiarity; a custom loadable language-file system would add avoidable maintenance and onboarding cost.
 *   - [x] **Status:** Complete.
 
+### **Task 93: Kitty Keyboard Protocol Move Binding**
+*   **Goal:** Use kitty keyboard protocol input to distinguish `^m` from Enter while retaining a silent `^n` tagged-move fallback.
+*   **Architecture contract:** Put protocol negotiation, parsing, and cleanup in a dedicated terminal-input module. Store its capability state in `ViewContext`; controllers dispatch events and do not own protocol logic.
+*   **Compatibility gate:** Before changing default bindings, implement a bounded event-driven compatibility spike. It must issue the keyboard-status query followed by primary device attributes, verify the requested keyboard flag, preserve unrelated input, and must not lose, reorder, misclassify, or perceptibly delay user input.
+*   **Bindings:** After successful negotiation, bind `^m` to move tagged files.
+*   **Control-parity contract:** Disambiguation changes every Ctrl chord into protocol events. Decode and dispatch the full existing Ctrl binding set identically across all input contexts.
+*   **Lifecycle contract:** Enable protocol input only for the current terminal session. Disable/pop it before every ncurses suspension or external handoff, then re-negotiate/re-enable it after resumption. Restore normal input on ordinary shutdown and handled termination. Treat the local terminal, multiplexers, and remote transport as one negotiated input path.
+*   **Fallback:** When negotiation is unavailable, rejected, or stripped, use `^n` for tagged move without a modal.
+*   **Footer contract:** Render `m`/`^m` on a protocol path and `m`/`^n` otherwise. Task 63's localized renderer remains authoritative for labels, punctuation, and styling.
+*   **Documentation contract:** The README, FAQ, and authored help describe the protocol requirement for `^m` and the `^n` fallback. Run `make help-assets` to regenerate runtime F1, manpage, and USAGE projections from their authored help sources.
+*   **Scope boundary:** This task covers terminal input capability, negotiation lifecycle, configuration, effective key dispatch, footer rendering, and user documentation. It does not replace ncurses; Idea FE-43 remains the separate investigation of a future TUI backend.
+*   **Acceptance criteria:** PTY tests prove successful negotiation; unsupported, malformed, and truncated-response fallback; all existing Ctrl bindings; input preservation during probing; and restoration around every external handoff and shutdown path.
+*   - [x] **Status:** Complete.
+
 ### **Task 63: Implement Configurable Keymap**
 *   **Description:** Abstract all hardcoded key commands (e.g., 'm', '^N') into a configurable keymap loaded from a separate keymap profile file. The core application logic will respond to command identifiers (e.g., `CMD_MOVE`), not raw characters. This will allow users to customize their workflow and resolve keybinding conflicts.
-*   **Sequencing dependency:** Implement after Task 43's portable footer keybinding/F1 wording cleanup. Prefer completing Task 47 parity gate first so keymap work lands on a stable footer/F1 contract.
-*   **Config contract:** Select a keymap profile via `ytnova.conf` (opt-in). Locale-oriented profiles are allowed as explicit user choices, for example an English mnemonic profile can bind `C` to `Copy`, while a German mnemonic profile can bind `K` to `Kopieren` and `L` to `Löschen`. The shipped default keymap must remain portable and internally consistent, but compatibility with old confusing UI wording is not a reason to preserve that wording.
-*   **Display contract:** Footer/help text must render active key tokens plus localized command labels together (for example active binding `C` + translated label `Copy` -> `(C)opy`) so runtime hints always match active bindings. Key tokens are data from the keymap, labels are data from localization, and punctuation/styling are renderer-owned.
+*   **Sequencing dependency:** Implement after Task 93 establishes enhanced key identity and input capability state, after Task 43's portable footer keybinding/F1 wording cleanup, and preferably after the Task 47 parity gate.
+*   **Config contract:** Select a keymap profile via `ytnova.conf` (opt-in). Locale-oriented profiles are allowed as explicit user choices, for example an English mnemonic profile can bind `C` to `Copy`, while a German mnemonic profile can bind `K` to `Kopieren` and `L` to `Löschen`. The shipped default keymap must remain internally consistent.
+*   **Display contract:** The footer must render active key tokens plus localized command labels together (for example active binding `C` + translated label `Copy` -> `(C)opy`) so runtime hints always match active bindings. Key tokens are data from the keymap, labels are data from localization, and punctuation/styling are renderer-owned.
 *   **Legacy menu override contract:** The existing `[MENU]` text override only changes displayed text and does not change keyboard behavior. It may remain as an expert display override during migration, but it is not the final localization/keybinding model and must not be used as a substitute for real keymap-driven labels.
-*   **Canonicalization/validation contract:** Normalize terminal byte aliases during keymap load (`^M`=`Enter`/`CR`, `^J`=`LF`/newline enter path, `^I`=`Tab`, `^[`=`Esc`) and reject profiles that map alias-equivalent inputs to different commands. Alias-equivalent inputs mapping to the same command are valid.
-*   **Portability fallback contract:** Require workflow-level fallback for core actions (reachable without fragile terminal-specific modifiers). This is not a per-key duplication mandate; tagged/single-item variants may share menu/mode-driven paths when direct keyspace is exhausted.
-*   **Behavior stability contract:** Default shipping keymap remains portable and stable; custom overrides are opt-in and must pass collision/unbound-action validation before activation.
+*   **Canonicalization/validation contract:** Normalize terminal byte aliases during keymap load (`^m`=`Enter`/`CR`, `^j`=`LF`/newline enter path, `^[`=`Esc`) and reject profiles that map alias-equivalent inputs to different commands. A confirmed protocol path may distinguish `^m` from Enter.
+*   **Capability contract:** The active keyboard-input capability selects the tagged-move binding. A protocol path uses `^m`; the silent fallback uses `^n`.
+*   **Behavior stability contract:** Custom overrides are opt-in and must pass collision/unbound-action validation before activation.
 *   - [ ] **Status:** Not Started.
 
 ---
@@ -2294,12 +2308,14 @@ Ordering policy (for all editors, including AI editors):
 *   **Rationale:** A stronger built-in viewer would make ytnova more self-contained for terminal inspection work, while still keeping the project focused on file management rather than format-specific rendering.
 *   - [ ] **Status:** Not Started.
 
-### **Idea FE-42: Investigate Optional Enhanced Terminal Input Protocols**
-*   **Goal:** Investigate whether opt-in enhanced keyboard/input protocols can safely improve ytnova's TUI input model without replacing the portable baseline path.
-*   **Input-protocol spike:** Start with kitty keyboard protocol and evaluate whether richer key events can distinguish collided control inputs such as `^M` versus `Enter`.
-*   **Fallback contract:** If enhanced keyboard negotiation is unavailable, rejected, or stripped by the active terminal path, keep the current portable bindings and help semantics (for example `^N` for tagged move) rather than making any enhanced protocol a requirement.
-*   **Scope boundary:** Treat this as an optional capability layered above the normal terminal path, not as a prerequisite for core navigation or command workflows.
-*   **Rationale:** This is an input-capability investigation intended to determine whether optional terminal features can relieve current control-key collisions while keeping ytnova portable.
+### **Idea FE-42: Investigate Optional Kitty Protocol Enhancements**
+*   **Goal:** Investigate optional Kitty protocol and terminal-UI capabilities beyond enhanced keyboard input that can improve ytnova workflows without changing the portable baseline.
+*   **Candidate scope:** Evaluate protocol-backed image/preview rendering, terminal-native tabs or window/workspace integration, hyperlinks, clipboard, notifications, and other capabilities that make GUI-like interaction useful within a terminal session.
+*   **Investigation scope:** For each candidate, establish concrete user benefit, terminal-path compatibility, fallback behavior, security implications, testability, packaging impact, and whether the integration belongs in ytnova rather than the terminal.
+*   **Architecture contract:** Keep protocol support behind a narrow capability boundary. Do not spread Kitty-specific state or APIs through controllers, core models, or rendering ownership; the boundary must remain replaceable by a future Rust, notcurses, or other backend path.
+*   **Compatibility contract:** Every capability must be negotiated, independently optional, and fully usable through the existing POSIX terminal workflow when unavailable.
+*   **Non-Goal:** Do not make Kitty, a GUI runtime, or any single terminal family a requirement for ytnova.
+*   **Rationale:** Kitty can provide richer terminal-native interaction, but adoption must be evidence-led and must preserve ytnova's terminal portability and future architecture choices.
 *   - [ ] **Status:** Not Started.
 
 ### **Idea FE-43: Investigate Replacing ncurses with a Better TUI Backend**

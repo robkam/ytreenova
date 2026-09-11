@@ -120,13 +120,16 @@ class YtreeNovaController:
         # Wait for first UI paint; do not couple startup sync to clock text.
         lines = self.wait_for_condition(
             lambda screen: screen
-            if any("Path:" in line or "COMMANDS" in line for line in screen)
+            if any(
+                "Path:" in line
+                or "COMMANDS" in line
+                for line in screen
+            )
             else False,
             timeout=8.0,
         )
         if not lines:
             raise pexpect.TIMEOUT("Startup sync failed: no UI activity detected")
-
     def select_file(self, filename):
         """
         Selects a file using Show All + Filter.

@@ -100,6 +100,24 @@ REVIEWED_EXCEPTIONS = {
         "Canonical event-driven PTY-output predicate: waits for observable state with a deadline and diagnostic, never an elapsed test delay or fixed action count.",
     ),
     (
+        "tests/tui_harness.py",
+        "_respond_to_keyboard_probe",
+        "polling-or-retry-loop",
+    ): (
+        "out_of_scope",
+        "terminal protocol parsing",
+        "The bounded loop extracts complete terminal protocol requests from accumulated PTY output; it does not wait, retry, or navigate.",
+    ),
+    (
+        "tests/tui_harness.py",
+        "wait_for_keyboard_probe_count",
+        "polling-or-retry-loop",
+    ): (
+        "retained",
+        "waiting and navigation remediation",
+        "Canonical event-driven protocol predicate: waits for an observable probe count with a deadline, never an elapsed test delay or fixed action count.",
+    ),
+    (
         "tests/ytnova_control.py",
         "wait_for_condition",
         "polling-or-retry-loop",

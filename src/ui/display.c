@@ -398,7 +398,7 @@ static const FooterCommandSpec dir_footer_ll_specs[] = {
                   "ACTION_QUIT")};
 
 static const FooterCommandSpec dir_footer_archive_to_root_specs[] = {
-    FOOTER_STATIC(UI_COMMAND_LAYOUT_KEY_PREFIX, "dir view", "1..9", NULL),
+    FOOTER_STATIC(UI_COMMAND_LAYOUT_KEY_PREFIX, "dir view", "1..0", NULL),
     FOOTER_ACTION(UI_COMMAND_LAYOUT_MNEMONIC, "copy", "C", NULL,
                   "ACTION_CMD_C"),
     FOOTER_ACTION(UI_COMMAND_LAYOUT_MNEMONIC, "Delete", "D", NULL,
@@ -441,7 +441,7 @@ static const FooterCommandSpec dir_footer_archive_to_root_specs[] = {
                   "ACTION_TOGGLE_HIDDEN")};
 
 static const FooterCommandSpec dir_footer_archive_exit_specs[] = {
-    FOOTER_STATIC(UI_COMMAND_LAYOUT_KEY_PREFIX, "dir view", "1..9", NULL),
+    FOOTER_STATIC(UI_COMMAND_LAYOUT_KEY_PREFIX, "dir view", "1..0", NULL),
     FOOTER_ACTION(UI_COMMAND_LAYOUT_MNEMONIC, "copy", "C", NULL,
                   "ACTION_CMD_C"),
     FOOTER_ACTION(UI_COMMAND_LAYOUT_MNEMONIC, "Delete", "D", NULL,
@@ -526,7 +526,7 @@ static const FooterCommandSpec file_footer_standard_specs[] = {
                    "ACTION_CMD_V", "ACTION_CMD_TAGGED_V"),
     FOOTER_ACTIONS(UI_COMMAND_LAYOUT_ALT_MNEMONIC, "Output", "O", "^O",
                    "ACTION_CMD_PRINT", "ACTION_CMD_TAGGED_PRINT"),
-    FOOTER_ACTIONS(UI_COMMAND_LAYOUT_ALT_MNEMONIC, "execute", "X", "^X",
+    FOOTER_ACTIONS(UI_COMMAND_LAYOUT_KEY_PREFIX, "execute", "X", "^X",
                    "ACTION_CMD_X", "ACTION_CMD_TAGGED_X"),
     FOOTER_ACTIONS(UI_COMMAND_LAYOUT_ALT_MNEMONIC, "pathcopy", "Y", "^Y",
                    "ACTION_CMD_Y", "ACTION_CMD_TAGGED_Y"),
@@ -555,7 +555,7 @@ static const FooterCommandSpec file_footer_ll_specs[] = {
                   "ACTION_QUIT")};
 
 static const FooterCommandSpec file_footer_archive_specs[] = {
-    FOOTER_STATIC(UI_COMMAND_LAYOUT_KEY_PREFIX, "file view", "1..9", NULL),
+    FOOTER_STATIC(UI_COMMAND_LAYOUT_KEY_PREFIX, "file view", "1..0", NULL),
     FOOTER_ACTIONS(UI_COMMAND_LAYOUT_ALT_MNEMONIC, "copy", "C", "^C",
                    "ACTION_CMD_C", "ACTION_CMD_TAGGED_C"),
     FOOTER_ACTIONS(UI_COMMAND_LAYOUT_ALT_MNEMONIC, "Delete", "D", "^D",
@@ -629,7 +629,7 @@ static const FooterCommandSpec preview_footer_specs[] = {
                    "ACTION_CMD_V", "ACTION_CMD_TAGGED_V"),
     FOOTER_ACTIONS(UI_COMMAND_LAYOUT_ALT_MNEMONIC, "Output", "O", "^O",
                    "ACTION_CMD_PRINT", "ACTION_CMD_TAGGED_PRINT"),
-    FOOTER_ACTIONS(UI_COMMAND_LAYOUT_ALT_MNEMONIC, "execute", "X", "^X",
+    FOOTER_ACTIONS(UI_COMMAND_LAYOUT_KEY_PREFIX, "execute", "X", "^X",
                    "ACTION_CMD_X", "ACTION_CMD_TAGGED_X"),
     FOOTER_ACTIONS(UI_COMMAND_LAYOUT_ALT_MNEMONIC, "pathcopy", "Y", "^Y",
                    "ACTION_CMD_Y", "ACTION_CMD_TAGGED_Y"),
@@ -820,7 +820,16 @@ static void ResolveFooterCommandSpec(const ViewContext *ctx, BOOL is_dir,
     (void)snprintf(resolved->secondary_key, sizeof(resolved->secondary_key),
                    "%s", "^C");
   }
-
+  if (spec->secondary_action_id != NULL &&
+      strcmp(spec->secondary_action_id, "ACTION_CMD_TAGGED_M") == 0) {
+    (void)snprintf(resolved->secondary_key, sizeof(resolved->secondary_key),
+                   "%s", ctx != NULL &&
+                                   ctx->terminal_input_capability ==
+                                       TERMINAL_INPUT_KITTY
+                               ? "^M"
+                               : "^N");
+    resolved->command.layout = UI_COMMAND_LAYOUT_KEY_PREFIX;
+  }
   if (!is_dir && IsViKeysEnabled(ctx) && spec->primary_action_id != NULL) {
     if (strcmp(spec->primary_action_id, "ACTION_CMD_D") == 0) {
       (void)snprintf(resolved->primary_key, sizeof(resolved->primary_key), "%s",
