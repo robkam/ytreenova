@@ -1,6 +1,7 @@
 import os
 import tempfile
 
+from helpers_ui import footer_text_from_lines
 from ytnova_control import YtreeNovaController
 from ytnova_keys import Keys
 
@@ -20,9 +21,14 @@ def _spawn_controller(cwd: str) -> YtreeNovaController:
 
 
 def _enter_file_mode(ytnova: YtreeNovaController) -> None:
-    ytnova.child.send(Keys.ENTER)
-    ytnova.wait_for_refresh()
-    ytnova.wait_for_refresh()
+    lines = ytnova.send_and_wait_for_condition(
+        Keys.ENTER,
+        lambda screen: screen
+        if "hex invert j compare" in footer_text_from_lines(screen)
+        else False,
+        timeout=2.0,
+    )
+    assert lines, "\n".join(ytnova.get_screen_dump())
 
 
 def _wait_for_screen_text(ytnova: YtreeNovaController, text: str, timeout: float = 2.0):

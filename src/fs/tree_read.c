@@ -16,7 +16,7 @@ static void UnReadSubTree(ViewContext *ctx, DirEntry *dir_entry, Statistic *s);
 static BOOL IsTransientScanStatError(int errnum);
 static void RemoveFileWithBoundary(ViewContext *ctx, FileEntry *fe_ptr,
                                    Statistic *s);
-static BOOL EscapeKeyPressedWithBoundary(const ViewContext *ctx);
+static BOOL EscapeKeyPressedWithBoundary(ViewContext *ctx);
 static int InputChoiceWithBoundary(ViewContext *ctx, const char *msg,
                                    const char *choices);
 static void ClearPromptLineWithBoundary(ViewContext *ctx);
@@ -33,9 +33,9 @@ static void RemoveFileWithBoundary(ViewContext *ctx, FileEntry *fe_ptr,
   (void)ctx->hook_remove_file(ctx, fe_ptr, s);
 }
 
-static BOOL EscapeKeyPressedWithBoundary(const ViewContext *ctx) {
+static BOOL EscapeKeyPressedWithBoundary(ViewContext *ctx) {
   if (ctx && ctx->hook_escape_key_pressed)
-    return ctx->hook_escape_key_pressed();
+    return ctx->hook_escape_key_pressed(ctx);
   return FALSE;
 }
 
