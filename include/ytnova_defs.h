@@ -9,6 +9,15 @@
 
 typedef struct _ViewContext ViewContext;
 
+#define TERMINAL_INPUT_PENDING_CAPACITY 256
+#define YTNOVA_KEY_CTRL_M 0x110002
+
+typedef enum {
+  TERMINAL_INPUT_UNKNOWN = 0,
+  TERMINAL_INPUT_LEGACY = 1,
+  TERMINAL_INPUT_KITTY = 2
+} TerminalInputCapability;
+
 /* Large File Support must be defined before system headers */
 #define _LARGEFILE64_SOURCE 1
 #define _FILE_OFFSET_BITS 64
@@ -726,6 +735,8 @@ typedef struct {
   int log_mode;
   unsigned int archive_capabilities;
   char log_path[PATH_LENGTH + 1];
+  char display_path[PATH_LENGTH + 1];
+  char temporary_archive_path[PATH_LENGTH + 1];
   char path[PATH_LENGTH + 1];
   char file_spec[FILE_SPEC_LENGTH + 1];
   char disk_name[DISK_NAME_LENGTH + 1];
@@ -1134,6 +1145,14 @@ typedef struct _ViewContext {
   char status_line_error_text[PATH_LENGTH + 1];
   BOOL status_line_notice_pending;
   char status_line_notice_text[PATH_LENGTH + 1];
+  TerminalInputCapability terminal_input_capability;
+  BOOL terminal_input_session_active;
+  BOOL terminal_input_active;
+  unsigned char terminal_input_pending[TERMINAL_INPUT_PENDING_CAPACITY];
+  size_t terminal_input_pending_offset;
+  size_t terminal_input_pending_length;
+  BOOL terminal_input_unread_key_pending;
+  int terminal_input_unread_key;
   char *initial_directory;
   char configuration_file_path[PATH_LENGTH + 1];
   BOOL configuration_file_path_is_explicit;
@@ -1185,8 +1204,8 @@ typedef struct _ViewContext {
   int (*hook_remove_file)(ViewContext *ctx, FileEntry *fe_ptr, Statistic *s);
   int (*hook_make_path)(const ViewContext *ctx, DirEntry *tree, char *dir_path,
                         DirEntry **dest_dir_entry);
-  BOOL (*hook_key_pressed)(void);
-  BOOL (*hook_escape_key_pressed)(void);
+  BOOL (*hook_key_pressed)(ViewContext *ctx);
+  BOOL (*hook_escape_key_pressed)(ViewContext *ctx);
   int (*hook_input_choice)(ViewContext *ctx, const char *msg,
                            const char *choices);
   void (*hook_quit)(ViewContext *ctx);

@@ -241,6 +241,22 @@ Compatibility shims are retired from the current AppState contract. Any legacy m
 *   **Dynamic Background Navigation:** While F7 is active, Up/Down keys move the cursor; the preview updates in real-time.
 *   **Undo Protocol:** Pressing `F7` or `Esc` destroys the overlay and returns the user to the **exact** position and mode held before the preview. No state changes persist.
 
+### 5.4 Protocol D: Negotiated Terminal Input
+
+`src/ui/terminal_input.c` owns kitty keyboard protocol negotiation, response parsing,
+pending-byte preservation, protocol event decoding, and session cleanup. The
+negotiated capability lives in `ViewContext`; controllers receive normalized
+keys through `WGetch()` and never parse terminal escape sequences themselves.
+
+Negotiation pushes kitty's disambiguation flag, queries its confirmed state,
+and uses primary device attributes as the bounded response sentinel. Bytes that
+are not valid protocol replies remain ordered in the session input queue.
+External terminal handoffs pop protocol input before leaving curses program
+mode, then restore curses state and negotiate again on return. Shutdown pops the
+mode without resuming it. A terminal, multiplexer, and remote connection are
+treated as one end-to-end capability path rather than inferred from environment
+names.
+
 ---
 
 ## 6. Visual and Rendering Standards
@@ -250,8 +266,8 @@ Compatibility shims are retired from the current AppState contract. Any legacy m
 *   **Command Preset Boundary:** Locale/layout-aware command presets are packaged read-only data keyed by stable preset ID and action ID. `etc/ytnova.commands` is the packaged default active command map; `commands.conf` may select zero or one packaged preset and then apply local overrides. Presets may seed the active command map, but they are not a second editable user config surface and they must not bypass the structured command-resolution path used by footer keybinding/F1/menu rendering.
 *   **Command Surface Identity Rule:** Command rows belong to stable runtime command-surface IDs, not to languages or storage back-end names. Canonical surfaces include at least directory/file and archive-directory/archive-file variants, and future surfaces may add new stable IDs without changing the row grammar or footer keybinding/F1 assembly pipeline.
 *   **Footer Packing Boundary:** Footer packing is a runtime layout algorithm, not a label-specific lookup table. The packing stage preserves stable command order, measures rendered entry widths, and chooses row splits by minimizing the width delta between the two top command rows. Any label-aware preference is allowed only as a tiebreaker between otherwise equivalent balanced fits; it must not become the primary wrap authority.
-*   **Canonical Help Source Boundary:** Authored contextual-help prose belongs to `etc/help/f1.en.md`, and authored man/USAGE reference prose belongs to `etc/help/man.en.md`, not to scattered ad-hoc runtime literals and not to the generated long-form outputs. The in-repo generator `scripts/generate_help_assets.py` projects those sources into `etc/ytnova.1.md`, `docs/USAGE.md`, the build manpage output, and the generated runtime help asset `src/core/generated_help_topics.h`.
-*   **Help Topic Schema Rule:** Every canonical help topic block uses an exact `## topic:<id>` heading, an immediate `ytnova-help-meta` fence with `title:` and `contexts:`, required `### Contextual F1` and `### Long form` sections, and optional `### Explainer links` entries written as `[Label](topic:<id>)`. Link-only explainer pages declare `contexts: none`.
+*   **Canonical Help Source Boundary:** Authored contextual-help prose belongs to `etc/help/f1.en.md`, and authored man/USAGE reference prose belongs to `etc/help/man.en.md`, not to scattered ad-hoc runtime literals or generated outputs. The in-repo generator `scripts/generate_help_assets.py` projects those sources into `etc/ytnova.1.md`, `docs/USAGE.md`, the build manpage output, and the generated runtime help asset `src/core/generated_help_topics.h`.
+*   **Help Topic Schema Rule:** F1 topic blocks use an exact `## topic:<id>` heading, an immediate `ytnova-help-meta` fence with `title:` and `contexts:`, a required `### Contextual F1` section, and optional `### Explainer links` entries written as `[Label](topic:<id>)`. Man topic blocks independently use the heading and metadata fence followed directly by ordered level-4 reference subsections. Link-only F1 explainer pages declare `contexts: none`.
 *   **Help Topic Mapping Boundary:** Stable topic IDs are content identities; stable runtime context/prompt IDs live only in topic metadata and the generated runtime lookup path. Reuse happens by mapping multiple contexts to one topic or by linking to shared topics, not by cloning the same prose into separate authored files.
 *   **Runtime Help Consumer Boundary:** `src/ui/runtime_help.c` is the sole UI consumer of `src/core/generated_help_topics.h`. It resolves context IDs to generated topics, appends runtime-owned footer/prompt command rows for parity, and lets popup footer link commands hop across shallow explainer topics without re-embedding help prose in controllers.
 *   **User Persistence Family Rule:** Config-like editable surfaces (`ytnova.conf`, `themes.conf`, and `commands.conf`) live under `$XDG_CONFIG_HOME/ytnova/` or `~/.config/ytnova/`; packaged command preset catalogs live under shared read-only app data (for example `/usr/share/ytnova/commands/`); session state such as command history lives under `$XDG_STATE_HOME/ytnova/` or `~/.local/state/ytnova/`. Home-directory dotfiles are compatibility fallbacks only when those XDG-style targets cannot be used.

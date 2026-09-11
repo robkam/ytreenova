@@ -19,6 +19,7 @@
 #include "ytnova_appstate_window.h"
 #include "ytnova_debug.h"
 #include "ytnova_i18n.h"
+#include "terminal_input.h"
 #include "default_profile_template.h"
 #include <fcntl.h>
 #include <string.h>
@@ -1192,6 +1193,7 @@ void ShutdownCurses(ViewContext *ctx) {
   if (screen != NULL)
     set_term(screen);
 
+  TerminalInputShutdown(ctx);
   endwin();
 
   if (screen != NULL) {
@@ -1268,6 +1270,8 @@ int Init(ViewContext *ctx, const char *configuration_file,
   if (InitApplyProfileDisplaySettings(ctx) != 0)
     return -1;
   if (InitApplyProfileRuntimeFlags(ctx) != 0)
+    return -1;
+  if (TerminalInputStart(ctx) != 0)
     return -1;
   InitStartRuntimeServices(ctx);
 

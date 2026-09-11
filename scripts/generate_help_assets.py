@@ -95,7 +95,7 @@ These commands work in most modes:
     *   `5` only works from the current `1` / Name base view; it always uses the Name file projection and is a silent no-op from `2`, `3`, or `4`.
     *   `5`, `7`, `8`, and `9` do not change tree rows; they change the panel's file projection instead, so in tree focus they update the small file window and in file focus they update the file window.
     *   Extra view states do not stack in the stats label; it names the one visible active state (`Compact`, `Mini preview`, `File`, or `Git`).
-    *   `0`: Do nothing on filesystem volumes; use `F6` for stats. In archive lists, toggle preloaded per-file Size, Packed, and Ratio details.
+*   `0`: Do nothing on filesystem volumes. In archive lists, toggle preloaded per-file Size, Packed, and Ratio details.
 *   **C-l**: **Reload**. Re-read the contents of the current directory from disk and refresh the view.
 *   **K**: **Volume Menu**. Show a list of all currently logged volumes (drives/paths). Select a volume to switch context instantly. Selecting the already-active volume preserves its current in-memory state (no implicit relog). Press `Delete` (or `D`) in the menu to release (unlog) a volume. *(With `VI_KEYS=1`, use uppercase `K`; lowercase `k` is navigation.)*
 *   **<** / **>** (or **,** / **.**): **Cycle Volumes**. Switch to the previous or next logged volume instantly.
@@ -274,6 +274,7 @@ MODE_TOPIC_ORDER = [
 ]
 
 KEYBIND_TOPIC_ORDER = [
+    ("enhanced-keyboard-input", "Kitty Keyboard Protocol"),
     ("shared-commands", "Shared Commands"),
     ("dir", "Directory Mode"),
     ("file", "File Mode"),
@@ -303,7 +304,7 @@ class HelpLink:
 
 
 @dataclass(frozen=True)
-class LongFormSection:
+class ReferenceSection:
     title: str
     body: str
 
@@ -337,7 +338,7 @@ class HelpTopic:
     contexts: tuple[str, ...]
     contextual_f1: str
     explainer_links: tuple[HelpLink, ...]
-    long_form_sections: tuple[LongFormSection, ...]
+    reference_sections: tuple[ReferenceSection, ...]
     help_strip: HelpStrip
 
 
@@ -406,7 +407,11 @@ def parse_help_strip(source_text: str, *, required: bool) -> HelpStrip:
 
 
 def parse_help_source(
-    source_text: str, *, require_long_form: bool = False, require_help_strip: bool = False
+    source_text: str,
+    *,
+    require_contextual_f1: bool = True,
+    require_reference_sections: bool = False,
+    require_help_strip: bool = False,
 ) -> list[HelpTopic]:
     help_strip = parse_help_strip(source_text, required=require_help_strip)
     lines = source_text.splitlines()
@@ -430,6 +435,10 @@ def parse_help_source(
 
         if len(block) < 6:
             raise HelpSourceError(f"line {line_no}: topic {topic_id!r} is incomplete")
+        if require_contextual_f1 and "### Long form" in block:
+            raise HelpSourceError(
+                f"line {line_no}: topic {topic_id!r} must keep all F1 content in ### Contextual F1"
+            )
 
         metadata_start = 1
         while metadata_start < len(block) and not block[metadata_start]:
@@ -445,12 +454,6 @@ def parse_help_source(
         if block[metadata_start + 3] != "```":
             raise HelpSourceError(f"line {line_no + metadata_start + 3}: topic {topic_id!r} metadata fence is not closed")
 
-        contextual_heading = metadata_start + 4
-        while contextual_heading < len(block) and not block[contextual_heading]:
-            contextual_heading += 1
-        if contextual_heading >= len(block) or block[contextual_heading] != "### Contextual F1":
-            raise HelpSourceError(f"line {line_no + contextual_heading}: topic {topic_id!r} must declare ### Contextual F1")
-
         title = block[metadata_start + 1][len("title: ") :].strip()
         contexts_raw = block[metadata_start + 2][len("contexts: ") :].strip()
         if not title:
@@ -465,20 +468,35 @@ def parse_help_source(
                 f"line {line_no + metadata_start + 2}: topic {topic_id!r} repeats a runtime context in contexts:"
             )
 
-        pos = contextual_heading + 1
-        contextual_lines: list[str] = []
-        while pos < len(block) and block[pos] not in {"### Explainer links", "### Long form"}:
-            contextual_lines.append(block[pos])
+        pos = metadata_start + 4
+        while pos < len(block) and not block[pos]:
             pos += 1
-        contextual_f1 = "\n".join(contextual_lines).strip()
-        if not contextual_f1:
-            raise HelpSourceError(f"line {line_no + contextual_heading}: topic {topic_id!r} has an empty Contextual F1 section")
+        contextual_lines: list[str] = []
+        if require_contextual_f1:
+            if pos >= len(block) or block[pos] != "### Contextual F1":
+                raise HelpSourceError(f"line {line_no + pos}: topic {topic_id!r} must declare ### Contextual F1")
+            pos += 1
+            while (
+                pos < len(block)
+                and block[pos] != "### Explainer links"
+                and not (require_reference_sections and block[pos].startswith("#### "))
+            ):
+                contextual_lines.append(block[pos])
+                pos += 1
+            contextual_f1 = "\n".join(contextual_lines).strip()
+            if not contextual_f1:
+                raise HelpSourceError(f"line {line_no + pos}: topic {topic_id!r} has an empty Contextual F1 section")
+        else:
+            contextual_f1 = ""
 
         links: list[HelpLink] = []
         if pos < len(block) and block[pos] == "### Explainer links":
             pos += 1
             link_lines: list[str] = []
-            while pos < len(block) and block[pos] != "### Long form":
+            while (
+                pos < len(block)
+                and not (require_reference_sections and block[pos].startswith("#### "))
+            ):
                 link_lines.append(block[pos])
                 pos += 1
             for offset, link_line in enumerate(link_lines, start=1):
@@ -495,17 +513,13 @@ def parse_help_source(
                 contextual_lines.extend(link_lines)
                 contextual_f1 = "\n".join(contextual_lines).strip()
 
-        sections: list[LongFormSection] = []
-        if pos < len(block) and block[pos] == "### Long form":
-            pos += 1
-            long_form_lines = block[pos:]
-            sections = _parse_long_form_sections(
-                topic_id, line_no + pos, long_form_lines
-            )
-        elif require_long_form:
-            raise HelpSourceError(
-                f"line {line_no}: topic {topic_id!r} is missing ### Long form"
-            )
+        sections: list[ReferenceSection] = []
+        if require_reference_sections:
+            if pos < len(block) and block[pos] == "### Long form":
+                raise HelpSourceError(
+                    f"line {line_no + pos}: topic {topic_id!r} must begin reference sections with #### headings"
+                )
+            sections = _parse_reference_sections(topic_id, line_no + pos, block[pos:])
         topics.append(
             HelpTopic(
                 topic_id=topic_id,
@@ -513,7 +527,7 @@ def parse_help_source(
                 contexts=contexts,
                 contextual_f1=contextual_f1,
                 explainer_links=tuple(links),
-                long_form_sections=tuple(sections),
+                reference_sections=tuple(sections),
                 help_strip=help_strip,
             )
         )
@@ -529,8 +543,8 @@ def parse_help_source(
     return topics
 
 
-def _parse_long_form_sections(topic_id: str, start_line: int, lines: list[str]) -> list[LongFormSection]:
-    sections: list[LongFormSection] = []
+def _parse_reference_sections(topic_id: str, start_line: int, lines: list[str]) -> list[ReferenceSection]:
+    sections: list[ReferenceSection] = []
     current_title: str | None = None
     current_lines: list[str] = []
 
@@ -542,7 +556,7 @@ def _parse_long_form_sections(topic_id: str, start_line: int, lines: list[str]) 
                     raise HelpSourceError(
                         f"line {start_line + offset - len(current_lines)}: topic {topic_id!r} subsection {current_title!r} is empty"
                     )
-                sections.append(LongFormSection(current_title, body))
+                sections.append(ReferenceSection(current_title, body))
             current_title = line[len("#### ") :].strip()
             current_lines = []
             if not current_title:
@@ -552,13 +566,13 @@ def _parse_long_form_sections(topic_id: str, start_line: int, lines: list[str]) 
 
     if current_title is None:
         raise HelpSourceError(
-            f"line {start_line}: topic {topic_id!r} long-form section needs at least one #### subsection"
+            f"line {start_line}: topic {topic_id!r} reference content needs at least one #### subsection"
         )
 
     body = "\n".join(current_lines).strip()
     if not body:
         raise HelpSourceError(f"topic {topic_id!r} subsection {current_title!r} is empty")
-    sections.append(LongFormSection(current_title, body))
+    sections.append(ReferenceSection(current_title, body))
     return sections
 
 
@@ -580,17 +594,17 @@ def render_manpage_markdown(
         "",
     ]
     for topic_id, heading in MODE_TOPIC_ORDER:
-        parts.append(render_contextual_projection(topic_map[topic_id], heading))
+        parts.append(render_reference_projection(topic_map[topic_id], heading))
     parts.extend([MANPAGE_STATIC_GLOBAL_KEYS.strip(), ""])
     for topic_id, heading in KEYBIND_TOPIC_ORDER:
-        parts.append(render_long_form_projection(topic_map[topic_id], heading))
-    parts.extend(["# COMPARE", "", render_long_form_projection(topic_map["compare"], topic_map["compare"].title, include_heading=False), ""])
+        parts.append(render_reference_projection(topic_map[topic_id], heading))
+    parts.extend(["# COMPARE", "", render_reference_projection(topic_map["compare"], topic_map["compare"].title, include_heading=False), ""])
     parts.extend([MANPAGE_STATIC_COMMAND_LINE.strip(), ""])
     for topic_id, heading in PROMPT_TOPIC_ORDER:
-        parts.append(render_long_form_projection(topic_map[topic_id], heading))
+        parts.append(render_reference_projection(topic_map[topic_id], heading))
     parts.extend(["# SUPPORT TOPICS", ""])
     for topic_id, heading in SUPPORT_TOPIC_ORDER:
-        parts.append(render_long_form_projection(topic_map[topic_id], heading))
+        parts.append(render_reference_projection(topic_map[topic_id], heading))
     parts.extend([MANPAGE_STATIC_TAIL.replace("{authors_line}", authors_line).strip(), ""])
     return "\n".join(parts).rstrip() + "\n"
 
@@ -603,12 +617,12 @@ def render_contextual_projection(topic: HelpTopic, heading: str) -> str:
     return "\n".join(lines)
 
 
-def render_long_form_projection(topic: HelpTopic, heading: str, *, include_heading: bool = True) -> str:
+def render_reference_projection(topic: HelpTopic, heading: str, *, include_heading: bool = True) -> str:
     lines: list[str] = []
     if include_heading:
         lines.append(f"### {heading}")
         lines.append("")
-    for index, section in enumerate(topic.long_form_sections):
+    for index, section in enumerate(topic.reference_sections):
         if index:
             lines.append("")
         lines.append(f"#### {section.title}")
@@ -943,7 +957,9 @@ def build_outputs(
         f1_source_path.read_text(encoding="utf-8"), require_help_strip=True
     )
     man_topics = parse_help_source(
-        man_source_path.read_text(encoding="utf-8"), require_long_form=True
+        man_source_path.read_text(encoding="utf-8"),
+        require_contextual_f1=False,
+        require_reference_sections=True,
     )
     locale_f1_catalogs: list[tuple[str, str, list[HelpTopic]]] = []
     validate_topic_inventory(f1_topics)

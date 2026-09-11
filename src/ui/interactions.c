@@ -15,6 +15,7 @@
 #include "ytnova_fs.h"
 #include "ytnova_ui.h"
 #include "interactions_panel_paths.h"
+#include "terminal_input.h"
 #include <ctype.h>
 #include <dirent.h>
 #include <errno.h>
@@ -740,7 +741,7 @@ int UI_ArchiveCallback(int status, const char *msg, long long bytes_delta,
     } else if (ctx && Progress_ShouldRender(ctx)) {
       DrawSpinner(ctx);
     }
-    if (EscapeKeyPressed()) {
+    if (EscapeKeyPressed(ctx)) {
       return ARCHIVE_CB_ABORT;
     }
   } else if (status == ARCHIVE_STATUS_ERROR) {
@@ -884,9 +885,16 @@ int GetPipeCommand(ViewContext *ctx, char *pipe_command) {
 
 int SystemCall(ViewContext *ctx, const char *command_line, Statistic *s) {
   int result;
+  BOOL restore_terminal_input;
 
+  restore_terminal_input = TerminalInputSuspend(ctx);
   endwin(); /* Ensure terminal state is reset before external command */
   result = SilentSystemCall(ctx, command_line, s);
+
+  if (restore_terminal_input) {
+    (void)reset_prog_mode();
+    (void)TerminalInputResume(ctx);
+  }
 
   (void)GetAvailBytes(&s->disk_space, s);
   /* Full screen redraw to fully restore the curses UI */
@@ -898,7 +906,9 @@ int SystemCall(ViewContext *ctx, const char *command_line, Statistic *s) {
 
 int QuerySystemCall(ViewContext *ctx, const char *command_line, Statistic *s) {
   int result;
+  BOOL restore_terminal_input;
 
+  restore_terminal_input = TerminalInputSuspend(ctx);
   endwin(); /* 1. Save state / Exit curses mode */
 
   /* 2. Execute command (runs outside curses) */
@@ -908,6 +918,10 @@ int QuerySystemCall(ViewContext *ctx, const char *command_line, Statistic *s) {
 
   HitReturnToContinue(); /* 3. Print message and wait for key in raw terminal */
 
+  if (restore_terminal_input) {
+    (void)reset_prog_mode();
+    (void)TerminalInputResume(ctx);
+  }
   if (ctx->hook_init_clock)
     ctx->hook_init_clock(ctx);
   (void)GetAvailBytes(&s->disk_space, s);

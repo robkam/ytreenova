@@ -220,7 +220,7 @@ BOOL Progress_Update(ViewContext *ctx, long long bytes_done,
                                             completed);
   if (Progress_ShouldRender(ctx))
     DrawSpinner(ctx);
-  if (EscapeKeyPressed()) {
+  if (EscapeKeyPressed(ctx)) {
     ctx->progress.cancel_requested = TRUE;
     (void)snprintf(ctx->progress.error_message,
                    sizeof(ctx->progress.error_message), "%s",

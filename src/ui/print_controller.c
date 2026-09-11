@@ -7,6 +7,7 @@
 
 #include "ytnova_cmd.h"
 #include "ytnova_ui.h"
+#include "terminal_input.h"
 #include <ctype.h>
 #include <string.h>
 #include <unistd.h>
@@ -234,6 +235,7 @@ void UI_HandlePrintController(ViewContext *ctx, DirEntry *dir_entry,
     return;
   }
 
+  (void)TerminalInputSuspend(ctx);
   endwin();
   SuspendClock(ctx);
 
@@ -243,6 +245,8 @@ void UI_HandlePrintController(ViewContext *ctx, DirEntry *dir_entry,
     HitReturnToContinue();
   }
 
+  (void)reset_prog_mode();
+  (void)TerminalInputResume(ctx);
   InitClock(ctx);
   if (dir_entry != NULL) {
     RefreshView(ctx, dir_entry);
