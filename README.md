@@ -58,6 +58,7 @@ v1.0.0-alpha is being published early so people can use the program, inspect the
 *   **Auto-Refresh:** Inotify integration for live directory updates.
 *   **External Viewers:** Associate specific file extensions with external programs (images, PDFs, etc.).
 *   **User Commands:** Bind keys to custom shell commands/scripts for infinite extensibility.
+*   **Kitty Keyboard Protocol:** A supporting terminal distinguishes `Ctrl-m` from `Enter`, so `Ctrl-m` moves tagged files. In Kitty, add `keyboard_protocol kitty` to `~/.config/kitty/kitty.conf` and restart the terminal. Terminals without protocol support silently use the legacy `Ctrl-n` tagged-move binding.
 
 ## Installation
 

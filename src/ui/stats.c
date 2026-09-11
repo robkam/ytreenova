@@ -702,7 +702,7 @@ static void DisplayDiskNameProjected(ViewContext *ctx,
   DrawSeparator(ctx, projection, ctx->layout.stats_y_vol_sep, buf);
 
   if (ctx->view_mode == ARCHIVE_MODE)
-    strncpy(path_buf, s->log_path, PATH_LENGTH);
+    strncpy(path_buf, s->display_path, PATH_LENGTH);
   else
     strncpy(path_buf, s->path, PATH_LENGTH);
   path_buf[PATH_LENGTH] = '\0';

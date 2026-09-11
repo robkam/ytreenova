@@ -8,6 +8,7 @@
 #include "ytnova_cmd.h"
 #include "ytnova_fs.h"
 #include "ytnova_runtime_launch.h"
+#include "terminal_input.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <stdlib.h>
@@ -113,17 +114,22 @@ int LaunchDetachedCommand(ViewContext *ctx, const char *command_line,
 int SilentSystemCallEx(ViewContext *ctx, const char *command_line, BOOL enable_clock, Statistic *s) {
   int command_status;
   int result;
+  BOOL restore_terminal_input;
 
   /* Hier ist die einzige Stelle, in der Kommandos aufgerufen werden! */
 
   if (ctx->hook_suspend_clock)
     ctx->hook_suspend_clock(ctx);
+  restore_terminal_input = TerminalInputSuspend(ctx);
 
   if (RuntimeLaunchRunShell(command_line, NULL, -1, -1, -1, FALSE,
                             &command_status) != 0)
     result = -1;
   else
     result = command_status;
+
+  if (restore_terminal_input)
+    (void)TerminalInputResume(ctx);
 
   /* Restore terminal settings. If enable_clock is TRUE, InitClock will
      implicitly call refresh() and restore the curses display later.

@@ -86,6 +86,8 @@ extern BOOL Match(FileEntry *fe, const Statistic *s);
 extern int Log(DirEntry *dir_entry, Statistic *s);
 extern int SetLogFile(char *filename);
 extern int LogDisk(ViewContext *ctx, YtreeNovaPanel *panel, char *path);
+extern int LogArchiveFile(ViewContext *ctx, YtreeNovaPanel *panel,
+                          const FileEntry *file_entry);
 extern int CycleLoadedVolume(ViewContext *ctx, YtreeNovaPanel *panel,
                              int direction);
 extern int GetNewLogPath(ViewContext *ctx, YtreeNovaPanel *panel, char *path);
