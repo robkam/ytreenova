@@ -71,6 +71,7 @@ def footer_lines(tui):
 
 def footer_text_from_lines(snapshot):
     snapshot = footer_lines_from_lines(snapshot)
+    raw = "\n".join(snapshot).lower()
     normalized_lines = []
     key_tokens = []
 
@@ -118,7 +119,7 @@ def footer_text_from_lines(snapshot):
         normalized_lines.append("j file")
 
     if any(line.startswith("file ") for line in normalized_lines):
-        if all(token in key_tokens for token in ("(h)", "(i)", "(j)")):
+        if all(token in raw for token in ("(h)", "(i)", "(j)")):
             normalized_lines.append("hex invert j compare")
 
     normalized = "\n".join(normalized_lines)

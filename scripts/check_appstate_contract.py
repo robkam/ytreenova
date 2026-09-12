@@ -568,15 +568,7 @@ def _parse_ytnova_actions(header_path: Path) -> tuple[list[str], list[str]]:
     except OSError as exc:
         return [], [f"{header_path}: failed to read: {exc}"]
 
-    match = None
-    for candidate in re.finditer(
-        r"typedef\s+enum\s*\{(?P<body>.*?)\}\s*(?P<name>[A-Za-z_][A-Za-z0-9_]*)\s*;",
-        source,
-        re.S,
-    ):
-        if candidate.group("name") == "YtreeNovaAction":
-            match = candidate
-            break
+    match = re.search(r"typedef\s+enum\s*\{(?P<body>.*?)\}\s*YtreeNovaAction\s*;", source, re.S)
     if match is None:
         return [], [f"{header_path}: failed to find YtreeNovaAction enum"]
 

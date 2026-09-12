@@ -11,7 +11,6 @@ class YtreeNovaTUI:
         env_extra=None,
         args=None,
         dimensions=(36, 120),
-        keyboard_protocol="enhanced",
     ):
         self.time_scale = self._read_time_scale()
         rows, cols = dimensions
@@ -33,11 +32,6 @@ class YtreeNovaTUI:
             encoding='utf-8',
             timeout=max(5.0 * self.time_scale, 5.0)
         )
-        self.keyboard_protocol = keyboard_protocol
-        self._keyboard_probe_buffer = ""
-        self._keyboard_pop_buffer = ""
-        self.keyboard_probe_count = 0
-        self.keyboard_pop_count = 0
         
         # Initialize an in-memory terminal screen using pyte
         self.screen = pyte.Screen(cols, rows)
@@ -70,53 +64,10 @@ class YtreeNovaTUI:
             read_timeout = self._scaled(timeout)
             while True:
                 data = self.child.read_nonblocking(size=4096, timeout=read_timeout)
-                self._respond_to_keyboard_probe(data)
                 self.stream.feed(data)
                 read_timeout = 0
         except (pexpect.TIMEOUT, pexpect.EOF):
             pass
-
-    def _respond_to_keyboard_probe(self, data):
-        request = "\x1b[?u\x1b[c"
-        pop = "\x1b[<u"
-        self._keyboard_probe_buffer += data
-        while request in self._keyboard_probe_buffer:
-            _, self._keyboard_probe_buffer = self._keyboard_probe_buffer.split(
-                request, 1
-            )
-            self.keyboard_probe_count += 1
-            protocol = self.keyboard_protocol
-            if isinstance(protocol, (tuple, list)):
-                protocol = protocol[
-                    min(self.keyboard_probe_count - 1, len(protocol) - 1)
-                ]
-            if protocol == "enhanced":
-                response = "\x1b[?1u\x1b[?1;2c"
-            elif protocol == "legacy":
-                response = "\x1b[?0u\x1b[?1;2c"
-            else:
-                response = None
-            if response is not None:
-                send_delay = self.child.delaybeforesend
-                self.child.delaybeforesend = 0
-                try:
-                    self.child.send(response)
-                finally:
-                    self.child.delaybeforesend = send_delay
-        self._keyboard_probe_buffer = self._keyboard_probe_buffer[-(len(request) - 1) :]
-
-        self._keyboard_pop_buffer += data
-        self.keyboard_pop_count += self._keyboard_pop_buffer.count(pop)
-        self._keyboard_pop_buffer = self._keyboard_pop_buffer[-(len(pop) - 1) :]
-
-    def wait_for_keyboard_probe_count(self, count, timeout=5.0):
-        deadline = time.monotonic() + self._scaled(timeout)
-        while self.keyboard_probe_count < count:
-            remaining = deadline - time.monotonic()
-            if remaining <= 0:
-                return False
-            self._read_output(timeout=min(remaining, self._scaled(0.1)))
-        return True
 
     def send_keystroke(self, keys, wait=0.3):
         """Sends keys to the pexpect process, reads output, and updates screen."""
@@ -194,9 +145,6 @@ class YtreeNovaTUI:
             self.child.expect(pexpect.EOF, timeout=self._scaled(timeout))
         except pexpect.TIMEOUT:
             return False
-        if self.child.before:
-            self._respond_to_keyboard_probe(self.child.before)
-            self.stream.feed(self.child.before)
         self._read_output(timeout=0)
         return True
 

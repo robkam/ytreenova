@@ -7,7 +7,6 @@
  ***************************************************************************/
 
 #include "watcher.h"
-#include "terminal_input.h"
 #include "ytnova_appstate_actions.h"
 #include "ytnova_appstate_focus.h"
 #include "ytnova_appstate_render.h"
@@ -680,15 +679,15 @@ void HitReturnToContinue(void) {
   doupdate();
 }
 
-BOOL KeyPressed(ViewContext *ctx) {
+BOOL KeyPressed() {
   BOOL pressed = FALSE;
 
   nodelay(stdscr, TRUE);
-  int c = WGetch(ctx, stdscr);
+  int c = wgetch(stdscr);
   if (c != ERR) {
     pressed = TRUE;
-    (void)TerminalInputUnreadKey(ctx, c);
-    DEBUG_KEYSTROKE_LOG("KeyPressed() saw: %3d ('%c') - PRESERVING", c,
+    ungetch(c);
+    DEBUG_KEYSTROKE_LOG("KeyPressed() saw: %3d ('%c') - UNGETTING", c,
                         (c >= 32 && c <= 126) ? c : '.');
   }
   nodelay(stdscr, FALSE);
@@ -696,19 +695,19 @@ BOOL KeyPressed(ViewContext *ctx) {
   return (pressed);
 }
 
-BOOL EscapeKeyPressed(ViewContext *ctx) {
+BOOL EscapeKeyPressed(void) {
   int c;
   BOOL pressed = FALSE;
 
   nodelay(stdscr, TRUE);
-  if ((c = WGetch(ctx, stdscr)) != ERR) {
+  if ((c = wgetch(stdscr)) != ERR) {
     DEBUG_KEYSTROKE_LOG("EscapeKeyPressed() saw: %3d ('%c')", c,
                         (c >= 32 && c <= 126) ? c : '.');
 
     if (c == ESC) {
       pressed = TRUE;
     } else {
-      (void)TerminalInputUnreadKey(ctx, c);
+      ungetch(c);
     }
   }
   nodelay(stdscr, FALSE);
@@ -919,8 +918,6 @@ YtreeNovaAction GetKeyAction(const ViewContext *ctx, int ch) {
   case 'm':
   case 'M':
     return AppStateValidatedKeyAction(ACTION_CMD_M);
-  case YTNOVA_KEY_CTRL_M:
-    return AppStateValidatedKeyAction(ACTION_CMD_TAGGED_M);
   case 'n':
   case 'N':
     return AppStateValidatedKeyAction(ACTION_CMD_MKFILE);
@@ -1045,8 +1042,7 @@ YtreeNovaAction GetKeyAction(const ViewContext *ctx, int ch) {
   }
 }
 
-static int NormalizeEscSequenceForWindow(ViewContext *ctx, WINDOW *win,
-                                         int ch) {
+static int NormalizeEscSequenceForWindow(WINDOW *win, int ch) {
   int seq1;
   int seq2;
 
@@ -1057,7 +1053,7 @@ static int NormalizeEscSequenceForWindow(ViewContext *ctx, WINDOW *win,
     win = stdscr;
 
   wtimeout(win, ESC_SEQUENCE_TIMEOUT_MS);
-  seq1 = TerminalInputReadKey(ctx, win);
+  seq1 = wgetch(win);
   if (seq1 == ERR) {
     wtimeout(win, -1);
     return ESC;
@@ -1069,7 +1065,7 @@ static int NormalizeEscSequenceForWindow(ViewContext *ctx, WINDOW *win,
     return ESC;
   }
 
-  seq2 = TerminalInputReadKey(ctx, win);
+  seq2 = wgetch(win);
   if (seq2 == ERR) {
     ungetch(seq1);
     wtimeout(win, -1);
@@ -1099,7 +1095,7 @@ static int NormalizeEscSequenceForWindow(ViewContext *ctx, WINDOW *win,
   case '4':
   case '7':
   case '8': {
-    int seq3 = TerminalInputReadKey(ctx, win);
+    int seq3 = wgetch(win);
     if (seq3 == '~') {
       ch = (seq2 == '1' || seq2 == '7') ? KEY_HOME : KEY_END;
     } else {
@@ -1125,7 +1121,7 @@ static int NormalizeEscSequenceForWindow(ViewContext *ctx, WINDOW *win,
 int WGetch(ViewContext *ctx, WINDOW *win) {
   int c;
 
-  c = TerminalInputReadKey(ctx, win);
+  c = wgetch(win);
 
   if (ctx && ctx->status_line_error_pending && c != ERR) {
 #ifdef KEY_RESIZE
@@ -1154,13 +1150,13 @@ int WGetch(ViewContext *ctx, WINDOW *win) {
   }
 #endif
 
-  return NormalizeEscSequenceForWindow(ctx, win, c);
+  return NormalizeEscSequenceForWindow(win, c);
 }
 
 int Getch(ViewContext *ctx) { return WGetch(ctx, stdscr); }
 
 static int NormalizeEscSequence(int ch) {
-  return NormalizeEscSequenceForWindow(NULL, stdscr, ch);
+  return NormalizeEscSequenceForWindow(stdscr, ch);
 }
 
 int GetEventOrKey(ViewContext *ctx) {

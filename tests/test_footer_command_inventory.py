@@ -67,7 +67,6 @@ def _footer_text(tui):
 
 
 def _assert_archive_file_commands(footer, *, read_only):
-    assert "1..0 file view" in footer, footer
     for command in ("copy", "filter", "hex", "invert", "output", "pipe", "view", "pathcopy"):
         assert command in footer, footer
     for unsupported in ("attributes", "edit", "newfile", "xecute", "z/^z"):
@@ -77,7 +76,7 @@ def _assert_archive_file_commands(footer, *, read_only):
         assert "delete" not in footer and "rename" not in footer and "m/^n" not in footer
     else:
         assert "commands" in footer and "readonly" not in footer, footer
-        assert "delete" in footer and "rename" in footer and "m/^m" in footer
+        assert "delete" in footer and "rename" in footer and "m/^n" in footer
 
 
 def _assert_archive_preview_commands(footer, *, read_only):
@@ -91,7 +90,7 @@ def _assert_archive_preview_commands(footer, *, read_only):
         assert "delete" not in footer and "rename" not in footer and "m/^n" not in footer
     else:
         assert "commands" in footer and "readonly" not in footer, footer
-        assert "delete" in footer and "rename" in footer and "m/^m" in footer
+        assert "delete" in footer and "rename" in footer and "m/^n" in footer
 
 
 def test_filesystem_directory_file_and_preview_commands(ytnova_binary, tmp_path):
@@ -139,7 +138,6 @@ def test_writable_archive_footer_commands_and_invert_dispatch(
     try:
         _open_selected_archive(tui)
         directory_footer = _footer_text(tui)
-        assert "1..0 dir view" in directory_footer, directory_footer
         for command in ("copy", "delete", "invert", "makedir", "movedir", "pathcopy", "rename"):
             assert command in directory_footer, directory_footer
         assert "commands" in directory_footer and "readonly" not in directory_footer

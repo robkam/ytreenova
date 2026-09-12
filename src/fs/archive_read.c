@@ -13,7 +13,7 @@
 #define ARCHIVE_EXTRACT_DIR_MODE 0700
 
 static void ArchiveMessageWithBoundary(ViewContext *ctx, const char *fmt, ...);
-static BOOL ArchiveKeyPressedWithBoundary(ViewContext *ctx);
+static BOOL ArchiveKeyPressedWithBoundary(const ViewContext *ctx);
 static void ArchiveQuitWithBoundary(ViewContext *ctx);
 static void ArchiveRecalculateSysStatsWithBoundary(ViewContext *ctx,
                                                    Statistic *s);
@@ -213,9 +213,9 @@ static void ArchiveMessageWithBoundary(ViewContext *ctx, const char *fmt, ...) {
   (void)ctx->hook_ui_message(ctx, "%s", msg);
 }
 
-static BOOL ArchiveKeyPressedWithBoundary(ViewContext *ctx) {
+static BOOL ArchiveKeyPressedWithBoundary(const ViewContext *ctx) {
   if (ctx && ctx->hook_key_pressed)
-    return ctx->hook_key_pressed(ctx);
+    return ctx->hook_key_pressed();
   return FALSE;
 }
 

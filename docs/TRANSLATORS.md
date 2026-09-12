@@ -62,18 +62,15 @@ F1 topics fall into three families:
 
 Do not collapse these families together in translation. If the source keeps a repeated rule in one shared topic, keep it there instead of rewording it differently on every local page.
 
-## Help-source structure rules you must preserve
+## F1 structure rules you must preserve
 
-Each F1 topic block has this schema:
+Each F1 topic block has a strict schema:
 
 - `## topic:<id>`
 - metadata fence with `title:` and `contexts:`
 - `### Contextual F1`
 - optional `### Explainer links`
-
-`etc/help/man.en.md` is an independent reference source. Its topic blocks use
-the metadata fence followed directly by level-4 reference subsections; they do
-not contain F1 sections or links.
+- `### Long form`
 
 Translators:
 
@@ -81,13 +78,13 @@ Translators:
   - `title:`
   - text under `### Contextual F1`
   - visible link labels in `### Explainer links`
-  - man-source reference headings and bodies
+  - long-form headings and bodies
 
 - **do not translate**
   - `topic:<id>`
   - `contexts:`
   - `topic:` targets inside links such as `(topic:navigation)`
-  - F1 schema headings like `### Contextual F1` and `### Explainer links` unless the generator/schema is explicitly updated to support localization there
+  - schema headings like `### Contextual F1`, `### Explainer links`, `### Long form` unless the generator/schema is explicitly updated to support localization there
 
 The stable IDs and context mappings are runtime keys, not prose.
 

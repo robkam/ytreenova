@@ -8182,8 +8182,7 @@ def test_ctrl_file_ops_dir_entry_viewports_commit_through_appstate_helper() -> N
     expectations = {
         "RebuildActiveFileListAfterMutation": 1,
         "handle_file_window_navigation_action": 2,
-        "HandleFileWindowPanelDispatchAction": 1,
-        "handle_file_window_misc_dispatch_action": 1,
+        "handle_file_window_misc_dispatch_action": 2,
         "HandleTaggedFileOpDispatchAction": 0,
         "HandleTaggedMoveAction": 1,
         "HandleTaggedSelectionDispatchAction": 1,
@@ -8241,10 +8240,10 @@ def test_ctrl_file_ops_enter_dir_entry_shape_commits_through_appstate_helper() -
     mutation = re.compile(r"\bdir_entry->big_window\s*=(?!=)")
 
     function_start = ctrl_file_ops.index(
-        "static BOOL HandleFileWindowPanelDispatchAction("
+        "BOOL handle_file_window_misc_dispatch_action("
     )
     function_end = ctrl_file_ops.index(
-        "\nBOOL handle_file_window_misc_dispatch_action(",
+        "\nstatic BOOL HandleTaggedFileOpDispatchAction(",
         function_start,
     )
     function_body = ctrl_file_ops[function_start:function_end]
