@@ -43,140 +43,44 @@ ytnova monitors the **currently selected directory** for changes (created/delete
 
 ### Help System
 
-#### Overview
 This manual is the fuller reference path for ytnova modes, commands, prompts, and support topics.
-
-#### Purpose
-This file is the fuller reference source for the manpage and generated `docs/USAGE.md`.
-
-#### Contents
-* **Modes and navigation**: `Directory`, `File`, `Archive-Dir`, `Archive-File`, `Showall`, `Global`, `F7 Preview`, and `F8 Split` explain what each runtime surface owns.
-* **Shared operator rules**: `Navigation`, `Tagged`, `Shared Commands`, `Command-line Editing`, `Vi Keys`, `F10 Config`, and `Theming` collect cross-surface behavior once instead of repeating it in every mode page.
-* **Prompt references**: `List Jump`, `Copy/Move Targets`, `Filter`, `Compare`, `Output`, `Execute`, `Create Archive`, and `Date Change` document syntax, scope, and decision points.
-* **Chooser and support surfaces**: `History`, `Volume`, `Applications`, and the `F2 Picker` cover the reusable helper dialogs and menus.
+The in-app `F1` popup provides the shorter contextual version for the active surface.
 ### Navigation
 
-#### Control-key notation
-`C-<chr>` means hold the Control key while typing `<chr>`. For example, `C-f` means hold Control and type `f`.
+The help popup uses list-style navigation.
+`Up` and `Down` move, `Enter` or `Right` follow, `Left` goes back, and `Esc` or `Q` closes.
 ### Directory Mode
 
-#### Overview
 Directory mode is the logged tree view.
 It owns directory navigation, tree expansion, and directory-scoped commands.
-
-#### Directory navigation
-* **Enter / Right / Left**: `Enter` opens the file window and finishes logging when the selected directory is not expanded yet. `Right` expands first and then descends. `Left` collapses the current node or climbs to its parent.
-* **Logging controls**: `+` logs or reveals one level without moving. `*` expands recursively. `-` collapses the branch, and a second `-` on a collapsed logged node releases it back to an unlogged state.
-* **Tree ownership**: Directory Mode owns branch shape and logged-tree coverage. File lists, Showall, and Global only project files from the tree you have already logged.
-
-#### Directory command families
-* **Presentation and scope**: `1..9 view` changes the panel presentation. `0` does nothing on filesystem volumes. `Filter`, `Showall`, `Global`, and `Jump` change which projected file set or visible subset you are inspecting.
-* **Filesystem changes**: `Attributes`, `Rename`, `Delete`, `Makedir`, and `New File` change metadata or create/remove entries. `Log` adds or reloads a logged root.
-* **Working-set control**: `Tag`, `Untag`, and `I` / `Invert Tags` define the set that later bulk commands consume. `I` flips tags only on filter-matching visible files in the selected directory.
-* **Transfer and export**: `Copy`, `MoveDir`, `Output`, `Pipe`, and `Archive` act on the selected branch or on the tagged set, depending on the command.
-* **Cross-surface actions**: `Compare` hands off to the compare flow, `Execute` runs a shell command with the current path, `Volume` switches logged volumes, `Dotfiles` toggles hidden entries, and `Quit` leaves ytnova.
 ### File Mode
 
-#### Overview
 File mode is the main file-list view.
 It owns file navigation, file-scoped commands, tagged actions, and export entry points.
-
-#### File navigation
-* **Presentation**: `1..9 view` stays in file mode and changes Name, Attributes, Owner, and Times plus Compact, size units, Mini preview, File detail, and the Git band where they apply. `0` does nothing on filesystem volumes.
-* **Enter**: Switch between the embedded file window and full-screen file mode without leaving the same file list.
-* **Columns**: `Left` and `Right` move across visible file columns. In single-column layouts they page backward and forward through the same list.
-
-#### File command families
-* **Inspection**: `View`, `Hex`, and `Edit` open the selected file through the configured pager, hex viewer, or editor.
-* **Transfer**: `Copy`, `Move`, and `Pathcopy` operate on the selected file. `Copy tagged` and `Move tagged` apply the same target rules to the tagged set.
-* **Working-set control**: `Tag`, `Untag`, `Tag all`, `Untag all`, and `I` / `Invert Tags` build or clear the set that later bulk commands consume. `I` flips tags only on matching visible files in the active list; Showall and Global limit it to their current result sets.
-* **List control**: `Filter`, `Sort`, `Jump`, and `Dotfiles` change how the current file list is projected. The filter prompt still owns the tagged-only scope toggle on `Tab`.
-* **Metadata and creation**: `Attributes`, `Rename`, `Delete`, and `New File` edit file state. `Log` opens `Log Path:` prefilled with the selected path; it accepts directories and recognized archive files only.
-* **Output and shell handoff**: `Output`, `Pipe`, `Execute`, and `Archive` export the current file or tagged set. `Execute` expands the prefilled `{}` path, and `C-x` reruns the command once per tagged file.
-* **Cross-surface actions**: `Compare` enters the compare flow, `Search tagged` narrows the tagged set by content, `Volume` switches logged volumes, and `Quit` exits ytnova.
 ### Archive-Dir Mode
 
-#### Overview
 Archive-Dir mode is the tree-style view inside a logged archive.
 It mirrors directory work where the archive format permits it.
-
-#### Archive directory navigation
-* **Enter / Left / Right**: Navigate the virtual tree the same way as ordinary Directory Mode, but only within the currently opened archive.
-* **Root handling**: `\` jumps to archive root from deeper nodes, and leaves the archive entirely when you are already at that root.
-* **Archive scope**: Expansion state is virtual. It reflects archive contents, not a live writable filesystem tree.
-
-#### Archive directory command families
-* **Presentation and scope**: `1..0 view` selects the archive presentation; `9` stays inert in archives. `0` toggles Size, Packed, and Ratio for archive file rows. `Filter`, `Showall`, `Global`, and `Jump` still operate on the archive-backed visible set.
-* **Archive-aware transfers and edits**: `Copy` and `Pathcopy` remain available when the archive supports copy-out. `MoveDir`, `Delete`, `Rename`, and `Makedir` appear only when the current archive format and access path support the required write-back operation. Directory transfers are recursive and reject a destination inside the source subtree. Common writable formats include `.tar`, `.tar.gz`, `.tar.bz2`, `.tar.xz`, and `.zip`; actual availability depends on the installed libarchive and archive properties.
-* **Working-set control**: `Tag`, `Untag`, and `I` / `Invert Tags` operate on the current virtual directory scope. `I` flips tags only on filter-matching visible entries in the selected archive directory.
-* **Transfers and export**: `Output`, `Pipe`, and `Compare` use archive-backed paths. `Log` and `Volume` switch away to other logged roots or volumes when needed.
-* **Session controls**: `Dotfiles` toggles hidden archive entries where the format exposes them, and `Quit` exits ytnova.
 ### Archive-File Mode
 
-#### Overview
 Archive-File mode is the file-list view for archive-backed content.
 Some filesystem commands are unavailable or become archive-aware here.
-
-#### Archive file navigation
-* **Presentation**: `1..8` keeps the usual file-view bands, while `9` remains a no-op because archive entries do not expose the Git band surface. `0` toggles Size, Packed, and Ratio for archive file rows.
-* **Enter**: Return to Archive Directory Mode for the same archive.
-* **List control**: `Jump`, `Filter`, and `Sort` still operate on the archive-backed visible file list.
-
-#### Archive file command families
-* **Inspection**: `View` and `Hex` open the selected archive entry without first moving you into an ordinary file-mode session.
-* **Transfer**: `Copy` and `Pathcopy` use archive-aware copy-out paths and remain available on readable archives. `Move` appears only with archive write-back support. `Copy tagged` and `Move tagged` apply the same capability rules to the tagged archive set.
-* **Working-set control**: `Tag`, `Untag`, and `I` / `Invert Tags` manage the current archive-backed working set. `I` flips tags only on matching visible entries in the current archive directory.
-* **Mutation limits**: `Move`, `Delete`, and `Rename` exist only where the archive path supports write-back. `Execute` is not available in archive file mode.
-* **Output and comparison**: `Output`, `Pipe`, `Compare`, `Search tagged`, and `View tagged` all stay scoped to the archive-backed list rather than a normal filesystem directory.
-* **Log**: `Log` loads the selected archive entry as another archive when it is a supported archive format.
-* **Session controls**: `Log`, `Volume`, `Dotfiles`, and `Quit` behave like their file-mode counterparts, but they may take you out of the current archive session.
 ### Showall Mode
 
-#### Overview
 Showall lists every file inside the current logged volume in one aggregated file list.
 It keeps single-volume scope while flattening directory boundaries.
-
-#### Showall behavior
-* **Scope**: Showall flattens one logged volume into one file list. It never crosses into other logged volume roots.
-* **Return path**: `Esc` returns to the directory you came from, and `\` jumps to the owner directory of the selected file within that same volume.
-* **List control**: `Sort`, `Filter`, `Jump`, and `Dotfiles` apply to the aggregated Showall result set rather than to each directory separately. The filter prompt still provides the tagged-only toggle on `Tab`.
-* **Command family**: Showall reuses the File Mode command surface: `Attributes`, `Copy`, `Delete`, `Edit`, `Filter`, `Hex`, `Invert Tags`, `Compare`, `Volume`, `Log`, `Move`, `New File`, `Pipe`, `Quit`, `Rename`, `Sort`, `Tag`, `Untag`, `View`, `Output`, `Execute`, `Pathcopy`, `Archive`, `Jump`, and `Dotfiles`. The difference is only the flattened single-volume scope.
 ### Global Mode
 
-#### Overview
 Global lists files from every logged volume in one aggregated file list.
 It keeps multi-volume scope while flattening directory boundaries.
-
-#### Global behavior
-* **Scope**: Global flattens every logged volume into one file list.
-* **Return path**: `Esc` returns to the prior directory surface, and `\` jumps to the owner directory even when it lives under another logged volume root.
-* **List control**: `Filter`, `Jump`, `Dotfiles`, and `Sort` operate on the aggregated Global result set. Repeating `G` is a no-op because you are already in Global.
-* **Command family**: Global reuses the File Mode command surface: `Attributes`, `Copy`, `Delete`, `Edit`, `Filter`, `Hex`, `Invert Tags`, `Compare`, `Volume`, `Log`, `Move`, `New File`, `Pipe`, `Quit`, `Rename`, `Sort`, `Tag`, `Untag`, `View`, `Output`, `Execute`, `Pathcopy`, `Archive`, `Jump`, and `Dotfiles`. The difference is the multi-volume scope and the cross-volume owner jump.
 ### File Preview Mode
 
-#### Overview
 F7 preview overlays file preview controls on top of the underlying file-selection context.
 The preview owns scrolling while the underlying selection still owns the file target.
-
-#### Preview navigation
-* **Two scopes stay active**: the underlying file selection still moves with `Up`, `Down`, `PgUp`, `PgDn`, `Home`, and `End`, while the preview buffer scrolls with `Shift-Up/Shift-Down`, `C-p/C-n`, `Shift-PgUp/Shift-PgDn`, and `Shift-Home/Shift-End`.
-* **Leaving preview**: `F7` or `Esc` returns to the suspended directory/file surface without discarding its current selection.
-* **Blocked overlays**: `F8` split and `Tab` panel switching are disabled while preview is active.
-
-#### Preview command families
-* **File-mode command reuse**: Preview keeps the file-focused command family available: `Attributes`, `Copy`, `Delete`, `Edit`, `Filter`, `Invert Tags`, `Compare`, `Move`, `New File`, `Rename`, `Tag`, `Untag`, `View`, `Output`, `Execute`, `Pathcopy`, `Archive`, `Jump`, and `Dotfiles`.
-* **Tagged and bulk behavior**: `C-k` still copies the tagged set, and `C-s` still runs Search Tagged without leaving preview.
-* **Applications handoff**: `F9` opens the Applications menu from preview without closing preview first.
 ### Split Screen Mode
 
-#### Overview
-Split mode keeps two panels active at once.
+Split mode keeps two panels active at once, and runtime F1 opens the directory or file split page for the active panel.
 Use the split page for the live footer command list and this page for the shared split model.
-
-#### Split controls
-* **Panel ownership**: Each panel keeps its own selection, tags, logged volume, view bands, and restore state. Split mode changes only which panel is active for the next command.
-* **Target defaults**: Copy, move, and compare prompts seed the inactive panel as the default destination or target, but you can still edit that default before the operation runs.
-* **Leaving split**: `F8` returns to one-panel mode. `Tab` switches the active panel without merging state between them.
 # KEY BINDINGS
 
 **Note:** All keys are case insensitive unless otherwise noted. `C-<key>` means hold the Control key while pressing `<key>`. For most commands, pressing **C-key** (indicated in footer menus only where different) applies the action to all **tagged** files in the current scope. The live footer stays low-noise: there is no held-Control footer variant, and control-only tagged/search semantics are explained in the active prompt/**F1** help instead of being shown all the time.
@@ -213,7 +117,7 @@ These commands work in most modes:
     *   `5` only works from the current `1` / Name base view; it always uses the Name file projection and is a silent no-op from `2`, `3`, or `4`.
     *   `5`, `7`, `8`, and `9` do not change tree rows; they change the panel's file projection instead, so in tree focus they update the small file window and in file focus they update the file window.
     *   Extra view states do not stack in the stats label; it names the one visible active state (`Compact`, `Mini preview`, `File`, or `Git`).
-*   `0`: Do nothing on filesystem volumes. In archive lists, toggle preloaded per-file Size, Packed, and Ratio details.
+    *   `0`: Do nothing on filesystem volumes; use `F6` for stats. In archive lists, toggle preloaded per-file Size, Packed, and Ratio details.
 *   **C-l**: **Reload**. Re-read the contents of the current directory from disk and refresh the view.
 *   **K**: **Volume Menu**. Show a list of all currently logged volumes (drives/paths). Select a volume to switch context instantly. Selecting the already-active volume preserves its current in-memory state (no implicit relog). Press `Delete` (or `D`) in the menu to release (unlog) a volume. *(With `VI_KEYS=1`, use uppercase `K`; lowercase `k` is navigation.)*
 *   **<** / **>** (or **,** / **.**): **Cycle Volumes**. Switch to the previous or next logged volume instantly.
@@ -230,19 +134,7 @@ When `VI_KEYS=1` in `[GLOBAL]`, ytnova reserves lowercase vi navigation keys:
 *   Lowercase **d/u** keep the regular context action (single item / current
     scope untag).
 
-### Kitty Keyboard Protocol
-
-#### Optional Kitty keyboard protocol
-YtreeNova uses the kitty keyboard protocol when the active terminal path supports it. This lets YtreeNova tell `C-m` from Enter, so `C-m` moves tagged files.
-
-To enable this in Kitty, add `keyboard_protocol kitty` to `~/.config/kitty/kitty.conf` and restart Kitty. Other terminals that support the protocol work too. If you use a multiplexer or remote session, it must pass the protocol through unchanged.
-
-Without protocol support, YtreeNova silently uses `C-n` to move tagged files.
 ### Shared Commands
-
-#### Overview
-These function keys keep their high-level meaning across modes.
-Surface-specific details still belong to the relevant mode or prompt topic.
 
 #### Shared function keys
 * **F1**: Open contextual help for the active surface.
@@ -259,10 +151,6 @@ The footer is authoritative for the active command map. `commands.conf` may chan
 When the footer is truncated in small terminal windows, use `C--` to reduce the terminal text size or `C-+` to increase it.
 ### Directory Mode
 
-#### Overview
-Directory mode is the logged tree view.
-It owns directory navigation, tree expansion, and directory-scoped commands.
-
 #### Directory navigation
 * **Enter / Right / Left**: `Enter` opens the file window and finishes logging when the selected directory is not expanded yet. `Right` expands first and then descends. `Left` collapses the current node or climbs to its parent.
 * **Logging controls**: `+` logs or reveals one level without moving. `*` expands recursively. `-` collapses the branch, and a second `-` on a collapsed logged node releases it back to an unlogged state.
@@ -276,10 +164,6 @@ It owns directory navigation, tree expansion, and directory-scoped commands.
 * **Cross-surface actions**: `Compare` hands off to the compare flow, `Execute` runs a shell command with the current path, `Volume` switches logged volumes, `Dotfiles` toggles hidden entries, and `Quit` leaves ytnova.
 ### File Mode
 
-#### Overview
-File mode is the main file-list view.
-It owns file navigation, file-scoped commands, tagged actions, and export entry points.
-
 #### File navigation
 * **Presentation**: `1..9 view` stays in file mode and changes Name, Attributes, Owner, and Times plus Compact, size units, Mini preview, File detail, and the Git band where they apply. `0` does nothing on filesystem volumes.
 * **Enter**: Switch between the embedded file window and full-screen file mode without leaving the same file list.
@@ -290,14 +174,10 @@ It owns file navigation, file-scoped commands, tagged actions, and export entry 
 * **Transfer**: `Copy`, `Move`, and `Pathcopy` operate on the selected file. `Copy tagged` and `Move tagged` apply the same target rules to the tagged set.
 * **Working-set control**: `Tag`, `Untag`, `Tag all`, `Untag all`, and `I` / `Invert Tags` build or clear the set that later bulk commands consume. `I` flips tags only on matching visible files in the active list; Showall and Global limit it to their current result sets.
 * **List control**: `Filter`, `Sort`, `Jump`, and `Dotfiles` change how the current file list is projected. The filter prompt still owns the tagged-only scope toggle on `Tab`.
-* **Metadata and creation**: `Attributes`, `Rename`, `Delete`, and `New File` edit file state. `Log` opens `Log Path:` prefilled with the selected path; it accepts directories and recognized archive files only.
+* **Metadata and creation**: `Attributes`, `Rename`, `Delete`, `New File`, and `Log` edit file state or add/reload content sources.
 * **Output and shell handoff**: `Output`, `Pipe`, `Execute`, and `Archive` export the current file or tagged set. `Execute` expands the prefilled `{}` path, and `C-x` reruns the command once per tagged file.
 * **Cross-surface actions**: `Compare` enters the compare flow, `Search tagged` narrows the tagged set by content, `Volume` switches logged volumes, and `Quit` exits ytnova.
 ### Archive-Dir Mode
-
-#### Overview
-Archive-Dir mode is the tree-style view inside a logged archive.
-It mirrors directory work where the archive format permits it.
 
 #### Archive directory navigation
 * **Enter / Left / Right**: Navigate the virtual tree the same way as ordinary Directory Mode, but only within the currently opened archive.
@@ -305,16 +185,12 @@ It mirrors directory work where the archive format permits it.
 * **Archive scope**: Expansion state is virtual. It reflects archive contents, not a live writable filesystem tree.
 
 #### Archive directory command families
-* **Presentation and scope**: `1..0 view` selects the archive presentation; `9` stays inert in archives. `0` toggles Size, Packed, and Ratio for archive file rows. `Filter`, `Showall`, `Global`, and `Jump` still operate on the archive-backed visible set.
+* **Presentation and scope**: `1..9 view` still selects the base directory/file presentation, except `9` stays inert in archives. `0` toggles Size, Packed, and Ratio for archive file rows. `Filter`, `Showall`, `Global`, and `Jump` still operate on the archive-backed visible set.
 * **Archive-aware transfers and edits**: `Copy` and `Pathcopy` remain available when the archive supports copy-out. `MoveDir`, `Delete`, `Rename`, and `Makedir` appear only when the current archive format and access path support the required write-back operation. Directory transfers are recursive and reject a destination inside the source subtree. Common writable formats include `.tar`, `.tar.gz`, `.tar.bz2`, `.tar.xz`, and `.zip`; actual availability depends on the installed libarchive and archive properties.
 * **Working-set control**: `Tag`, `Untag`, and `I` / `Invert Tags` operate on the current virtual directory scope. `I` flips tags only on filter-matching visible entries in the selected archive directory.
 * **Transfers and export**: `Output`, `Pipe`, and `Compare` use archive-backed paths. `Log` and `Volume` switch away to other logged roots or volumes when needed.
 * **Session controls**: `Dotfiles` toggles hidden archive entries where the format exposes them, and `Quit` exits ytnova.
 ### Archive-File Mode
-
-#### Overview
-Archive-File mode is the file-list view for archive-backed content.
-Some filesystem commands are unavailable or become archive-aware here.
 
 #### Archive file navigation
 * **Presentation**: `1..8` keeps the usual file-view bands, while `9` remains a no-op because archive entries do not expose the Git band surface. `0` toggles Size, Packed, and Ratio for archive file rows.
@@ -327,13 +203,8 @@ Some filesystem commands are unavailable or become archive-aware here.
 * **Working-set control**: `Tag`, `Untag`, and `I` / `Invert Tags` manage the current archive-backed working set. `I` flips tags only on matching visible entries in the current archive directory.
 * **Mutation limits**: `Move`, `Delete`, and `Rename` exist only where the archive path supports write-back. `Execute` is not available in archive file mode.
 * **Output and comparison**: `Output`, `Pipe`, `Compare`, `Search tagged`, and `View tagged` all stay scoped to the archive-backed list rather than a normal filesystem directory.
-* **Log**: `Log` loads the selected archive entry as another archive when it is a supported archive format.
 * **Session controls**: `Log`, `Volume`, `Dotfiles`, and `Quit` behave like their file-mode counterparts, but they may take you out of the current archive session.
 # COMPARE
-
-#### Overview
-Compare covers diff-style viewing, target selection, scope selection, basis selection, and result handling.
-Use the related compare topics for the prompt-by-prompt details.
 
 #### Compare flow
 Choose the target first.
@@ -371,11 +242,6 @@ These keys apply while prompt dialogs are active (for example: Log, Copy, Move).
 
 ### Filter Help
 
-#### Overview
-Filters apply glob, exclusion, attribute, date, and size selectors to the current file-list family.
-The prompt starts with `*`, which means all files.
-Terms can be stacked by separating them with commas.
-
 #### Syntax
 * **Glob selectors**: `*` shows everything. `*.c` matches one pattern. `*.c,*.h` stacks multiple include terms.
 * **Exclusions**: Prefix a term with `-`, for example `-*.o`, to subtract matching rows after the include terms.
@@ -390,10 +256,6 @@ The filter always applies to the current file-list family: a normal file list, a
 The tagged-only toggle is offered only when tags already exist in the current scope, and the prompt changes to `FILTER [tagged only]:` when it is active.
 ### Output Help
 
-#### Overview
-Output exports one or more files to a destination using raw, framed, or page-break formats.
-The related output topics cover format, separator, and destination prompts.
-
 #### Output model
 `Output` is a batch export flow, not a viewer.
 It writes the current file or tagged set as `Raw`, `Framed`, or `Page break` text, or sends the same stream to a printer command.
@@ -407,10 +269,6 @@ Hardcopy asks only for the printer command because it always streams raw output.
 
 ### Command-line Editing
 
-#### Overview
-Most prompts share the same editing keys.
-Prompt-specific syntax and scope rules belong to the relevant command topic.
-
 #### Editing keys
 * **Left/Right**: Move inside the current prompt text.
 * **Home/End**: Jump to the start or end of the prompt text.
@@ -423,14 +281,6 @@ Prompt-specific syntax and scope rules belong to the relevant command topic.
 * **F2**: Open a browser or picker when the current prompt supports browsing.
 * **F1**: Show syntax or scope rules that matter only to the current prompt.
 ### Copy/Move Targets
-
-#### Overview
-Copy, move, and pathcopy use two explicit prompts.
-First choose the replacement name or wildcard rename pattern.
-Then choose the destination directory.
-The split stays intentional because name/pattern and destination are separate decisions.
-Merging them would hide meaning instead of removing friction.
-Overwrite conflicts compare size/time so you can judge newer/older and bigger/smaller.
 
 #### Target forms
 Use a directory path when you want the original names preserved under another directory.
@@ -447,10 +297,6 @@ Overwrite/replace conflicts show source and destination size/time facts when ava
 Directory copy/move starts after the destination is accepted; there is no extra copy-now or move-now confirmation.
 ### List Jump
 
-#### Overview
-`/` is ytnova's in-list name jump.
-It remains scoped to the current runtime list.
-
 #### Jump model
 `/` opens an incremental jump prompt for the current visible list only.
 Tree/directory views jump among visible directory names, while file-oriented views jump among the visible file rows for that surface.
@@ -462,10 +308,6 @@ Tree/directory views jump among visible directory names, while file-oriented vie
 * **Scope changes**: Filtering, Showall/Global projection, archives, and split mode all change which visible list `/` searches, but they do not change the jump keys themselves.
 ### Vi Keys
 
-#### Overview
-When `VI_KEYS=1`, lowercase vi navigation is reserved.
-Conflicting commands move to uppercase or another safe key.
-
 #### Navigation remap
 With `VI_KEYS=1`, lowercase `h`, `j`, `k`, and `l` become `Left`, `Down`, `Up`, and `Right`.
 `C-u` and `C-d` become page up and page down.
@@ -474,10 +316,6 @@ With `VI_KEYS=1`, lowercase `h`, `j`, `k`, and `l` become `Left`, `Down`, `Up`, 
 Commands that would steal those lowercase keys move out of the way.
 Examples include `J compare`, `K volume`, `D delete tagged`, and `U untag all` where those actions exist.
 ### F10 Config
-
-#### Overview
-F10 owns configuration-related actions, including profile editing, command editing, theme editing, and reload.
-It is the setup surface rather than an ordinary file-management command.
 
 #### Config surface
 Use `F10` when you want to change persistent behavior instead of doing one one-off file or directory action.
@@ -488,10 +326,6 @@ Profile settings, command labels, themes, and reload all live here.
 `commands.conf` owns user command labels and bindings.
 `themes.conf` owns theme selection and theme-role overrides.
 ### Theming
-
-#### Overview
-Themes style semantic UI roles and file-type palettes.
-Theme edits belong in the config/theme files, not in per-screen hard-coded colors.
 
 #### Theme model
 Themes set semantic roles such as `footer`, `help`, `help_footer`, `help_heading`, `help_topic`, `help_attention`, `help_alert`, `help_keybind`, `help_link`, `help_link_selection`, `selection`, `picker`, and `warning`.

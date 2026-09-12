@@ -45,23 +45,6 @@ Switching languages immediately would have turned this phase into a total rewrit
 
 YtreeNova only needs fast, reliable text/line-box terminal UI for file and VFS browsing, and ncurses already provides that cleanly, while switching to termbox2 or notcurses would add backend complexity for features outside ytnova’s core scope (like richer in-app media rendering) that are better handled by external helper programs.
 
-### Why does Ctrl-m depend on the terminal?
-
-Traditional terminal input reports `Ctrl-m` as `Enter`. YtreeNova uses the kitty
-keyboard protocol to distinguish them through the complete active terminal path,
-including multiplexers and remote sessions. When available, `Ctrl-m` moves
-tagged files. Otherwise YtreeNova silently uses `Ctrl-n` for Move tagged.
-
-To enable the protocol in kitty, add this line to
-`~/.config/kitty/kitty.conf`, then restart kitty:
-
-```
-keyboard_protocol kitty
-```
-
-When using a multiplexer or remote session, its terminal path must also pass
-kitty keyboard protocol sequences unchanged.
-
 ---
 
 ## Project Philosophy

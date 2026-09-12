@@ -20,11 +20,7 @@ spec.loader.exec_module(helpgen)
 def test_help_generator_preserves_catalog_context_and_locale_projection():
     f1_topics = helpgen.parse_help_source((REPO_ROOT / "etc" / "help" / "f1.en.md").read_text(encoding="utf-8"))
     de_topics = helpgen.parse_help_source((REPO_ROOT / "etc" / "help" / "f1.de.md").read_text(encoding="utf-8"))
-    man_topics = helpgen.parse_help_source(
-        (REPO_ROOT / "etc" / "help" / "man.en.md").read_text(encoding="utf-8"),
-        require_contextual_f1=False,
-        require_reference_sections=True,
-    )
+    man_topics = helpgen.parse_help_source((REPO_ROOT / "etc" / "help" / "man.en.md").read_text(encoding="utf-8"))
     helpgen.validate_topic_inventory(f1_topics)
     helpgen.validate_locale_topic_projection(f1_topics, de_topics, locale_id="de")
     header = helpgen.render_runtime_header(f1_topics, source_path="etc/help/f1.en.md", locale_topics=[("de", "etc/help/f1.de.md", de_topics)])
@@ -34,23 +30,6 @@ def test_help_generator_preserves_catalog_context_and_locale_projection():
     assert helpgen.generated_banner("etc/help/man.en.md") in helpgen.render_manpage_markdown(man_topics, usage_mode=False, source_path="etc/help/man.en.md")
     assert helpgen.generated_banner("etc/help/man.en.md") in helpgen.render_manpage_markdown(man_topics, usage_mode=True, source_path="etc/help/man.en.md")
     assert "generated_help_catalogs" in header
-    assert "manpage" not in header.lower()
-
-
-def test_manpage_projects_enhanced_keyboard_guidance_without_archive_stats_cross_reference():
-    man_topics = helpgen.parse_help_source(
-        (REPO_ROOT / "etc" / "help" / "man.en.md").read_text(encoding="utf-8"),
-        require_contextual_f1=False,
-        require_reference_sections=True,
-    )
-    manpage = helpgen.render_manpage_markdown(
-        man_topics, usage_mode=False, source_path="etc/help/man.en.md"
-    )
-
-    assert "keyboard_protocol kitty" in manpage
-    assert "`0`: Do nothing on filesystem volumes. In archive lists" in manpage
-    assert "`0`: Do nothing on filesystem volumes; use `F6` for stats." not in manpage
-    assert "Help popup keys" not in manpage
 
 
 def test_help_generator_rejects_invalid_or_duplicate_help_strip_keys():
@@ -77,7 +56,7 @@ One line.
         helpgen.parse_help_source(source, require_help_strip=True)
 
 
-def test_help_generator_allows_f1_topics_without_reference_sections():
+def test_help_generator_allows_f1_topics_without_long_form_sections():
     f1_source = """## topic:test
 ```ytnova-help-meta
 title: Test
@@ -89,24 +68,21 @@ One line.
 
     topics = helpgen.parse_help_source(f1_source)
 
-    assert topics[0].reference_sections == ()
+    assert topics[0].long_form_sections == ()
 
 
-def test_help_generator_uses_reference_subheadings_without_long_form_marker():
+def test_help_generator_requires_long_form_sections_for_man_source():
     man_source = """## topic:test
 ```ytnova-help-meta
 title: Test
 contexts: none
 ```
-#### Reference
-Reference body.
+### Contextual F1
+One line.
 """
 
-    topics = helpgen.parse_help_source(
-        man_source, require_contextual_f1=False, require_reference_sections=True
-    )
-
-    assert topics[0].reference_sections[0].title == "Reference"
+    with pytest.raises(helpgen.HelpSourceError, match="missing ### Long form"):
+        helpgen.parse_help_source(man_source, require_long_form=True)
 
 
 def test_help_generator_rejects_duplicate_runtime_context_ownership():
@@ -117,6 +93,7 @@ contexts: prompt.shared
 ```
 ### Contextual F1
 One line.
+### Long form
 #### Section
 Body.
 
@@ -127,6 +104,7 @@ contexts: prompt.shared
 ```
 ### Contextual F1
 Another line.
+### Long form
 #### Section
 Body.
 """
@@ -137,6 +115,7 @@ contexts: none
 ```
 ### Contextual F1
 One line.
+### Long form
 #### Section
 Body.
 
@@ -147,6 +126,7 @@ contexts: none
 ```
 ### Contextual F1
 Another line.
+### Long form
 #### Section
 Body.
 """

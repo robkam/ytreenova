@@ -144,8 +144,6 @@ void Volume_Delete(ViewContext *ctx, struct Volume *vol) {
 
   if (vol->dir_entry_list && !AppStateReleaseVolumeDirEntryList(vol))
     return;
-  if (vol->vol_stats.temporary_archive_path[0] != '\0')
-    (void)unlink(vol->vol_stats.temporary_archive_path);
   /* Invalidate any panels using this volume to prevent stale references */
   if (ctx->left && ctx->left->vol == vol) {
     Volume_ClearPanelFileEntries(ctx->left);
@@ -350,8 +348,6 @@ struct Volume *Volume_Load(ViewContext *ctx, const char *path,
 
   strncpy(s->log_path, resolved_path, PATH_LENGTH);
   s->log_path[PATH_LENGTH] = '\0';
-  strncpy(s->display_path, resolved_path, PATH_LENGTH);
-  s->display_path[PATH_LENGTH] = '\0';
   strncpy(s->path, resolved_path, PATH_LENGTH);
   s->path[PATH_LENGTH] = '\0';
 

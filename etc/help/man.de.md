@@ -12,7 +12,12 @@ Jeder Themenblock in dieser Datei folgt demselben parserseitigen Vertrag:
 3. Der Metadaten-Block enthält genau diese Schlüssel in genau dieser Reihenfolge:
    * `title:` — der Klartext-Titel des Themas.
    * `contexts:` — kommagetrennte stabile Laufzeit-Kontext- oder Prompt-IDs oder das Literal `none` für reine Link-Themen.
-4. Anschließend folgen direkt ein oder mehrere Referenzunterabschnitte der Ebene 4 (`#### ...`). Ihre Reihenfolge bleibt so erhalten, wie sie geschrieben wurde.
+4. Danach enthält der Block diese Abschnitte in dieser Reihenfolge:
+   * erforderlich `### Contextual F1`
+   * optional `### Explainer links`
+   * erforderlich `### Long form`
+5. Wenn `### Explainer links` vorhanden ist, benutzt jeder Eintrag Markdown-Linksyntax mit einem `topic:`-Ziel, zum Beispiel `- [Navigation](topic:navigation)`.
+6. `### Long form` enthält einen oder mehrere Unterabschnitte der Ebene 4 (`#### ...`). Ihre Reihenfolge bleibt so erhalten, wie sie geschrieben wurde.
 
 Diese Datei folgt der Themeninventur, den `contexts:`-Zuordnungen und den Linkzielen von `etc/help/man.en.md`.
 Die englische Datei bleibt die kanonische Quelle für Struktur und Inventar; diese deutsche Datei pflegt die lokalisierte Referenzprosa als Autorenquelle und nicht aus einem generierten Artefakt heraus.
@@ -24,13 +29,17 @@ title: Inhalt
 contexts: none
 ```
 
-#### Überblick
+### Contextual F1
 
 Dieses Handbuch ist der ausführliche Referenzpfad für Modi, Prompts, Befehle und Hilfsthemen in ytnova.
+Das In-App-`F1`-Popup bleibt der kürzere kontextuelle Pfad für die gerade aktive Oberfläche.
+
+### Long form
 
 #### Zweck
 
 Diese Datei ist die deutsche Autorenquelle für das Handbuch und das generierte `docs/USAGE.md`.
+Sie bleibt referenzorientiert; das kontextuelle `F1` erklärt weiter nur die aktuelle Oberfläche.
 
 #### Inhalt
 
@@ -46,25 +55,30 @@ title: Navigation
 contexts: none
 ```
 
+### Contextual F1
+
+Das Hilfepopup benutzt listenartige Navigation.
+`Up` und `Down` bewegen, `Enter` oder `Right` folgen, `Left` geht zurück und `Esc` oder `Q` schließt.
+
+### Long form
+
 #### Steuerungstasten-Notation
 
 `C-<chr>` bedeutet: Halte die Control-Taste gedrückt und tippe `<chr>`. `C-f` bedeutet also: Halte Control gedrückt und tippe `f`.
 
+#### Hilfepopup-Tasten
 
-## topic:enhanced-keyboard-input
+* **Up/Down**: Zwischen auswählbaren Zeilen oder Links bewegen.
+* **Page Up/Page Down**: Längere Hilfeseiten scrollen.
+* **Home/End**: Zum Anfang oder Ende der aktuellen Hilfeseite springen.
+* **Enter/Right**: Das gewählte Hilfethema oder den Link öffnen.
+* **Left**: Einen Schritt zurückgehen.
+* **Esc/Quit**: Das Popup schließen.
 
-```ytnova-help-meta
-title: Kitty-Tastaturprotokoll
-contexts: none
-```
+#### Zuständigkeit
 
-#### Optionales Kitty-Tastaturprotokoll
-
-YtreeNova verwendet das Kitty-Tastaturprotokoll, wenn der aktive Terminalpfad es unterstützt. Dadurch kann YtreeNova `C-m` von Enter unterscheiden, sodass `C-m` markierte Dateien verschiebt.
-
-Um dies in Kitty zu aktivieren, füge `keyboard_protocol kitty` zu `~/.config/kitty/kitty.conf` hinzu und starte Kitty neu. Auch andere Terminals mit Protokollunterstützung funktionieren. Bei einem Multiplexer oder einer Remote-Sitzung muss das Protokoll unverändert durchgereicht werden.
-
-Ohne Protokollunterstützung verwendet YtreeNova stillschweigend `C-n`, um markierte Dateien zu verschieben.
+Dieses Thema besitzt nur die Navigation innerhalb des Hilfepopups.
+Für den Laufzeit-Sprung mit `/` ist `List Jump` zuständig; für normale Verzeichnis- oder Dateiauswahl die lokale Modusseite.
 
 ## topic:list-jump
 
@@ -73,10 +87,12 @@ title: List Jump
 contexts: none
 ```
 
-#### Überblick
+### Contextual F1
 
 `/` ist der Namenssprung innerhalb der aktuellen Liste.
-Er bleibt immer auf die sichtbare Laufzeitliste beschränkt.
+Er ist von der Hilfepopup-Navigation getrennt und bleibt immer auf die sichtbare Laufzeitliste beschränkt.
+
+### Long form
 
 #### Sprungmodell
 
@@ -97,10 +113,12 @@ title: Shared Commands
 contexts: none
 ```
 
-#### Überblick
+### Contextual F1
 
 Diese Funktionstasten behalten ihre grobe Bedeutung über mehrere Modi hinweg.
 Oberflächenspezifische Details gehören trotzdem zur jeweiligen Modus- oder Prompt-Seite.
+
+### Long form
 
 #### Gemeinsame Funktionstasten
 
@@ -120,10 +138,12 @@ title: Tagged
 contexts: none
 ```
 
-#### Überblick
+### Contextual F1
 
 Markierte Dateien bilden eine Arbeitsmenge für Sammelaktionen, verengte Ansichten, Suchen sowie Archiv- und Exportabläufe.
 Tag-basierte Arbeit ist ein zentrales Workflow-Muster von ytnova.
+
+### Long form
 
 #### Grundlagen
 
@@ -147,9 +167,11 @@ title: Markierungsanzeige
 contexts: viewer.tagged
 ```
 
-#### Überblick
+### Contextual F1
 
 Mit `n` und `p` wechseln Sie Dateien, mit Seitentasten und `Leertaste` blättern Sie in der aktuellen Datei, und mit `/` oder `?` wechseln Sie zwischen Treffern der Markierungssuche. `C-s` durchsucht außerhalb der Anzeige die Markierungsliste.
+
+### Long form
 
 #### Navigationsbereiche
 
@@ -162,10 +184,12 @@ title: Command-line Editing
 contexts: none
 ```
 
-#### Überblick
+### Contextual F1
 
 Die meisten Prompts teilen sich dieselben Bearbeitungstasten.
 Prompt-spezifische Syntax und Bereichsregeln gehören zum jeweiligen Befehlsthema.
+
+### Long form
 
 #### Bearbeitungstasten
 
@@ -188,12 +212,14 @@ title: Copy/Move Targets
 contexts: none
 ```
 
-#### Überblick
+### Contextual F1
 
 Copy, Move und Pathcopy benutzen zwei explizite Prompts.
 Zuerst wählst du Ersatznamen oder Wildcard-Muster, danach das Zielverzeichnis.
 Die Trennung bleibt absichtlich bestehen, weil Name/Muster und Ziel zwei verschiedene Entscheidungen sind.
 Überschreibkonflikte zeigen Größen- und Zeitinformationen, damit du neuer/älter oder größer/kleiner beurteilen kannst.
+
+### Long form
 
 #### Zielarten
 
@@ -215,10 +241,12 @@ title: Vi Keys
 contexts: none
 ```
 
-#### Überblick
+### Contextual F1
 
 Wenn `VI_KEYS=1`, sind die vi-Navigationstasten in Kleinbuchstaben reserviert.
 Kollidierende Befehle wandern dann auf Großbuchstaben oder andere sichere Tasten.
+
+### Long form
 
 #### Navigations-Umschaltung
 
@@ -237,10 +265,12 @@ title: F10 Config
 contexts: none
 ```
 
-#### Überblick
+### Contextual F1
 
 F10 besitzt die konfigurationsbezogenen Aktionen, also Profilbearbeitung, Befehlsbearbeitung, Theme-Bearbeitung und Reload.
 Es ist die Einrichtungsoberfläche und kein gewöhnlicher Dateibefehl.
+
+### Long form
 
 #### Konfigurationsoberfläche
 
@@ -260,10 +290,12 @@ title: Theming
 contexts: none
 ```
 
-#### Überblick
+### Contextual F1
 
 Themes gestalten semantische UI-Rollen und Dateityp-Paletten.
 Theme-Änderungen gehören in die Konfigurationsdateien und nicht in hart codierte Farben pro Bildschirm.
+
+### Long form
 
 #### Theme-Modell
 
@@ -282,10 +314,12 @@ title: Directory Help
 contexts: main.dir
 ```
 
-#### Überblick
+### Contextual F1
 
 Directory Mode ist die geloggte Baumansicht.
 Er besitzt Verzeichnisnavigation, Baumaufbau und verzeichnisbezogene Befehle.
+
+### Long form
 
 #### Verzeichnisnavigation
 
@@ -308,10 +342,12 @@ title: File Help
 contexts: main.file
 ```
 
-#### Überblick
+### Contextual F1
 
 File Mode ist die Haupt-Dateilistenansicht.
 Er besitzt Dateinavigation, dateibezogene Befehle, Tag-Aktionen und Export-Einstiege.
+
+### Long form
 
 #### Dateinavigation
 
@@ -325,7 +361,7 @@ Er besitzt Dateinavigation, dateibezogene Befehle, Tag-Aktionen und Export-Einst
 * **Transfer**: `Copy`, `Move` und `Pathcopy` arbeiten auf der gewählten Datei; `Copy tagged` und `Move tagged` benutzen dieselben Zielregeln für den markierten Satz.
 * **Arbeitsmengensteuerung**: `Tag`, `Untag`, `Tag all`, `Untag all` und `Invert Tags` bauen oder leeren den Satz für spätere Sammelbefehle.
 * **Listensteuerung**: `Filter`, `Sort`, `Jump` und `Dotfiles` ändern die Projektion der sichtbaren Liste. Der Filterprompt besitzt weiter den Tagged-only-Schalter auf `Tab`.
-* **Metadaten und Erzeugung**: `Attributes`, `Rename`, `Delete` und `New File` ändern Dateistatus. `Log` öffnet `Log Path:` mit dem gewählten Pfad und akzeptiert nur Verzeichnisse und erkannte Archivdateien.
+* **Metadaten und Erzeugung**: `Attributes`, `Rename`, `Delete`, `New File` und `Log` ändern Dateistatus oder laden Inhalte neu ein.
 * **Export und Shell-Handoff**: `Output`, `Pipe`, `Execute` und `Archive` exportieren die aktuelle Datei oder den markierten Satz. `Execute` expandiert `{}` für eine Datei; `C-x` wiederholt den Befehl pro markierter Datei.
 * **Oberflächenwechsel**: `Compare`, `Search tagged`, `Volume` und `Quit` verzweigen in andere Arbeitsabläufe.
 
@@ -336,10 +372,12 @@ title: Archive Directory Help
 contexts: main.archive-dir
 ```
 
-#### Überblick
+### Contextual F1
 
 Archive-Dir ist die Baumansicht innerhalb eines geloggten Archivs.
 Sie spiegelt Verzeichnisarbeit, soweit das Archivformat dies zulässt.
+
+### Long form
 
 #### Archiv-Verzeichnisnavigation
 
@@ -349,11 +387,10 @@ Sie spiegelt Verzeichnisarbeit, soweit das Archivformat dies zulässt.
 
 #### Archiv-Befehlsfamilien
 
-* **Darstellung und Bereich**: `1..0 view` wählt die Archivdarstellung; `9` bleibt im Archiv wirkungslos. `0` ergänzt jede sichtbare Archiv-Dateizeile um Size, Packed und Ratio. Size ist die ursprüngliche Dateigröße, Packed der im Archiv belegte Platz und Ratio der eingesparte Platz in Prozent. Ein Bindestrich bedeutet, dass das Format keine verlässliche gepackte Größe liefert. Die Werte werden beim Laden des Archivs erfasst, sodass `0` nur die Anzeige ändert; erneutes Drücken blendet sie aus. `Filter`, `Showall`, `Global` und `Jump` arbeiten auf der archivgestützten sichtbaren Menge.
+* **Darstellung und Bereich**: `1..9 view` wählt weiter die Grunddarstellung, nur `9` bleibt im Archiv wirkungslos. `0` ergänzt jede sichtbare Archiv-Dateizeile um Size, Packed und Ratio. Size ist die ursprüngliche Dateigröße, Packed der im Archiv belegte Platz und Ratio der eingesparte Platz in Prozent. Ein Bindestrich bedeutet, dass das Format keine verlässliche gepackte Größe liefert. Die Werte werden beim Laden des Archivs erfasst, sodass `0` nur die Anzeige ändert; erneutes Drücken blendet sie aus. `Filter`, `Showall`, `Global` und `Jump` arbeiten auf der archivgestützten sichtbaren Menge.
 * **Archivbewusste Änderungen**: `Delete`, `Rename` und `Makedir` funktionieren nur, wenn Format und Zugriffspfad Rückschreiben zulassen.
 * **Arbeitsmenge**: `Tag` und `Untag` gelten für den aktuellen virtuellen Verzeichnisbereich.
-* **Transfer und Export**: `Output`, `Pipe`, `Compare` und `Volume` benutzen archivgestützte Pfade oder wechseln zu anderen geloggten Wurzeln.
-* **Log**: `Log` lädt den gewählten Archiveintrag als weiteres Archiv, wenn sein Archivformat unterstützt wird.
+* **Transfer und Export**: `Output`, `Pipe`, `Compare`, `Log` und `Volume` benutzen archivgestützte Pfade oder wechseln zu anderen geloggten Wurzeln.
 * **Sitzungssteuerung**: `Dotfiles` schaltet versteckte Archiv-Einträge dort um, wo das Format sie zeigt; `Quit` beendet ytnova.
 
 ## topic:archive-file
@@ -363,10 +400,12 @@ title: Archive File Help
 contexts: main.archive-file
 ```
 
-#### Überblick
+### Contextual F1
 
 Archive-File ist die Dateilistenansicht für archivgestützten Inhalt.
 Einige Dateisystembefehle fehlen dort oder verhalten sich archivspezifisch.
+
+### Long form
 
 #### Archiv-Dateinavigation
 
@@ -390,11 +429,13 @@ title: Filter Help
 contexts: prompt.filter,prompt.filter-tagged
 ```
 
-#### Überblick
+### Contextual F1
 
 Filter wenden Glob-, Ausschluss-, Attribut-, Datums- und Größen-Selektoren auf die aktuelle Dateilistenfamilie an.
 Der Prompt startet mit `*`, also allen Dateien.
 Mehrere Terme werden mit Kommas gestapelt.
+
+### Long form
 
 #### Syntax
 
@@ -418,10 +459,12 @@ title: Compare Help
 contexts: none
 ```
 
-#### Überblick
+### Contextual F1
 
 Compare deckt Diff-Ansicht, Zielwahl, Bereichswahl, Vergleichsbasis und Ergebnisbehandlung ab.
 Die zugehörigen Compare-Themen beschreiben die einzelnen Prompts im Detail.
+
+### Long form
 
 #### Compare-Ablauf
 
@@ -444,10 +487,12 @@ title: Compare Target Help
 contexts: prompt.compare-target
 ```
 
-#### Überblick
+### Contextual F1
 
 Der Compare-Target-Prompt wählt die andere Datei, das andere Verzeichnis, das andere Panel oder ein externes Viewer-Ziel.
 Welche Ziele verfügbar sind, hängt vom aktiven Vergleichsmodus ab.
+
+### Long form
 
 #### Zielregeln
 
@@ -461,10 +506,12 @@ title: Date Change Help
 contexts: prompt.change-date
 ```
 
-#### Überblick
+### Contextual F1
 
 Der Datums-Prompt akzeptiert `YYYY-MM-DD` sowie optional `HH:MM[:SS]` für Attributänderungen.
 `F3` schaltet um, ob der eingegebene Wert Modified, Accessed oder beide Zeitstempel aktualisiert.
+
+### Long form
 
 #### Bereichswahl
 
@@ -484,10 +531,12 @@ title: Compare Scope Help
 contexts: none
 ```
 
-#### Überblick
+### Contextual F1
 
 Der Compare-Scope-Prompt wählt Einzelobjekt, getaggten Satz, aktuelles Verzeichnis oder einen größeren Listenbereich.
 Welche Optionen genau auftauchen, hängt von der aktiven Oberfläche ab.
+
+### Long form
 
 #### Bereichswahl
 
@@ -502,10 +551,12 @@ title: Compare Basis Help
 contexts: none
 ```
 
-#### Überblick
+### Contextual F1
 
 Der Compare-Basis-Prompt wählt die Kriterien für den aktuellen Vergleichslauf.
 Typische Basen sind Name, Größe, Zeit und inhaltlich stärkere Vergleiche.
+
+### Long form
 
 #### Basisauswahl
 
@@ -519,10 +570,12 @@ title: Compare Result Help
 contexts: none
 ```
 
-#### Überblick
+### Contextual F1
 
 Compare-Ergebnisse lassen sich anzeigen, filtern und in eine getaggte Arbeitsmenge für Folgeaktionen umwandeln.
 Dieses Thema gehört zur Ergebnisbehandlung.
+
+### Long form
 
 #### Ergebnis-Tagging
 
@@ -536,9 +589,11 @@ title: Execute File Help
 contexts: prompt.execute-file
 ```
 
-#### Überblick
+### Contextual F1
 
 Der File-Execute-Prompt beginnt mit `{}` für den Pfad der gewählten Datei. Gib den Befehl davor und folgende Shell-Syntax danach ein.
+
+### Long form
 
 #### Platzhalterregeln
 
@@ -552,9 +607,11 @@ title: Execute Directory Help
 contexts: prompt.execute-dir
 ```
 
-#### Überblick
+### Contextual F1
 
 Der Directory-Execute-Prompt beginnt mit `{}` für den aktuellen Verzeichnispfad. Gib den Befehl davor und folgende Shell-Syntax danach ein.
+
+### Long form
 
 #### Platzhalterregeln
 
@@ -568,10 +625,12 @@ title: Search Tagged Help
 contexts: prompt.search-tagged
 ```
 
-#### Überblick
+### Contextual F1
 
 Search Tagged führt eine Textsuche nur über den markierten Satz aus und entfernt Tags bei Nicht-Treffern.
 Es ist eine Verengung einer vorhandenen Arbeitsmenge.
+
+### Long form
 
 #### Regeln für Search Tagged
 
@@ -585,10 +644,12 @@ title: Create Archive Help
 contexts: prompt.create-archive
 ```
 
-#### Überblick
+### Contextual F1
 
 Create Archive baut ein neues Archiv bevorzugt aus dem markierten Satz oder, wenn nichts markiert ist, aus der aktuellen Auswahl.
 Welche Archivformate unterstützt sind, hängt vom gewählten Suffix ab.
+
+### Long form
 
 #### Archiv-Erzeugung
 
@@ -602,10 +663,12 @@ title: Output Help
 contexts: none
 ```
 
-#### Überblick
+### Contextual F1
 
 Output exportiert eine oder mehrere Dateien zu einem Ziel, als Raw, Framed oder Page break.
 Die zugehörigen Output-Themen beschreiben Format-, Trennzeichen- und Zielprompts.
+
+### Long form
 
 #### Output-Modell
 
@@ -626,10 +689,12 @@ title: Output Format Help
 contexts: none
 ```
 
-#### Überblick
+### Contextual F1
 
 Output Format bestimmt, wie jede exportierte Datei im Batch eingerahmt wird.
 Raw, Framed und Page break dienen verschiedenen Nachbearbeitern oder Lesern.
+
+### Long form
 
 #### Formatwahl
 
@@ -643,11 +708,13 @@ title: Output Destination Help
 contexts: prompt.output-destination
 ```
 
-#### Überblick
+### Contextual F1
 
 Output Destination wählt zuerst Dateiausgabe oder Hardcopy und sammelt dann den endgültigen Zielwert.
 Für Dateiausgabe ist `CWD` das aktuelle Arbeitsverzeichnis für nackte Dateinamen.
 `F3` schaltet nur im Dateiziel-Prompt zwischen `Raw`, `Framed` und `Page break` um.
+
+### Long form
 
 #### Zielwahl
 
@@ -661,10 +728,12 @@ title: Output Separator Help
 contexts: prompt.output-separator
 ```
 
-#### Überblick
+### Contextual F1
 
 Output Separator erscheint nur, wenn `F3` `Framed` oder `Page break` gewählt hat.
 Raw-Ausgabe überspringt diesen Prompt.
+
+### Long form
 
 #### Trennzeichenregeln
 
@@ -678,10 +747,12 @@ title: Showall Help
 contexts: main.showall
 ```
 
-#### Überblick
+### Contextual F1
 
 Showall listet alle Dateien des aktuellen geloggten Volumes in einer einzigen aggregierten Dateiliste auf.
 Es behält Einzel-Volume-Bereich und entfernt nur die Verzeichnisgrenzen.
+
+### Long form
 
 #### Showall-Verhalten
 
@@ -697,10 +768,12 @@ title: Global Help
 contexts: main.global
 ```
 
-#### Überblick
+### Contextual F1
 
 Global listet Dateien aus allen geloggten Volumes in einer einzigen aggregierten Dateiliste.
 Es behält Mehr-Volume-Bereich und entfernt nur die Verzeichnisgrenzen.
+
+### Long form
 
 #### Global-Verhalten
 
@@ -716,10 +789,12 @@ title: F7 Preview Help
 contexts: overlay.f7-dir,overlay.f7-file
 ```
 
-#### Überblick
+### Contextual F1
 
 F7 Preview legt Vorschau-Steuerung über den darunterliegenden Dateiauswahlkontext.
 Die Vorschau besitzt das Scrollen, während die darunterliegende Auswahl weiter die Zieldatei besitzt.
+
+### Long form
 
 #### Vorschau-Navigation
 
@@ -740,10 +815,12 @@ title: F8 Split Help
 contexts: none
 ```
 
-#### Überblick
+### Contextual F1
 
-Split Mode hält zwei Panels gleichzeitig aktiv.
+Split Mode hält zwei Panels gleichzeitig aktiv, und Laufzeit-`F1` öffnet je nach aktivem Panel die Split-Seite für Directory oder File.
 Benutze die lokale Split-Seite für die live sichtbare Footer-Befehlsliste und diese Seite für das gemeinsame Split-Modell.
+
+### Long form
 
 #### Split-Steuerung
 
@@ -758,9 +835,12 @@ title: F8 Split Help
 contexts: overlay.f8-dir
 ```
 
-#### Überblick
+### Contextual F1
 
 Die Split-Directory-Seite verbindet die gemeinsamen Split-Regeln mit der aktiven Directory-Footer-Befehlsfamilie.
+Sie ist die Laufzeit-`F1`-Seite, wenn der Fokus im Baum-Panel liegt.
+
+### Long form
 
 #### Split-Steuerung
 
@@ -780,9 +860,12 @@ title: F8 Split Help
 contexts: overlay.f8-file
 ```
 
-#### Überblick
+### Contextual F1
 
 Die Split-File-Seite verbindet die gemeinsamen Split-Regeln mit der aktiven File-Footer-Befehlsfamilie.
+Sie ist die Laufzeit-`F1`-Seite, wenn der Fokus im Dateipanel liegt.
+
+### Long form
 
 #### Split-Steuerung
 
@@ -802,10 +885,12 @@ title: History Help
 contexts: dialog.history
 ```
 
-#### Überblick
+### Contextual F1
 
 Der History-Dialog benutzt frühere Prompt-Einträge wieder und unterstützt Anheften oder Löschen.
 Er ist eine gemeinsame Hilfsoberfläche für Prompts mit Historie.
+
+### Long form
 
 #### History-Aktionen
 
@@ -823,10 +908,12 @@ title: Volume Help
 contexts: dialog.volume-menu
 ```
 
-#### Überblick
+### Contextual F1
 
 Das Volume-Menü listet geladene Volumes, lässt dich zu einem wechseln und kann ein Volume freigeben.
 Geladene Volumes behalten ihren unabhängigen In-Memory-Zustand, bis sie freigegeben oder neu geladen werden.
+
+### Long form
 
 #### Volume-Aktionen
 
@@ -843,11 +930,13 @@ title: Applications Help
 contexts: dialog.applications
 ```
 
-#### Überblick
+### Contextual F1
 
 Das Applications-Menü listet konfigurierte Anwendungs-Presets auf.
 Mit `Enter` startest du das markierte Preset; ytnova kehrt sofort zurück, während die gestartete Anwendung weiterläuft.
 Mit `E` bearbeitest du den Katalog hinter den Presets, mit `Esc` brichst du ab.
+
+### Long form
 
 #### Applications-Aktionen
 
@@ -867,10 +956,12 @@ title: F2 Picker Help
 contexts: dialog.f2-picker
 ```
 
-#### Überblick
+### Contextual F1
 
 Der F2 Picker durchsucht einen Pfad oder ein Preset, das der aktive Prompt unterstützt.
 Er ist ein Prompt-Helfer und kein eigenständiger Modus; zusätzlich bietet er Volume-Zyklus, Logging und Dotfile-Umschaltung, ohne den Prompt zu verlassen.
+
+### Long form
 
 #### F2-Picker-Aktionen
 

@@ -21,7 +21,6 @@
 #include "ytnova_runtime_launch.h"
 #include "ytnova_panel_anchor.h"
 #include "ytnova_ui.h"
-#include "terminal_input.h"
 #include <assert.h>
 #include <ctype.h>
 #include <string.h>
@@ -906,207 +905,6 @@ BOOL handle_file_window_command_action(ViewContext *ctx, YtreeNovaAction action,
   return FALSE;
 }
 
-typedef struct {
-  DirEntry **dir_entry_ptr;
-  YtreeNovaAction *loop_action_ptr;
-  int *unput_char_ptr;
-  const int *start_x_ptr;
-  BOOL *need_dsp_help_ptr;
-  BOOL *maybe_change_x_step_ptr;
-  Statistic *statistic;
-  BOOL *handled_ptr;
-} FileWindowPanelDispatchState;
-
-static BOOL HandleFileWindowPanelDispatchAction(
-    ViewContext *ctx, YtreeNovaAction action,
-    FileWindowPanelDispatchState *state) {
-  DirEntry **dir_entry_ptr = state->dir_entry_ptr;
-  YtreeNovaAction *loop_action_ptr = state->loop_action_ptr;
-  int *unput_char_ptr = state->unput_char_ptr;
-  const int *start_x_ptr = state->start_x_ptr;
-  BOOL *need_dsp_help_ptr = state->need_dsp_help_ptr;
-  BOOL *maybe_change_x_step_ptr = state->maybe_change_x_step_ptr;
-  Statistic *s = state->statistic;
-  BOOL *handled_ptr = state->handled_ptr;
-  DirEntry *dir_entry;
-  FileEntry *fe_ptr = NULL;
-  DirEntry *de_ptr = NULL;
-  char new_log_path[PATH_LENGTH + 1];
-
-#define loop_action (*loop_action_ptr)
-#define unput_char (*unput_char_ptr)
-#define start_x (*start_x_ptr)
-#define need_dsp_help (*need_dsp_help_ptr)
-#define maybe_change_x_step (*maybe_change_x_step_ptr)
-
-  *handled_ptr = TRUE;
-  dir_entry = *dir_entry_ptr;
-  switch (action) {
-  case ACTION_CMD_MKFILE:
-    if (ctx->view_mode == DISK_MODE || ctx->view_mode == USER_MODE) {
-      char file_name[PATH_LENGTH * 2 + 1];
-      ClearHelp(ctx);
-      *file_name = '\0';
-      if (UI_ReadString(ctx, ctx->active, "MAKE FILE:", file_name, PATH_LENGTH,
-                        HST_FILE) == CR) {
-        int mk_result = MakeFile(ctx, dir_entry, file_name, s, NULL,
-                                 (ChoiceCallback)UI_ChoiceResolver);
-        if (mk_result == 0) {
-          BuildFileEntryList(ctx, ctx->active);
-          RefreshView(ctx, dir_entry);
-        } else if (mk_result == 1) {
-          MESSAGE(ctx, "File already exists!");
-        } else {
-          MESSAGE(ctx, "Can't create File*\"%s\"", file_name);
-        }
-      }
-      need_dsp_help = TRUE;
-    }
-    break;
-
-  case ACTION_CMD_S:
-    UI_HandleSort(ctx, dir_entry, s, start_x);
-    need_dsp_help = TRUE;
-    break;
-
-  case ACTION_FILTER:
-    if (UI_ReadFilter(ctx) == 0) {
-      if (!AppStateCommitDirEntryFileViewport(dir_entry, 0, 0))
-        return FALSE;
-      BuildFileEntryList(ctx, ctx->active);
-      DisplayFilter(ctx, s);
-      DisplayFiles(ctx, ctx->active, dir_entry, dir_entry->start_file,
-                   dir_entry->start_file + dir_entry->cursor_pos, start_x,
-                   ctx->ctx_file_window);
-
-      if (dir_entry->global_flag)
-        DisplayDiskStatistic(ctx, s);
-      else
-        DisplayDirStatistic(ctx, dir_entry, NULL, s);
-
-      if (ctx->active->file_count == 0)
-        unput_char = ESC;
-      maybe_change_x_step = TRUE;
-    }
-    need_dsp_help = TRUE;
-    break;
-
-  case ACTION_LOG:
-    fe_ptr =
-        ctx->active
-            ->file_entry_list[dir_entry->start_file + dir_entry->cursor_pos]
-            .file;
-    if (ctx->view_mode == ARCHIVE_MODE) {
-      if (LogArchiveFile(ctx, ctx->active, fe_ptr) == 0) {
-        dir_entry = GetPanelDirEntry(ctx->active);
-        if (!dir_entry) {
-          loop_action = ACTION_ESCAPE;
-          break;
-        }
-        unput_char = ESC;
-      }
-      need_dsp_help = TRUE;
-    } else if (ctx->view_mode == DISK_MODE || ctx->view_mode == USER_MODE) {
-      (void)GetFileNamePath(fe_ptr, new_log_path);
-      if (!GetNewLogPath(ctx, ctx->active, new_log_path)) {
-        if (!AppStateCommitDirEntryLogFlag(dir_entry, TRUE))
-          return FALSE;
-        if (LogDisk(ctx, ctx->active, new_log_path) == 0) {
-          dir_entry = GetPanelDirEntry(ctx->active);
-          if (!dir_entry) {
-            loop_action = ACTION_ESCAPE;
-            break;
-          }
-        }
-        unput_char = ESC;
-      }
-      need_dsp_help = TRUE;
-    }
-    break;
-
-  case ACTION_ENTER:
-    if (ctx->preview_mode) {
-      loop_action = ACTION_NONE;
-      break;
-    }
-    if (dir_entry->big_window)
-      break;
-    if (!AppStateCommitPanelFileShape(ctx->active, TRUE))
-      return FALSE;
-    if (!AppStateCommitDirEntryFileShape(dir_entry, TRUE))
-      return FALSE;
-    RefreshView(ctx, dir_entry);
-    FileNav_RereadWindowSize(ctx, dir_entry);
-    loop_action = ACTION_NONE;
-    break;
-
-  case ACTION_QUIT_DIR:
-    need_dsp_help = TRUE;
-    fe_ptr =
-        ctx->active
-            ->file_entry_list[dir_entry->start_file + dir_entry->cursor_pos]
-            .file;
-    de_ptr = fe_ptr->dir_entry;
-    QuitTo(ctx, de_ptr);
-    break;
-
-  case ACTION_QUIT:
-    need_dsp_help = TRUE;
-    Quit(ctx);
-    loop_action = ACTION_NONE;
-    break;
-
-  case ACTION_HELP:
-    (void)UI_ShowIntegratedHelp(ctx, dir_entry);
-    need_dsp_help = TRUE;
-    break;
-
-  case ACTION_REFRESH:
-    dir_entry = RefreshFileView(ctx, dir_entry);
-    need_dsp_help = TRUE;
-    break;
-
-  case ACTION_EDIT_CONFIG:
-    UI_OpenConfigProfile(ctx, dir_entry);
-    need_dsp_help = TRUE;
-    break;
-
-  case ACTION_RESIZE:
-    (void)AppStateMarkResizeRequest(ctx);
-    break;
-
-  case ACTION_TOGGLE_STATS: if (ctx->is_split_screen && ctx->active &&
-                                !AppStateCommitPanelStatsVisibility(ctx->active, !ctx->active->show_stats))
-      break;
-    if (!ctx->is_split_screen || !ctx->active) ctx->show_stats = !ctx->show_stats;
-    (void)AppStateMarkResizeRequest(ctx);
-    break;
-  case ACTION_TOGGLE_COMPACT:
-    if (!AppStateCommitFixedColumnWidth(ctx,
-                                        (ctx->fixed_col_width == 0)
-                                            ? ResolveCompactFileWidth(
-                                                  ctx, ctx->active)
-                                            : 0))
-      return FALSE;
-    (void)AppStateMarkResizeRequest(ctx);
-    break;
-
-  case ACTION_ESCAPE:
-    break;
-  default:
-    *handled_ptr = FALSE;
-    break;
-  }
-  *dir_entry_ptr = dir_entry;
-
-#undef loop_action
-#undef unput_char
-#undef start_x
-#undef need_dsp_help
-#undef maybe_change_x_step
-  return TRUE;
-}
-
 BOOL handle_file_window_misc_dispatch_action(
     ViewContext *ctx, YtreeNovaAction action, DirEntry **dir_entry_ptr,
     YtreeNovaAction *loop_action_ptr, int *unput_char_ptr,
@@ -1119,6 +917,7 @@ BOOL handle_file_window_misc_dispatch_action(
   DirEntry *de_ptr = NULL;
   BOOL handled = TRUE;
   char filepath[PATH_LENGTH + 1];
+  char new_log_path[PATH_LENGTH + 1];
 
 #define loop_action (*loop_action_ptr)
 #define unput_char (*unput_char_ptr)
@@ -1134,17 +933,6 @@ BOOL handle_file_window_misc_dispatch_action(
   }
 
   dir_entry = *dir_entry_ptr;
-
-  {
-    FileWindowPanelDispatchState panel_state = {
-        &dir_entry, loop_action_ptr, unput_char_ptr, start_x_ptr,
-        need_dsp_help_ptr, maybe_change_x_step_ptr, s, &handled};
-    if (!HandleFileWindowPanelDispatchAction(ctx, action, &panel_state))
-      return FALSE;
-  }
-  if (handled)
-    goto misc_dispatch_done;
-  handled = TRUE;
 
   switch (action) {
   case ACTION_FILEINFO_1:
@@ -1283,7 +1071,147 @@ BOOL handle_file_window_misc_dispatch_action(
     need_dsp_help = TRUE;
     break;
 
+  case ACTION_CMD_MKFILE:
+    if (ctx->view_mode == DISK_MODE || ctx->view_mode == USER_MODE) {
+      char file_name[PATH_LENGTH * 2 + 1];
+      ClearHelp(ctx);
+      *file_name = '\0';
+      if (UI_ReadString(ctx, ctx->active, "MAKE FILE:", file_name, PATH_LENGTH,
+                        HST_FILE) == CR) {
+        int mk_result = MakeFile(ctx, dir_entry, file_name, s, NULL,
+                                 (ChoiceCallback)UI_ChoiceResolver);
+        if (mk_result == 0) {
+          BuildFileEntryList(ctx, ctx->active);
+          RefreshView(ctx, dir_entry);
+        } else if (mk_result == 1) {
+          MESSAGE(ctx, "File already exists!");
+        } else {
+          MESSAGE(ctx, "Can't create File*\"%s\"", file_name);
+        }
+      }
+      need_dsp_help = TRUE;
+    }
+    break;
 
+  case ACTION_CMD_S:
+    UI_HandleSort(ctx, dir_entry, s, start_x);
+    need_dsp_help = TRUE;
+    break;
+
+  case ACTION_FILTER:
+    if (UI_ReadFilter(ctx) == 0) {
+      if (!AppStateCommitDirEntryFileViewport(dir_entry, 0, 0))
+        return FALSE;
+      BuildFileEntryList(ctx, ctx->active);
+      DisplayFilter(ctx, s);
+      DisplayFiles(ctx, ctx->active, dir_entry, dir_entry->start_file,
+                   dir_entry->start_file + dir_entry->cursor_pos, start_x,
+                   ctx->ctx_file_window);
+
+      if (dir_entry->global_flag)
+        DisplayDiskStatistic(ctx, s);
+      else
+        DisplayDirStatistic(ctx, dir_entry, NULL, s);
+
+      if (ctx->active->file_count == 0)
+        unput_char = ESC;
+      maybe_change_x_step = TRUE;
+    }
+    need_dsp_help = TRUE;
+    break;
+
+  case ACTION_LOG:
+    fe_ptr =
+        ctx->active
+            ->file_entry_list[dir_entry->start_file + dir_entry->cursor_pos]
+            .file;
+    if (ctx->view_mode == DISK_MODE || ctx->view_mode == USER_MODE) {
+      (void)GetFileNamePath(fe_ptr, new_log_path);
+      if (!GetNewLogPath(ctx, ctx->active, new_log_path)) {
+        if (!AppStateCommitDirEntryLogFlag(dir_entry, TRUE))
+          return FALSE;
+        if (LogDisk(ctx, ctx->active, new_log_path) == 0) {
+          dir_entry = GetPanelDirEntry(ctx->active);
+          if (!dir_entry) {
+            loop_action = ACTION_ESCAPE;
+            break;
+          }
+        }
+        unput_char = ESC;
+      }
+      need_dsp_help = TRUE;
+    }
+    break;
+
+  case ACTION_ENTER:
+    if (ctx->preview_mode) {
+      loop_action = ACTION_NONE;
+      break;
+    }
+    if (dir_entry->big_window)
+      break;
+    if (!AppStateCommitPanelFileShape(ctx->active, TRUE))
+      return FALSE;
+    if (!AppStateCommitDirEntryFileShape(dir_entry, TRUE))
+      return FALSE;
+    RefreshView(ctx, dir_entry);
+    FileNav_RereadWindowSize(ctx, dir_entry);
+    loop_action = ACTION_NONE;
+    break;
+
+  case ACTION_QUIT_DIR:
+    need_dsp_help = TRUE;
+    fe_ptr =
+        ctx->active
+            ->file_entry_list[dir_entry->start_file + dir_entry->cursor_pos]
+            .file;
+    de_ptr = fe_ptr->dir_entry;
+    QuitTo(ctx, de_ptr);
+    break;
+
+  case ACTION_QUIT:
+    need_dsp_help = TRUE;
+    Quit(ctx);
+    loop_action = ACTION_NONE;
+    break;
+
+  case ACTION_HELP:
+    (void)UI_ShowIntegratedHelp(ctx, dir_entry);
+    need_dsp_help = TRUE;
+    break;
+
+  case ACTION_REFRESH:
+    dir_entry = RefreshFileView(ctx, dir_entry);
+    need_dsp_help = TRUE;
+    break;
+
+  case ACTION_EDIT_CONFIG:
+    UI_OpenConfigProfile(ctx, dir_entry);
+    need_dsp_help = TRUE;
+    break;
+
+  case ACTION_RESIZE:
+    (void)AppStateMarkResizeRequest(ctx);
+    break;
+
+  case ACTION_TOGGLE_STATS: if (ctx->is_split_screen && ctx->active &&
+                                !AppStateCommitPanelStatsVisibility(ctx->active, !ctx->active->show_stats))
+      break;
+    if (!ctx->is_split_screen || !ctx->active) ctx->show_stats = !ctx->show_stats;
+    (void)AppStateMarkResizeRequest(ctx);
+    break;
+  case ACTION_TOGGLE_COMPACT:
+    if (!AppStateCommitFixedColumnWidth(ctx,
+                                        (ctx->fixed_col_width == 0)
+                                            ? ResolveCompactFileWidth(
+                                                  ctx, ctx->active)
+                                            : 0))
+      return FALSE;
+    (void)AppStateMarkResizeRequest(ctx);
+    break;
+
+  case ACTION_ESCAPE:
+    break;
 
   default:
     handled = FALSE;
@@ -1478,7 +1406,6 @@ static BOOL HandleTaggedCommandDispatchAction(
         pid_t pipe_child_pid = -1;
 
         /* Exit ncurses mode */
-        (void)TerminalInputSuspend(ctx);
         endwin();
         SuspendClock(ctx);
 
@@ -1486,8 +1413,6 @@ static BOOL HandleTaggedCommandDispatchAction(
                 filepath, NULL, &walking_package.function_data.pipe_cmd.pipe_file,
                 &pipe_child_pid) != 0) {
           /* Restore ncurses mode if popen fails */
-          (void)reset_prog_mode();
-          (void)TerminalInputResume(ctx);
           InitClock(ctx);
           touchwin(stdscr);
           wnoutrefresh(stdscr);
@@ -1505,8 +1430,6 @@ static BOOL HandleTaggedCommandDispatchAction(
           HitReturnToContinue();
 
           /* Restore ncurses mode */
-          (void)reset_prog_mode();
-          (void)TerminalInputResume(ctx);
           InitClock(ctx);
           touchwin(stdscr);
           wnoutrefresh(stdscr);
@@ -1619,15 +1542,12 @@ static BOOL HandleTaggedCommandDispatchAction(
       if (GetTaggedCommandLine(ctx, command_line) == 0) {
         NormalizeQuotedExecPlaceholders(
             command_line, (size_t)COMMAND_LINE_LENGTH + 1U);
-        (void)TerminalInputSuspend(ctx);
         endwin();
         SuspendClock(ctx);
         walking_package.function_data.execute.command = command_line;
         FileTags_SilentWalkTaggedFiles(ctx, ExecuteCommand, &walking_package);
         HitReturnToContinue();
 
-        (void)reset_prog_mode();
-        (void)TerminalInputResume(ctx);
         InitClock(ctx);
         touchwin(stdscr);
         wnoutrefresh(stdscr);

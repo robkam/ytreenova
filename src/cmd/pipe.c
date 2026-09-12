@@ -8,7 +8,6 @@
 #include "ytnova_cmd.h"
 #include "ytnova_fs.h"
 #include "ytnova_runtime_launch.h"
-#include "terminal_input.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -112,8 +111,6 @@ static void RestorePipeCommandUi(ViewContext *ctx, DirEntry *dir_entry) {
     return;
   }
 
-  (void)reset_prog_mode();
-  (void)TerminalInputResume(ctx);
   if (ctx->hook_init_clock) {
     ctx->hook_init_clock(ctx);
   }
@@ -181,7 +178,6 @@ int Pipe(ViewContext *ctx, DirEntry *dir_entry, FileEntry *file_entry,
   }
 
   /* Exit curses mode for external command */
-  (void)TerminalInputSuspend(ctx);
   endwin();
   if (ctx->hook_suspend_clock)
     ctx->hook_suspend_clock(ctx);
@@ -264,7 +260,6 @@ int PipeDirectory(ViewContext *ctx, DirEntry *dir_entry, char *pipe_command) {
   }
 
   /* Exit curses mode for external command */
-  (void)TerminalInputSuspend(ctx);
   endwin();
   if (ctx->hook_suspend_clock)
     ctx->hook_suspend_clock(ctx);
