@@ -13,6 +13,10 @@
 #include <stdlib.h> /* Added for free, exit */
 #include <string.h>
 #include <time.h>
+#include <wchar.h>
+
+#define COMMAND_STRIP_MULTIBYTE_INVALID ((size_t)-1)
+#define COMMAND_STRIP_MULTIBYTE_INCOMPLETE ((size_t)-2)
 
 /*****************************************************************************
  *                              GetAttributes                                *
@@ -1164,15 +1168,42 @@ int UI_CommandStripVisualLength(const UICommandStripCommand *commands,
 
 static void CommandStripRenderText(WINDOW *win, int y, int *x, int max_x,
                                    const char *text, int attr) {
+  mbstate_t state;
+
   if (win == NULL || x == NULL || text == NULL)
     return;
 
+  memset(&state, 0, sizeof(state));
   wattrset(win, attr);
-  for (; *text && *x < max_x; ++text) {
-    int raw = (unsigned char)*text;
-    chtype ch = raw < 32 ? ACS_BLOCK : (chtype)raw;
+  while (*text != '\0' && *x < max_x) {
+    unsigned char raw = (unsigned char)*text;
+    wchar_t wide_char;
+    size_t byte_count;
+    int rendered_width;
 
-    mvwaddch(win, y, (*x)++, ch);
+    if (raw < 32) {
+      mvwaddch(win, y, (*x)++, ACS_BLOCK);
+      text++;
+      memset(&state, 0, sizeof(state));
+      continue;
+    }
+
+    byte_count = mbrtowc(&wide_char, text, MB_CUR_MAX, &state);
+    if (byte_count == COMMAND_STRIP_MULTIBYTE_INVALID ||
+        byte_count == COMMAND_STRIP_MULTIBYTE_INCOMPLETE || byte_count == 0) {
+      byte_count = 1;
+      rendered_width = 1;
+      memset(&state, 0, sizeof(state));
+    } else {
+      rendered_width = wcwidth(wide_char);
+      if (rendered_width < 1)
+        rendered_width = 1;
+    }
+    if (*x + rendered_width > max_x)
+      break;
+    mvwaddnstr(win, y, *x, text, (int)byte_count);
+    *x += rendered_width;
+    text += byte_count;
   }
 }
 

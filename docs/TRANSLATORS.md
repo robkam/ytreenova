@@ -68,8 +68,10 @@ Each F1 topic block has this schema:
 
 - `## topic:<id>`
 - metadata fence with `title:` and `contexts:`
-- `### Contextual F1`
-- optional `### Explainer links`
+- exactly one `### Contextual F1`
+
+Followable topic links use `[translated label](topic:<id>)` naturally within
+the contextual text. Do not add a separate links section.
 
 `etc/help/man.en.md` is an independent reference source. Its topic blocks use
 the metadata fence followed directly by level-4 reference subsections; they do
@@ -80,14 +82,14 @@ Translators:
 - **translate**
   - `title:`
   - text under `### Contextual F1`
-  - visible link labels in `### Explainer links`
+  - visible labels in inline topic links
   - man-source reference headings and bodies
 
 - **do not translate**
   - `topic:<id>`
   - `contexts:`
-  - `topic:` targets inside links such as `(topic:navigation)`
-  - F1 schema headings like `### Contextual F1` and `### Explainer links` unless the generator/schema is explicitly updated to support localization there
+  - `topic:` targets inside links such as `(topic:ytnova-navigation)`
+  - the F1 schema heading `### Contextual F1`
 
 The stable IDs and context mappings are runtime keys, not prose.
 

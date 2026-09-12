@@ -110,8 +110,7 @@ def _topic_blocks(source):
         r"title: (?P<title>[^\n]+)\n"
         r"contexts: (?P<contexts>[^\n]+)\n"
         r"```\n+"
-        r"### Contextual F1\n(?P<contextual>.*?)(?:\n+### Explainer links\n(?P<links>.*?))?"
-        r"(?=^## topic:|\Z)",
+        r"### Contextual F1\n(?P<contextual>.*?)(?=^## topic:|\Z)",
         re.M | re.S,
     )
     return list(pattern.finditer(source))
@@ -142,9 +141,9 @@ def _topic_context_map(source):
     return context_map
 
 
-def _topic_explainer_links(source, topic):
-    links = _topic_block_map(source)[topic].group("links") or ""
-    return re.findall(r"- \[([^\]]+)\]\(topic:([a-z0-9-]+)\)", links)
+def _topic_inline_links(source, topic):
+    contextual = _topic_block_map(source)[topic].group("contextual")
+    return re.findall(r"\[([^\]]+)\]\(topic:([a-z0-9-]+)\)", contextual)
 
 
 def _topic_command_labels(source, topic):
@@ -189,7 +188,6 @@ def test_help_source_uses_deterministic_topic_block_schema():
             contexts = block.group("contexts")
             contextual = (block.groupdict().get("contextual") or "").strip()
             reference = (block.groupdict().get("reference") or "").strip()
-            links = (block.groupdict().get("links") or "").strip()
 
             assert block.group("title").strip()
             assert contexts == "none" or re.fullmatch(
@@ -201,10 +199,8 @@ def test_help_source_uses_deterministic_topic_block_schema():
                 )
             else:
                 assert contextual
-            if links:
-                assert re.fullmatch(
-                    r"(?:- \[[^\]]+\]\(topic:[a-z0-9-]+\)\n?)+", links
-                ), f"invalid explainer links block for topic {block.group('topic')}"
+            if path in (Path("etc/help/f1.en.md"),) + LOCALE_F1_SOURCES:
+                assert "### " not in contextual
 
 
 def test_f1_and_man_sources_keep_independent_schemas():
@@ -216,7 +212,6 @@ def test_f1_and_man_sources_keep_independent_schemas():
     for path in (Path("etc/help/man.en.md"),) + LOCALE_MAN_SOURCES:
         source = _read_help_source(path)
         assert "### Contextual F1" not in source
-        assert "### Explainer links" not in source
         assert all(block.group("reference") for block in _topic_blocks(source))
 
 
@@ -228,7 +223,6 @@ def test_ytnova_navigation_keeps_its_facts_in_visible_contextual_help():
         assert "topic:list-jump" in topic.group("contextual")
         assert "topic:f7" in topic.group("contextual")
         assert "topic:f8" in topic.group("contextual")
-        assert not (topic.group("links") or "").strip()
 
 
 def test_contextual_help_uses_portable_control_key_notation():
@@ -246,13 +240,6 @@ def test_tagged_help_explains_control_key_operations_and_footer_marker():
         )
         assert "`C-`" in contextual
         assert "`^`" in contextual
-
-
-def test_man_sources_do_not_emit_per_topic_see_also_noise():
-    for path in (Path("etc/help/man.en.md"), Path("etc/help/man.de.md")):
-        assert not re.search(
-            r"^### Explainer links\n- \[", path.read_text(encoding="utf-8"), re.MULTILINE
-        )
 
 
 def test_help_source_defines_required_first_pass_topics():
@@ -303,11 +290,11 @@ def test_f1_sources_keep_all_runtime_content_in_contextual_sections():
 
 def test_contents_topic_is_a_complete_alphabetical_operator_index():
     f1_source = _read_help_source(Path("etc/help/f1.en.md"))
-    contents_only_topics = {"execute-dir", "execute-file", "f1-navigation"}
+    help_strip_only_topics = {"f1-navigation"}
     expected_targets = {
         topic
         for topic in _topic_block_map(f1_source)
-        if topic != "index" and topic not in contents_only_topics
+        if topic != "index" and topic not in help_strip_only_topics
     }
-    contents_links = _topic_explainer_links(f1_source, "index")
+    contents_links = _topic_inline_links(f1_source, "index")
     assert {target for _, target in contents_links} == expected_targets

@@ -162,6 +162,33 @@ REVIEWED_EXCEPTIONS = {
         "external and static contract classification",
         "Archive payload comparison verifies moved fixture bytes; the string is test data, not editable interface prose.",
     ),
+    (
+        "tests/test_footer_command_inventory.py",
+        "test_writable_archive_footer_commands_and_invert_dispatch",
+        "exact-prose-assertion",
+    ): (
+        "retained",
+        "published footer command contract",
+        "The archive directory footer key range is an explicit, documented user-facing command contract.",
+    ),
+    (
+        "tests/test_help_generator.py",
+        "test_c_literal_escapes_question_marks_that_form_c_trigraphs",
+        "exact-prose-assertion",
+    ): (
+        "retained",
+        "generated C literal contract",
+        "The exact escaped value prevents C trigraph interpretation while preserving the authored runtime text.",
+    ),
+    (
+        "tests/test_help_source_schema.py",
+        "test_f1_and_man_sources_keep_independent_schemas",
+        "exact-prose-assertion",
+    ): (
+        "retained",
+        "machine-consumed help source schema",
+        "The exact headings distinguish the generator's F1 and manpage input grammars; they are schema tokens, not editable prose.",
+    ),
 }
 
 EXTERNAL_CONTRACT_SYMBOLS = {

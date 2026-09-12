@@ -2,17 +2,10 @@
 #include <stddef.h>
 
 typedef struct {
-    const char *label;
-    const char *target_topic_id;
-} GeneratedHelpLink;
-
-typedef struct {
     const char *topic_id;
     const char *title;
     const char *contexts_csv;
     const char *contextual_f1;
-    size_t explainer_link_count;
-    const GeneratedHelpLink *explainer_links;
 } GeneratedHelpTopic;
 
 typedef struct {
@@ -32,1203 +25,527 @@ typedef struct {
     GeneratedHelpFooter footer;
 } GeneratedHelpCatalog;
 
-static const GeneratedHelpLink generated_help_links_en_index[] = {
-    {"Applications", "applications-menu"},
-    {"Archive Directory", "archive-dir"},
-    {"Archive File", "archive-file"},
-    {"Command-line Editing", "command-line-editing"},
-    {"Command-line Parameters", "command-line-parameters"},
-    {"Compare", "compare"},
-    {"Compare Basis", "compare-basis"},
-    {"Compare Result", "compare-results"},
-    {"Compare Scope", "compare-scope"},
-    {"Compare Target", "compare-target"},
-    {"Configuration Files", "configuration-files"},
-    {"Copy/Move Targets", "copy-move-targets"},
-    {"Create Archive", "create-archive"},
-    {"Date Change", "change-date"},
-    {"Directory", "directory"},
-    {"F10 Config", "f10"},
-    {"F2 Picker", "f2-picker"},
-    {"F7 Preview", "f7"},
-    {"F8 Split", "f8"},
-    {"F8 Split Directory", "f8-dir"},
-    {"F8 Split File", "f8-file"},
-    {"File", "file"},
-    {"Filter", "filter"},
-    {"Global", "global"},
-    {"History", "history-dialog"},
-    {"List Jump", "list-jump"},
-    {"Navigation", "ytnova-navigation"},
-    {"Output", "output"},
-    {"Output Destination", "output-destination"},
-    {"Output Format", "output-format"},
-    {"Output Separator", "output-separator"},
-    {"Search Tagged", "search-tagged"},
-    {"Shared Commands", "shared-commands"},
-    {"Showall", "showall"},
-    {"Tagged", "tagged"},
-    {"Tagged Viewer", "tagged-viewer"},
-    {"Theming", "theming"},
-    {"Vi Keys", "vi-keys"},
-    {"Volume", "volume-menu"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_list_jump[] = {
-    {"Directory mode", "directory"},
-    {"File mode", "file"},
-    {"Showall", "showall"},
-    {"Global", "global"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_shared_commands[] = {
-    {"F7 preview", "f7"},
-    {"F8 split", "f8"},
-    {"Applications menu", "applications-menu"},
-    {"F10 config", "f10"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_command_line_editing[] = {
-    {"Vi Keys", "vi-keys"},
-    {"History", "history-dialog"},
-    {"F2 Picker", "f2-picker"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_command_line_parameters[] = {
-    {"Configuration Files", "configuration-files"},
-    {"Filter", "filter"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_configuration_files[] = {
-    {"F10 Config", "f10"},
-    {"Theming", "theming"},
-    {"Command-line Parameters", "command-line-parameters"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_vi_keys[] = {
-    {"Navigation", "ytnova-navigation"},
-    {"Command-line editing", "command-line-editing"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_f10[] = {
-    {"Theming", "theming"},
-    {"Shared commands", "shared-commands"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_theming[] = {
-    {"F10 config", "f10"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_archive_dir[] = {
-    {"Navigation", "ytnova-navigation"},
-    {"Filter", "filter"},
-    {"Compare", "compare"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_archive_file[] = {
-    {"Navigation", "ytnova-navigation"},
-    {"Tagged", "tagged"},
-    {"Copy/Move Targets", "copy-move-targets"},
-    {"Filter", "filter"},
-    {"Compare", "compare"},
-    {"Output", "output"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_filter[] = {
-    {"Tagged", "tagged"},
-    {"Showall", "showall"},
-    {"Global", "global"},
-    {"Command-line Editing", "command-line-editing"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_compare[] = {
-    {"File", "file"},
-    {"Directory", "directory"},
-    {"Navigation", "ytnova-navigation"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_compare_target[] = {
-    {"Compare", "compare"},
-    {"Command-line Editing", "command-line-editing"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_change_date[] = {
-    {"File mode", "file"},
-    {"Directory mode", "directory"},
-    {"Command-line editing", "command-line-editing"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_compare_scope[] = {
-    {"Compare", "compare"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_compare_basis[] = {
-    {"Compare", "compare"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_compare_results[] = {
-    {"Compare", "compare"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_execute_file[] = {
-    {"File mode", "file"},
-    {"Command-line editing", "command-line-editing"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_execute_dir[] = {
-    {"Directory mode", "directory"},
-    {"Command-line editing", "command-line-editing"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_search_tagged[] = {
-    {"Tagged", "tagged"},
-    {"Command-line editing", "command-line-editing"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_create_archive[] = {
-    {"Tagged", "tagged"},
-    {"Command-line editing", "command-line-editing"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_output[] = {
-    {"File mode", "file"},
-    {"Archive file", "archive-file"},
-    {"Command-line editing", "command-line-editing"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_output_format[] = {
-    {"Output Help", "output"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_output_destination[] = {
-    {"Output Help", "output"},
-    {"Output Format Help", "output-format"},
-    {"Command-line editing", "command-line-editing"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_output_separator[] = {
-    {"Output Help", "output"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_showall[] = {
-    {"Navigation", "ytnova-navigation"},
-    {"Tagged", "tagged"},
-    {"Copy", "copy-move-targets"},
-    {"Filter", "filter"},
-    {"Compare", "compare"},
-    {"Move", "copy-move-targets"},
-    {"Output", "output"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_global[] = {
-    {"Navigation", "ytnova-navigation"},
-    {"Tagged", "tagged"},
-    {"Copy", "copy-move-targets"},
-    {"Filter", "filter"},
-    {"Compare", "compare"},
-    {"Move", "copy-move-targets"},
-    {"Output", "output"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_f7[] = {
-    {"Navigation", "ytnova-navigation"},
-    {"Tagged", "tagged"},
-    {"Copy/Move Targets", "copy-move-targets"},
-    {"Filter", "filter"},
-    {"Compare", "compare"},
-    {"Applications", "applications-menu"},
-    {"Output", "output"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_f8[] = {
-    {"Navigation", "ytnova-navigation"},
-    {"F8 Split Directory", "f8-dir"},
-    {"F8 Split File", "f8-file"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_f8_dir[] = {
-    {"Navigation", "ytnova-navigation"},
-    {"F8 Split", "f8"},
-    {"Copy", "copy-move-targets"},
-    {"Filter", "filter"},
-    {"J compare", "compare"},
-    {"moVedir", "copy-move-targets"},
-    {"Output", "output"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_f8_file[] = {
-    {"Navigation", "ytnova-navigation"},
-    {"F8 Split", "f8"},
-    {"Tagged", "tagged"},
-    {"C/^Copy", "copy-move-targets"},
-    {"Filter", "filter"},
-    {"J compare", "compare"},
-    {"Move", "copy-move-targets"},
-    {"Output", "output"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_history_dialog[] = {
-    {"Navigation", "ytnova-navigation"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_volume_menu[] = {
-    {"Navigation", "ytnova-navigation"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_applications_menu[] = {
-    {"Navigation", "ytnova-navigation"},
-};
-
-static const GeneratedHelpLink generated_help_links_en_f2_picker[] = {
-    {"Navigation", "ytnova-navigation"},
-    {"Command-line editing", "command-line-editing"},
-};
-
 static const GeneratedHelpTopic generated_help_topics_en[] = {
     {
         "index",
         "Help Index",
         NULL,
-        "Browse this index when you know the question but not the page.\nPress `Enter` or `Right` on a topic to open it.\nUse `Left` to come back here.\nUse `Esc` to leave help.\n\n`Purpose`\nUse `F1` for the task in front of you, not as one giant manual.\nLocal pages answer the active question first.\nShared topics hold the repeated rules.\n\n`Index use`\nThis list stays alphabetical so you can scan it quickly.\nStart with the current screen when you know it; otherwise pick the topic that matches your question.\nOpen a topic, read the short answer, then use `Left` to come back without losing your place.\n\n\n- [Applications](topic:applications-menu)\n- [Archive Directory](topic:archive-dir)\n- [Archive File](topic:archive-file)\n- [Command-line Editing](topic:command-line-editing)\n- [Command-line Parameters](topic:command-line-parameters)\n- [Compare](topic:compare)\n- [Compare Basis](topic:compare-basis)\n- [Compare Result](topic:compare-results)\n- [Compare Scope](topic:compare-scope)\n- [Compare Target](topic:compare-target)\n- [Configuration Files](topic:configuration-files)\n- [Copy/Move Targets](topic:copy-move-targets)\n- [Create Archive](topic:create-archive)\n- [Date Change](topic:change-date)\n- [Directory](topic:directory)\n- [F10 Config](topic:f10)\n- [F2 Picker](topic:f2-picker)\n- [F7 Preview](topic:f7)\n- [F8 Split](topic:f8)\n- [F8 Split Directory](topic:f8-dir)\n- [F8 Split File](topic:f8-file)\n- [File](topic:file)\n- [Filter](topic:filter)\n- [Global](topic:global)\n- [History](topic:history-dialog)\n- [List Jump](topic:list-jump)\n- [Navigation](topic:ytnova-navigation)\n- [Output](topic:output)\n- [Output Destination](topic:output-destination)\n- [Output Format](topic:output-format)\n- [Output Separator](topic:output-separator)\n- [Search Tagged](topic:search-tagged)\n- [Shared Commands](topic:shared-commands)\n- [Showall](topic:showall)\n- [Tagged](topic:tagged)\n- [Tagged Viewer](topic:tagged-viewer)\n- [Theming](topic:theming)\n- [Vi Keys](topic:vi-keys)\n- [Volume](topic:volume-menu)",
-        39,
-        generated_help_links_en_index,
+        "Choose a topic with `Up` and `Down`.\nPress `Enter` or `Right` to open it.\n`Left` returns to the previous help page.\n`Esc` closes help.\n\n`Navigation` in this list explains movement through YtreeNova. The help strip's `Navigation` command explains movement inside the help popup.\n\n- [Applications](topic:applications-menu)\n- [Archive Directory](topic:archive-dir)\n- [Archive File](topic:archive-file)\n- [Command-line Editing](topic:command-line-editing)\n- [Command-line Parameters](topic:command-line-parameters)\n- [Compare](topic:compare)\n- [Compare Basis](topic:compare-basis)\n- [Compare Result](topic:compare-results)\n- [Compare Scope](topic:compare-scope)\n- [Compare Target](topic:compare-target)\n- [Configuration Files](topic:configuration-files)\n- [Copy/Move Targets](topic:copy-move-targets)\n- [Create Archive](topic:create-archive)\n- [Date Change](topic:change-date)\n- [Directory](topic:directory)\n- [Execute Directory](topic:execute-dir)\n- [Execute File](topic:execute-file)\n- [F10 Config](topic:f10)\n- [F2 Picker](topic:f2-picker)\n- [F7 Preview](topic:f7)\n- [F8 Split](topic:f8)\n- [F8 Split Directory](topic:f8-dir)\n- [F8 Split File](topic:f8-file)\n- [File](topic:file)\n- [Filter](topic:filter)\n- [Global](topic:global)\n- [History](topic:history-dialog)\n- [List Jump](topic:list-jump)\n- [Navigation](topic:ytnova-navigation)\n- [Output](topic:output)\n- [Output Destination](topic:output-destination)\n- [Output Format](topic:output-format)\n- [Output Separator](topic:output-separator)\n- [Search Tagged](topic:search-tagged)\n- [Shared Commands](topic:shared-commands)\n- [Showall](topic:showall)\n- [Tagged](topic:tagged)\n- [Tagged Viewer](topic:tagged-viewer)\n- [Theming](topic:theming)\n- [Vi Keys](topic:vi-keys)\n- [Volume](topic:volume-menu)",
     },
     {
         "f1-navigation",
         "Help Navigation",
         NULL,
         "Use the `Up` and `Down` arrow keys to scroll help one line at a time.\nUse the `Up` and `Down` arrow keys to move between links.\n`Page Up` and `Page Down` move one help screen at a time.\n`Home` and `End` go to the top and bottom.\n`Enter` or the `Right` arrow key opens the selected link.\nThe `Left` arrow key returns to the previous help page.\nPress `I` to go to `Help Index`.\n`Esc` or `Q` closes help.",
-        0,
-        NULL,
     },
     {
         "ytnova-navigation",
         "YtreeNova Navigation",
         NULL,
         "YtreeNova is built for keyboard use. Mouse effects may occur, but they are incidental rather than designed controls.\nUse the `Up` and `Down` arrow keys to move one row at a time.\n`Page Up` and `Page Down` move one screen at a time.\n`Home` and `End` go to the first and last visible rows.\n`Enter` opens the selected item.\n`Right` opens or expands the selected item where that view supports it.\n`Left` goes back or collapses the selected item where that view supports it.\n[/ jump](topic:list-jump) moves to a matching name as you type in the current list. `Enter` selects it; `Esc` cancels.\n`Tab` moves to the next visible sibling in the tree and wraps at the end; `Shift-Tab` reverses it.\n[F8 split](topic:f8) mode: `Tab` switches active panels; some prompts give `Tab` a local meaning.\n[F7 preview](topic:f7) mode: ordinary navigation keys move the file selection; their shifted forms scroll the preview.\n\n`Terminal input limits`\n`Alt` is deliberately unsupported because terminals handle it inconsistently.\n`Kitty keyboard protocol`\nYtreeNova uses the kitty keyboard protocol when the active terminal path supports it. This lets it tell `C-m` from Enter, so `C-m` moves tagged files.\nIn Kitty, add `keyboard_protocol kitty` to `~/.config/kitty/kitty.conf` and restart Kitty. Other terminals that support the protocol work too.\nIf you use a multiplexer or remote session, it must pass the protocol through unchanged.\nWithout protocol support, YtreeNova silently uses `C-n` to move tagged files.\n`C-[` is Esc.",
-        0,
-        NULL,
     },
     {
         "list-jump",
         "List Jump",
         NULL,
-        "Press `/`, type letters, and press `Enter` to land on the best visible match in the current list.\nIn tree views, repeat the jump in the next directory if you want to go deeper.\n\n`Jump model`\n`/` opens a live name-jump prompt for the current list only.\nTree and directory views jump among visible directory names.\nFile-oriented views jump among the visible file rows for that surface.\n\n`Accept or cancel`\n`Type letters`: Move to the best current match as you type.\n`Enter`: Land on the current match and stay there.\n`Esc`: Cancel the jump and restore the original selection.\n`Scope changes`: Filtering, Showall, Global, archives, and split mode all change which visible list `/` searches.\n\n\n- [Directory mode](topic:directory)\n- [File mode](topic:file)\n- [Showall](topic:showall)\n- [Global](topic:global)",
-        4,
-        generated_help_links_en_list_jump,
+        "Press `/`, type part of a name, and press `Enter` to keep the best visible match.\nThe selection moves as you type.\n`Esc` restores the selection you had before the jump.\n\nThe jump searches only the current visible list. In a directory tree, repeat it after entering a directory when you want to go deeper.",
     },
     {
         "shared-commands",
         "Shared Commands",
         NULL,
-        "These keys keep the same high-level meaning across more than one mode.\nUse the mode page for local commands, and use this page for the shared function-key family.\n\n`Shared function keys`\n`F1`: Open contextual help for the active surface.\n`F5`: Refresh the current view.\n`F6`: Toggle the statistics strip for the active panel.\nSplit panels keep independent visibility.\n`F7`: Toggle preview for the active file context.\n`F8`: Toggle split-screen mode.\n`F9`: Open the Applications menu.\n`F10`: Open the configuration command surface.\n`Esc`: Back out of the current overlay, prompt, or popup.\n\n\n- [F7 preview](topic:f7)\n- [F8 split](topic:f8)\n- [Applications menu](topic:applications-menu)\n- [F10 config](topic:f10)",
-        4,
-        generated_help_links_en_shared_commands,
+        "`F1` opens help for the current screen or prompt.\n`F5` refreshes the current view.\n`F6` changes the statistics or details shown for the active view.\n[F7 preview](topic:f7) opens or closes the file preview.\n[F8 split](topic:f8) opens or closes the second panel.\n`F9` opens the [Applications menu](topic:applications-menu).\n`F10` opens [configuration](topic:f10).\n`Esc` leaves the current prompt, menu, preview, or popup.\n\nThe footer shows the active bindings. `commands.conf` may change its keys and labels.\nUse `C--` and `C-+` to reduce or increase terminal text size when the footer does not fit.",
     },
     {
         "tagged",
         "Tagged",
         NULL,
-        "Tags select several files, then apply one operation to the group.\nTagged files are indicated by `*` in the margin.\n\nIn a file list, press `T` to tag the selected file or `U` to untag it. The selection moves down to the next file.\nIn a directory tree, `T` and `U` affect files that the current filter allows in the selected directory, then move down to the next directory.\n\n`i` reverses tags on files that the current filter allows in the current scope.\n\nWhen statistics are shown, tagged-file totals appear there.\n\nHold the Control key with the letter after `C-` to run the matching operation on all tagged files. `^` in a footer label means the same tagged operation, as in `C/^Copy`.\n\n`C-a` opens the attributes prompt.\n`C-c` opens the [copy](topic:copy-move-targets) prompt.\n`C-d` asks before deleting tagged files.\n`C-m` opens the [move](topic:copy-move-targets) prompt when the protocol is available; `C-n` is the legacy binding.\n`C-o` opens the [output](topic:output) prompt.\n`C-p` opens the pipe prompt.\n`C-r` opens the rename prompt.\n`C-s` [searches tagged files](topic:search-tagged) and untags files without a hit.\n`C-t` tags all files in the active file list. In a directory tree, it tags files allowed by the current filter in all logged directories.\n`C-u` untags all files in the active file list. In a directory tree, it untags files allowed by the current filter in all logged directories.\n`C-v` views tagged files one after another.\n`C-x` opens a [command prompt](topic:execute-file) and runs the operation once per tagged file.\n`C-y` [pathcopies](topic:copy-move-targets) the tagged files.\n`C-z` depending on where the selection is opens the [archive Directory](topic:archive-dir) or [archive file](topic:archive-file) prompt\n\nFor a tagged-only [filter](topic:filter) scope, press `F`, then `Tab`. This does not change tags.",
-        0,
-        NULL,
+        "Tags select several files, then apply one operation to the group.\nTagged files are indicated by `*` in the margin.\n\nIn a file list, press `T` to tag the selected file or `U` to untag it. The selection moves down to the next file.\nIn a directory tree, `T` and `U` affect files that the current filter allows in the selected directory, then move down to the next directory.\n\n`I` reverses tags on files that the current filter allows in the current scope.\n\nWhen statistics are shown, tagged-file totals appear there.\n\nHold the Control key with the letter after `C-` to run the matching operation on all tagged files. `^` in a footer label means the same tagged operation, as in `C/^Copy`.\n\n`C-a` opens the attributes prompt.\n`C-c` opens the [copy](topic:copy-move-targets) prompt.\n`C-d` asks before deleting tagged files.\n`C-m` opens the [move](topic:copy-move-targets) prompt when the protocol is available; without it, use `C-n`.\n`C-o` opens the [output](topic:output) prompt.\n`C-p` opens the pipe prompt.\n`C-r` opens the rename prompt.\n`C-s` [searches tagged files](topic:search-tagged) and untags files without a hit.\n`C-t` tags all files in the active file list. In a directory tree, it tags files allowed by the current filter in all logged directories.\n`C-u` untags all files in the active file list. In a directory tree, it untags files allowed by the current filter in all logged directories.\n`C-v` views tagged files one after another.\n`C-x` opens a [command prompt](topic:execute-file) and runs the operation once per tagged file.\n`C-y` [pathcopies](topic:copy-move-targets) the tagged files.\n`C-z` opens the [archive directory](topic:archive-dir) or [archive file](topic:archive-file) prompt, depending on the current selection.\n\nFor a tagged-only [filter](topic:filter) scope, press `F`, then `Tab`. This does not change tags.",
     },
     {
         "tagged-viewer",
         "Tagged Viewer",
         "viewer.tagged",
-        "`View tagged` opens the tagged search results in the internal viewer.\nUse `n` and `p` to move to the next or previous tagged file.\nUse `Space`, `PgDn`, and `PgUp` only to move by pages in the current file.\nAfter `C-s` searches the tagged set, use `/` for the next hit and `?` for the previous hit in the current file.\n`C-s` remains the tagged-list search action outside this viewer.\nWith `TAGGEDVIEWER=external`, the configured pager owns search and hit navigation.\n\n`Navigation scopes`\n\nThe internal viewer separates file traversal from search-hit traversal so paging never changes files.\n\nSee [Tagged](topic:tagged).",
-        0,
-        NULL,
+        "Use `n` and `p` to open the next or previous tagged file.\nUse `Space`, `Page Down`, and `Page Up` to move within the current file.\nAfter a tagged search, use `/` and `\?` for the next or previous hit in that file.\n`Esc` closes the viewer.\n\nWith `TAGGEDVIEWER=external`, the configured pager controls paging and search instead. See [Tagged](topic:tagged) for creating and using the tagged set.",
     },
     {
         "command-line-editing",
         "Command-line Editing",
         NULL,
-        "Most prompts share the same editing keys.\nUse this page for cursor movement, delete keys, history, and picker shortcuts.\n\n`Editing keys`\n`Left/Right`: Move one character.\n`Home/End`: Jump to the start or end.\n`C-a/C-e`: Same as `Home` and `End`.\n`Backspace/C-h`: Delete the character to the left.\n`Delete/C-d`: Delete the character under the cursor.\n`C-w`: Delete the word to the left.\n`C-u`: Delete from the cursor back to the start.\n`C-k`: Delete from the cursor to the end.\n`Enter`: Accept the current value.\n`Esc`: Cancel without committing the prompt.\n\n`Prompt helpers`\n`Up`: Open or cycle prompt history when that prompt keeps history.\n`History dialog`: Use `P` to pin, `D` to delete, `Enter` to reuse, and `Esc` to cancel.\n`F2`: Open a browser or picker when the current prompt supports browsing.\n`F1`: Show the syntax or local rules for the current prompt.\n\n\n- [Vi Keys](topic:vi-keys)\n- [History](topic:history-dialog)\n- [F2 Picker](topic:f2-picker)",
-        3,
-        generated_help_links_en_command_line_editing,
+        "Most prompts use the same editing keys.\n`Left` and `Right` move one character.\n`Home` and `End` go to the start or end.\n`C-a` and `C-e` do the same.\n`Backspace` or `C-h` deletes the character to the left.\n`Delete` or `C-d` deletes the character under the cursor.\n`C-w` deletes the word to the left.\n`C-u` deletes back to the start.\n`C-k` deletes to the end.\n`Up` opens or cycles saved values when the prompt keeps history.\n`F2` opens the [directory picker](topic:f2-picker) when browsing is available.\n`F1` opens help for the current prompt.\n`Enter` accepts the value.\n`Esc` cancels without accepting it.",
     },
     {
         "command-line-parameters",
         "Command-line Parameters",
         NULL,
-        "Start ytnova with paths to log, or use an option to change startup behaviour.\nUse `ytnova --init` once to create missing configuration files.\nUse `ytnova --version` to print the version and exit.\n\n`Startup options`\n`-d depth`: Set the startup scan depth.\nUse a number, `min` or `root` for 0, or `max` or `all` for 100.\n`-f filter`: Start with a file filter.\nQuote shell patterns such as `\"*.c\"` so the shell does not expand them first.\n`-h history_file`: Use a different command-history file.\n`-p config_file`: Use a different main configuration file instead of `~/.config/ytnova/ytnova.conf`.\n`--init`: Create missing starter configuration files and exit.\n`-v`, `-V`, `--version`: Print version information and exit.\n`Paths`: Give one or more directory or archive paths to log them as startup volumes.\nWith no path, ytnova logs the current directory.\n\n\n- [Configuration Files](topic:configuration-files)\n- [Filter](topic:filter)",
-        2,
-        generated_help_links_en_command_line_parameters,
+        "Give ytnova one or more directory or archive paths to log them at startup. With no path, it logs the current directory.\n\n`-d depth` sets the startup scan depth. Use a number, `min` or `root` for zero, or `max` or `all` for 100.\n`-f filter` starts with a [file filter](topic:filter). Quote shell patterns such as `\"*.c\"` so the shell does not expand them first.\n`-h history_file` selects another command-history file.\n`-p config_file` selects another main configuration file.\n`--init` creates missing starter [configuration files](topic:configuration-files) and exits.\n`-v`, `-V`, or `--version` prints the version and exits.",
     },
     {
         "configuration-files",
         "Configuration Files",
         NULL,
-        "Editable user configuration files are normally created under `~/.config/ytnova`.\nAn explicit profile, an existing legacy file, or packaged defaults can be used instead.\n\n`Configuration directory`\n`ytnova.conf`: Main profile settings, including startup scan depth, `VI_KEYS`, and `SEPARATE_DIR_FILE_VIEWS`.\n`commands.conf`: Command labels, key bindings, and command-preset selection.\n`themes.conf`: Theme selection and theme-role overrides.\n`applications.conf`: Application presets opened from `F9`.\n`History`: Command history is separate from these configuration files.\nUse `-h` to choose a different history file.\n\nUse `-p` to choose a different `ytnova.conf`.\nExisting legacy home-dotfiles and packaged defaults remain available when a preferred user file is not used.\n\n\n- [F10 Config](topic:f10)\n- [Theming](topic:theming)\n- [Command-line Parameters](topic:command-line-parameters)",
-        3,
-        generated_help_links_en_configuration_files,
+        "User configuration normally lives under `~/.config/ytnova`.\n`ytnova.conf` contains profile settings such as scan depth, `VI_KEYS`, and `SEPARATE_DIR_FILE_VIEWS`.\n`commands.conf` contains command labels, bindings, and preset selection.\n`themes.conf` selects a theme and overrides theme roles.\n`applications.conf` contains the presets opened by `F9`.\nCommand history is stored separately; use `-h` to select another history file.\n\nUse `-p` to select another `ytnova.conf`. Existing legacy home files and packaged defaults remain fallbacks. Use [F10 configuration](topic:f10) to edit the active files.",
     },
     {
         "copy-move-targets",
         "Copy/Move Targets",
         NULL,
-        "`Copy`, `move`, and `pathcopy` first ask for a name or rename pattern, then for the destination directory.\n\nWith one file, leave its autofilled name to keep it, or edit it to rename it. You can use wildcards in either case.\n\nFor [Tagged](topic:tagged) files, leave the autofilled `*` to keep their names, or enter a rename pattern:\n`*` keeps the remaining original name. Use `copy-*` to add a prefix or `*.bak` to change the extension.\n`?` keeps one character from the original name. For example, `??-*` keeps the first two characters, adds `-`, then keeps the rest.\nOther characters are used as written.\n\nUse `Up` to reuse a previous name or pattern.\n\nEnter the destination directory in `To Directory`. In [F8 split](topic:f8) mode, it starts as the other panel’s currently selected directory.\n\nUse `Up` to reuse a previous destination, or press [F2](topic:f2-picker) to choose one.\n\nThe same prompts apply to [archive files](topic:archive-file) and [archive directories](topic:archive-dir). Copying an archive file extracts it as needed; moving it copies it, then removes the original. You can also copy into a logged archive.\n\n`pathcopy` recreates the selected file’s existing path below the destination directory.\n\nIf the destination directory is missing, ytnova asks whether to create it. If a destination file already exists, ytnova asks before replacing it.",
-        0,
-        NULL,
+        "`Copy`, `move`, and `pathcopy` first ask for a name or rename pattern, then for the destination directory.\n\nWith one file, leave its autofilled name to keep it, or edit it to rename it. You can use wildcards in either case.\n\nFor [Tagged](topic:tagged) files, leave the autofilled `*` to keep their names, or enter a rename pattern:\n`*` keeps the remaining original name. Use `copy-*` to add a prefix or `*.bak` to change the extension.\n`\?` keeps one character from the original name. For example, `\?\?-*` keeps the first two characters, adds `-`, then keeps the rest.\nOther characters are used as written.\n\nUse `Up` to reuse a previous name or pattern.\n\nEnter the destination directory in `To Directory`. In [F8 split](topic:f8) mode, it starts as the other panel’s currently selected directory.\n\nUse `Up` to reuse a previous destination, or press [F2](topic:f2-picker) to choose one.\n\nThe same prompts apply to [archive files](topic:archive-file) and [archive directories](topic:archive-dir). Copying an archive file extracts it as needed; moving it copies it, then removes the original. You can also copy into a logged archive.\n\n`pathcopy` recreates the selected file’s existing path below the destination directory.\n\nIf the destination directory is missing, ytnova asks whether to create it. If a destination file already exists, ytnova asks before replacing it.",
     },
     {
         "vi-keys",
         "Vi Keys",
         NULL,
-        "With `VI_KEYS=1`, lowercase vi movement keys stay active.\nCommands that would collide move to uppercase or another safe key.\n\n`Navigation remap`\nWith `VI_KEYS=1`, lowercase `h`, `j`, `k`, and `l` become `Left`, `Down`, `Up`, and `Right`.\n`C-u` and `C-d` become page up and page down.\n\n`Command collisions`\nCommands that would steal those lowercase keys move out of the way.\nExamples include `J compare`, `K volume`, `D delete tagged`, and `U untag all` where those actions exist.\n\n\n- [Navigation](topic:ytnova-navigation)\n- [Command-line editing](topic:command-line-editing)",
-        2,
-        generated_help_links_en_vi_keys,
+        "Set `VI_KEYS=1` to use lowercase vi movement keys.\n`h`, `j`, `k`, and `l` become `Left`, `Down`, `Up`, and `Right`.\n`C-u` and `C-d` become page up and page down.\n\nCommands that would collide move to another binding. The footer shows the active keys; examples include `J` for compare, `K` for the volume menu, `D` for deleting tagged files, and `U` for untagging all.",
     },
     {
         "f10",
         "F10 Config Help",
         NULL,
-        "Use `F10` for configuration work, not one-off file actions.\nThat is where profile, commands, themes, reload, and similar setup actions belong.\n\n`Config surface`\nUse `F10` when you want to change persistent behavior instead of changing only the current selection.\nProfile settings, command labels, themes, and reload all live here.\n\n`Related files`\n`ytnova.conf` owns profile settings.\n`commands.conf` owns user command labels and bindings.\n`themes.conf` owns theme selection and theme-role overrides.\n\n\n- [Theming](topic:theming)\n- [Shared commands](topic:shared-commands)",
-        2,
-        generated_help_links_en_f10,
+        "Press `F10` when you want to change persistent setup rather than perform a file operation.\nChoose the profile command to edit `ytnova.conf`.\nChoose the commands entry to edit labels and bindings in `commands.conf`.\nChoose the theme entry to edit `themes.conf`.\nChoose reload to apply saved configuration again.\n\nSee [Configuration Files](topic:configuration-files) for file locations and [Theming](topic:theming) for help roles.",
     },
     {
         "theming",
         "Theming",
         NULL,
-        "Themes style semantic roles, not one-off screen positions.\nThat keeps help, picker, selection, footer, and warning surfaces readable as one system.\n\n`Theme model`\nThemes set semantic roles such as `footer`, `help`, `help_keybind`, `help_link`, `help_link_selection`, `selection`, `picker`, and `warning`.\n`footer` owns footer-style command strips, while `help` owns the F1 reading body and `help_box_lines` owns the popup frame.\nLinked explainers use `help_link`, and the active linked target uses `help_link_selection`, so help pages stay readable without hard-coded colors.\n\n`Editing path`\nUse `F10` to open the theme or config editing path.\nKeep high-frequency navigation surfaces readable first: selection, picker, footer, and help.\n\n\n- [F10 config](topic:f10)",
-        1,
-        generated_help_links_en_theming,
+        "Themes assign colours and attributes to named interface roles.\n`footer` styles the main program footer.\n`help` styles the F1 text body.\n`help_footer` styles the help strip.\n`help_keybind` highlights its bound letter.\n`help_heading` styles help titles and headings.\n`help_topic` styles backticked keys and terms.\n`help_link` and `help_link_selection` style links and the selected link.\n`help_box_lines` styles the popup border.\n\nUse [F10 configuration](topic:f10) to edit the active theme file. Keep selection, footer, picker, and help text readable against the chosen background.",
     },
     {
         "directory",
         "Directory Help",
         "main.dir",
-        "This is the `directory window`. It shows the hierarchical directory tree that ytnova has read in the current `volume`.\nThe selected directory’s files appear in the `small window`.\n\n`+` means ytnova has not yet expanded or logged that directory’s subdirectory branch in the tree.\n\nThe `footer` shows the commands available here.\nSome commands have their own `F1` help.\n\n`Left` collapses the selected branch. If that branch is already hidden, it moves to the directory above.\n`Right` moves into the first shown directory below the selected one. If ytnova has not read the selected directory yet, it reads it first.\n`+` reads the selected directory and adds its branch to the tree without moving the selection.\n`*` reads every directory below the selected directory without moving the selection.\n`-` collapses the selected directory and unlogs its files from the logged tree. They no longer appear in Showall or the statistics.\nPress `Enter` to switch into the selected directory’s `file window`. If its tree branch is not logged yet, ytnova reads it first.\n\nThe number keys change what you see.\n`1` shows names, the default.\n`2` shows attributes.\n`3` shows the owner.\n`4` shows times.\nPress an active `2`, `3`, or `4` again to return to names.\nThese views normally change both this panel’s tree and its `file window`.\nSet `SEPARATE_DIR_FILE_VIEWS=1` in `ytnova.conf` to keep them separate.\n\n`5` turns compact names on or off in the `file window`.\n`6` switches size units in both tree and file rows.\n`7` shows a small text preview for each displayed file.\n`8` shows file details for each displayed file.\n`9` shows Git information for files in a Git project.\n`5`, `7`, `8`, and `9` change only the `file window`.\n\n`Attributes` opens a submenu to alter the selected directory’s attributes.\n[Copy](topic:copy-move-targets) copies the selected directory and its contents.\n`Delete` deletes the selected directory.\n[Filter](topic:filter) changes the files shown in the current view.\n`filter-matching` means files allowed by the current Filter.\n`Global` shows files from every logged volume in one list.\n`I` (`Invert`) reverses tags only on filter-matching visible files in the selected directory.\n`J` [compare](topic:compare) compares this directory with another.\n`K volume` opens the volume menu.\n`Log` reads the selected directory or archive, or reads a logged directory again.\n`Makedir` creates a directory below the selected directory.\n`Newfile` creates an empty file inside the selected directory.\n[Output](topic:output) exports the current selection.\n`Pipe` runs a command in the selected directory and sends it the displayed file names.\n`Quit` exits ytnova.\n`Rename` renames the selected directory.\n`Showall` shows all files in the current volume in one list.\n`T` and `U` tag and untag all matching files in the selected directory, then move to the next directory.\n`C-t` and `C-u` [tag and untag](topic:tagged) all matching files in every logged directory in the current volume.\n[moVedir](topic:copy-move-targets) moves the selected directory and its contents.\n`eXecute` runs a command for the selected directory.\n`Z archive` creates an archive from the current selection.\n`/ jump` moves to a displayed name as you type.\n`\\` dotfiles` shows or hides hidden names.\n\n`F5` refreshes the active view.\n`F6` shows or hides statistics.\n`F7` turns autoview on or off.\n`F8` turns split-screen on or off.\n`F9` opens the Applications menu.\n`F10` opens configuration.\n`Esc` cancels the current operation.",
-        0,
-        NULL,
+        "This is the `directory window`. It shows the hierarchical directory tree that ytnova has read in the current `volume`.\nThe selected directory’s files appear in the `small window`.\n\n`+` means ytnova has not yet expanded or logged that directory’s subdirectory branch in the tree.\n\nThe `footer` shows the commands available here.\nSome commands have their own `F1` help.\n\n`Left` collapses the selected branch. If that branch is already hidden, it moves to the directory above.\n`Right` moves into the first shown directory below the selected one. If ytnova has not read the selected directory yet, it reads it first.\n`+` reads the selected directory and adds its branch to the tree without moving the selection.\n`*` reads every directory below the selected directory without moving the selection.\n`-` collapses the selected directory and unlogs its files from the logged tree. They no longer appear in Showall or the statistics.\nPress `Enter` to switch into the selected directory’s `file window`. If its tree branch is not logged yet, ytnova reads it first.\n\nThe number keys change what you see.\n`1` shows names, the default.\n`2` shows attributes.\n`3` shows the owner.\n`4` shows times.\nPress an active `2`, `3`, or `4` again to return to names.\nThese views normally change both this panel’s tree and its `file window`.\nSet `SEPARATE_DIR_FILE_VIEWS=1` in `ytnova.conf` to keep them separate.\n\n`5` turns compact names on or off in the `file window`.\n`6` switches size units in both tree and file rows.\n`7` shows a small text preview for each displayed file.\n`8` shows file details for each displayed file.\n`9` shows Git information for files in a Git project.\n`5`, `7`, `8`, and `9` change only the `file window`.\n\n`Attributes` opens a submenu to alter the selected directory’s attributes.\n[Copy](topic:copy-move-targets) copies the selected directory and its contents.\n`Delete` deletes the selected directory.\n[Filter](topic:filter) changes the files shown in the current view.\n`filter-matching` means files allowed by the current Filter.\n`Global` shows files from every logged volume in one list.\n`I` (`Invert`) reverses tags only on filter-matching visible files in the selected directory.\n`J` [compare](topic:compare) compares this directory with another.\n`K volume` opens the volume menu.\n`Log` reads the selected directory or archive, or reads a logged directory again.\n`Makedir` creates a directory below the selected directory.\n`Newfile` creates an empty file inside the selected directory.\n[Output](topic:output) exports the current selection.\n`Pipe` runs a command in the selected directory and sends it the displayed file names.\n`Quit` exits ytnova.\n`Rename` renames the selected directory.\n`Showall` shows all files in the current volume in one list.\n`T` and `U` tag and untag all matching files in the selected directory, then move to the next directory.\n`C-t` and `C-u` [tag and untag](topic:tagged) all matching files in every logged directory in the current volume.\n[moVedir](topic:copy-move-targets) moves the selected directory and its contents.\n`eXecute` runs a command for the selected directory.\n`Z archive` creates an archive from the current selection.\n`/ jump` moves to a displayed name as you type.\n`\\` shows or hides hidden names.\n\n`F5` refreshes the active view.\n`F6` shows or hides statistics.\n`F7` turns autoview on or off.\n`F8` turns split-screen on or off.\n`F9` opens the Applications menu.\n`F10` opens configuration.\n`Esc` cancels the current operation.",
     },
     {
         "file",
         "File Help",
         "main.file",
-        "This is the `file window`. The selected row is a `file`.\nCommands in this `footer` act on it unless the line says it uses tagged files.\n\nThe `footer` shows the commands available here.\nSome commands have their own `F1` help.\n\nThe number keys change what you see.\n`1`: Show names.\n`2`: Show attributes, including `name -> target` for symlinks.\n`3`: Show the owner.\n`4`: Show times.\nPress the active `2`, `3`, or `4` again to return to names.\n`5`: Turn `Compact` on or off from the names view.\n`6`: Switch visible file sizes between readable and raw units.\n`7`: Show a small text preview on each visible file row.\n`8`: Show file details on each visible file row.\n`9`: Show the `Git band` when this directory is in a Git worktree.\n\n`A`: Open attributes for the selected file.\n`C-a`: Open attributes for matching [tagged files](topic:tagged).\n`C`: Open [Copy](topic:copy-move-targets) for the selected file.\n`C-c`: Copy matching tagged files.\n`D`: Delete the selected file.\n`C-d`: Delete matching tagged files.\n\n`E`: Edit the selected file in the configured editor.\n`F`: Open [Filter](topic:filter) for this list.\n`H`: Open the selected file in hex view.\n`I`: Reverse tags in the visible list.\n\n`J`: [Compare](topic:compare) the selected file with another file.\n`K`: Open the volume menu.\n`L`: Open `Log Path:` without leaving this list. It starts with the selected path; `C-u` clears it for another path. Log accepts directories and recognized archive files only.\n`M`: Open [Move](topic:copy-move-targets) for the selected file.\n`C-m`: Move matching tagged files when the protocol is available.\n`C-n`: Move matching tagged files without protocol support.\n`N`: Create a new empty file.\n\n`O`: Open [Output](topic:output) for the selected file.\n`C-o`: Output matching tagged files.\n`P`: Run a command with the selected file’s contents as input.\n`C-p`: Run that command for matching tagged files.\n`Q`: Quit ytnova.\n`R`: Rename the selected file.\n`C-r`: Rename matching tagged files.\n\n`S`: Choose the file-list sort order.\n`C-s`: Search tagged files.\n`T`: [Tag](topic:tagged) the selected file, then move to the next file.\n`C-t`: Tag every visible file.\n`U`: Remove the selected file’s tag, then move to the next file.\n`C-u`: Remove tags from every visible file.\n\n`V`: View the selected file.\n`C-v`: View matching tagged files one after another.\n`X`: Type a shell command. `{}` is the selected file’s path.\n`C-x`: Run that command once for each matching tagged file.\n`Y`: [Pathcopy](topic:copy-move-targets) the selected file and keep its path relative to the current volume root.\n`C-y`: Pathcopy matching tagged files.\n`Z`: Archive tagged files, or the selected file when none are tagged.\n`C-z`: Archive matching tagged files.\n\n`/ jump` moves to a displayed name as you type.\n`\\` dotfiles` shows or hides hidden names.\n\n`F5`: Refresh the active view.\n`F6`: Show or hide the statistics strip.\n`F7`: Turn autoview on or off.\n`F8`: Turn split-screen on or off.\n`F9`: Open the Applications menu.\n`F10`: Open configuration.\n`Esc`: Cancel the current operation.",
-        0,
-        NULL,
+        "This is the `file window`. The selected row is a `file`.\nCommands in this `footer` act on it unless the line says it uses tagged files.\n\nThe `footer` shows the commands available here.\nSome commands have their own `F1` help.\n\nThe number keys change what you see.\n`1`: Show names.\n`2`: Show attributes, including `name -> target` for symlinks.\n`3`: Show the owner.\n`4`: Show times.\nPress the active `2`, `3`, or `4` again to return to names.\n`5`: Turn `Compact` on or off from the names view.\n`6`: Switch visible file sizes between readable and raw units.\n`7`: Show a small text preview on each visible file row.\n`8`: Show file details on each visible file row.\n`9`: Show the `Git band` when this directory is in a Git worktree.\n\n`A`: Open attributes for the selected file.\n`C-a`: Open attributes for matching [tagged files](topic:tagged).\n`C`: Open [Copy](topic:copy-move-targets) for the selected file.\n`C-c`: Copy matching tagged files.\n`D`: Delete the selected file.\n`C-d`: Delete matching tagged files.\n\n`E`: Edit the selected file in the configured editor.\n`F`: Open [Filter](topic:filter) for this list.\n`H`: Open the selected file in hex view.\n`I`: Reverse tags in the visible list.\n\n`J`: [Compare](topic:compare) the selected file with another file.\n`K`: Open the volume menu.\n`L`: Open `Log Path:` without leaving this list. It starts with the selected path; `C-u` clears it for another path. Log accepts directories and recognized archive files only.\n`M`: Open [Move](topic:copy-move-targets) for the selected file.\n`C-m`: Move matching tagged files when the protocol is available.\n`C-n`: Move matching tagged files without protocol support.\n`N`: Create a new empty file.\n\n`O`: Open [Output](topic:output) for the selected file.\n`C-o`: Output matching tagged files.\n`P`: Run a command with the selected file’s contents as input.\n`C-p`: Run that command for matching tagged files.\n`Q`: Quit ytnova.\n`R`: Rename the selected file.\n`C-r`: Rename matching tagged files.\n\n`S`: Choose the file-list sort order.\n`C-s`: Search tagged files.\n`T`: [Tag](topic:tagged) the selected file, then move to the next file.\n`C-t`: Tag every visible file.\n`U`: Remove the selected file’s tag, then move to the next file.\n`C-u`: Remove tags from every visible file.\n\n`V`: View the selected file.\n`C-v`: View matching tagged files one after another.\n`X`: Type a shell command. `{}` is the selected file’s path.\n`C-x`: Run that command once for each matching tagged file.\n`Y`: [Pathcopy](topic:copy-move-targets) the selected file and keep its path relative to the current volume root.\n`C-y`: Pathcopy matching tagged files.\n`Z`: Archive tagged files, or the selected file when none are tagged.\n`C-z`: Archive matching tagged files.\n\n`/ jump` moves to a displayed name as you type.\n`\\` shows or hides hidden names.\n\n`F5`: Refresh the active view.\n`F6`: Show or hide the statistics strip.\n`F7`: Turn autoview on or off.\n`F8`: Turn split-screen on or off.\n`F9`: Open the Applications menu.\n`F10`: Open configuration.\n`Esc`: Cancel the current operation.",
     },
     {
         "archive-dir",
         "Archive Directory Help",
         "main.archive-dir",
-        "The archive-directory footer acts inside the current archive location.\nArchive commands follow the usual list keys unless a command says otherwise. Mutating commands appear only when the opened archive and installed libarchive support them; unavailable commands reject clearly if invoked. Common writable formats include `.tar`, `.tar.gz`, `.tar.bz2`, `.tar.xz`, and `.zip`, but availability depends on this archive and the installed libarchive.\n\n`View and scope`\n`1`: Name only.\nThis is the plain default view.\n`2`: Attributes.\n`3`: Owner.\n`4`: Times.\n`Reset`: `1` always returns to the plain Name view.\nIf `2`, `3`, or `4` is already active, pressing that same key again also returns to Name.\n`5`: Turn Compact on or off from the current `1` / Name view only.\n`6`: Switch archive rows between readable and raw size units.\nStats stay readable.\n`7`: Show a small text preview on each visible archive file row.\nIt leaves Compact so you can see the text.\n`8`: Show file detail text on each visible archive file row.\nIt leaves Compact so you can see the summary.\n`9`: Unused in archive lists.\n`0`: Toggle Size, Packed, and Ratio for archive file rows.\n`Delete`: Delete the selected archive directory entry.\n`Filter`: Filter this archive-backed file list.\n`Global`: Mix archive results into the cross-volume file list.\n`I` (`Invert`): Reverse tags only on filter-matching visible entries in the selected archive directory.\n`J compare`: Compare this archive directory or its logged tree.\n`K volume`: Open the volume menu.\n`Log`: Load the selected archive entry as another archive when it is a supported archive format.\n`Makedir`: Create a directory where the archive format supports it.\n`Output`: Export the current archive-backed selection.\n`Pipe`: Type a shell command. ytnova sends the visible matching names from the selected archive directory to its standard input, one per line.\n`Quit`: Quit ytnova.\n`Rename`: Rename the selected archive directory entry.\n`Showall`: Open the current archive-wide file list.\n`Tag`: Tag the files in the current virtual directory.\n`Untag`: Remove those tags.\n`\\ root/exit`: Jump to archive root, or leave the archive when you are already there.\n`/ jump`: Press `/`, type letters, and press `Enter` to land on the best visible match.\n`Dotfiles`: Show or hide hidden archive entries when this view exposes them.\n`F1`: Open this help.\n`F5`: Refresh.\n`F6`: Toggle the statistics strip for the active panel.\nSplit panels keep independent visibility.\n`F7`: Toggle preview.\n`F8`: Toggle split.\n`F9`: Open Applications.\n`F10`: Open configuration.\n\n\n- [Navigation](topic:ytnova-navigation)\n- [Filter](topic:filter)\n- [Compare](topic:compare)",
-        3,
-        generated_help_links_en_archive_dir,
+        "This is a directory tree inside an archive. Its rows describe archive entries, not ordinary filesystem directories.\n`Enter`, `Left`, and `Right` move through the archive tree.\n`\\` goes to the archive root; at the root it leaves the archive.\n\n`1` to `8` change the archive view.\n`9` has no effect because archive entries do not have Git status.\n`0` shows or hides Size, Packed, and Ratio on archive file rows.\n\n[Copy](topic:copy-move-targets) and `Pathcopy` extract entries to a destination.\n`Move`, `Delete`, `Rename`, and `Makedir` are offered only when the archive and installed libarchive support writing the result.\n[Filter](topic:filter), `Showall`, `Global`, `Tag`, `Untag`, and `I` work on the archive-backed entries in their current scope.\n[Compare](topic:compare), `Output`, and `Pipe` read from archive-backed paths.\n`Log` opens a supported archive entry as another archive.\n`K` opens the volume menu.\n`F5` refreshes the view.\n`F6` changes the statistics shown.\n`F7` opens preview.\n`F8` opens split mode.\n`F9` opens Applications.\n`F10` opens configuration.\n`Q` exits ytnova.",
     },
     {
         "archive-file",
         "Archive File Help",
         "main.archive-file",
-        "The archive-file footer acts on the selected archive entry or tagged set.\nArchive commands follow the usual list keys unless a command says otherwise. Mutating commands appear only when the opened archive and installed libarchive support them; unavailable commands reject clearly if invoked. Common writable formats include `.tar`, `.tar.gz`, `.tar.bz2`, `.tar.xz`, and `.zip`, but availability depends on this archive and the installed libarchive.\n\n`View and scope`\n`1`: Name only.\nThis is the plain default view.\n`2`: Attributes.\n`3`: Owner.\n`4`: Times.\n`Reset`: `1` always returns to the plain Name view.\nIf `2`, `3`, or `4` is already active, pressing that same key again also returns to Name.\n`5`: Turn Compact on or off from the current `1` / Name view only.\n`6`: Switch archive rows between readable and raw size units.\nStats stay readable.\n`7`: Show a small text preview on each visible archive file row.\nIt leaves Compact so you can see the text.\n`8`: Show file detail text on each visible archive file row.\nIt leaves Compact so you can see the summary.\n`9`: Unused in archive lists.\n`0`: Toggle Size, Packed, and Ratio for archive file rows.\n`C/^Copy`: `C` copies the selected archive entry through archive-aware extract/copy paths.\n`C-c` copies the tagged archive entries.\n`Delete`: Delete the selected archive entry.\n`Filter`: Filter this archive-backed list.\n`C-s` searches only tagged entries and untags non-matches.\n`Hex`: Open the selected archive entry in hex view.\n`I` (`Invert`): Flip tags only on matching visible entries in the current archive directory.\n`J compare`: Compare the selected archive entry with another file.\n`K volume`: Open the volume menu.\n`Log`: Log another directory or archive.\n`Move`: `M` moves the selected archive entry.\n`C-m` moves tagged archive entries when the protocol is available; `C-n` does so otherwise.\n`Output`: Export the selected archive entry.\n`Pipe`: Type a shell command and feed it the contents of the selected archive entry on standard input.\n`Quit`: Quit ytnova.\n`Rename`: Rename the selected archive entry.\n`Sort`: Change the archive file-list sort order.\n`Tag`: Tag the selected archive entry.\n`C-t` tags every visible archive row.\n`Untag`: Remove the selected tag.\n`C-u` clears archive tags in this scope.\n`View`: View the selected archive entry.\n`C-v` views the tagged archive entries one after another.\n`eXecute`: Not available in archive file mode.\n`pathcopY`: Copy the selected archive entry while keeping its relative path.\n`/ jump`: Press `/`, type letters, and press `Enter` to land on the best visible match.\n`Dotfiles`: Show or hide hidden archive entries when this view exposes them.\n`F1`: Open this help.\n`F5`: Refresh.\n`F6`: Toggle the statistics strip for the active panel.\nSplit panels keep independent visibility.\n`F7`: Toggle preview.\n`F8`: Toggle split.\n`F9`: Open Applications.\n`F10`: Open configuration.\n\n\n- [Navigation](topic:ytnova-navigation)\n- [Tagged](topic:tagged)\n- [Copy/Move Targets](topic:copy-move-targets)\n- [Filter](topic:filter)\n- [Compare](topic:compare)\n- [Output](topic:output)",
-        6,
-        generated_help_links_en_archive_file,
+        "This is a file list inside an archive. The selected row is an archive entry, not an ordinary writable file.\n`Enter` returns to the archive directory tree.\n`Left` and `Right` move across file columns.\n\n`1` to `8` change the archive view.\n`9` has no effect because archive entries do not have Git status.\n`0` shows or hides Size, Packed, and Ratio.\n\n`V` views the selected entry and `H` opens it in hex view.\n[Copy](topic:copy-move-targets) and `Y` pathcopy extract the selected entry; their `C-` variants use tagged entries.\n`Move`, `Delete`, and `Rename` are available only when archive write-back is supported.\n`eXecute` is not available for archive entries.\n[Filter](topic:filter), `Sort`, `Tag`, `Untag`, `I`, and tagged search stay within the archive-backed list.\n[Compare](topic:compare), `Output`, and `Pipe` read the selected entry or tagged set.\n`Log` opens the selected entry as another archive when its format is supported.\n`K` opens the volume menu.\n`F5` refreshes the view.\n`F6` changes the statistics shown.\n`F7` opens preview.\n`F8` opens split mode.\n`F9` opens Applications.\n`F10` opens configuration.\n`Q` exits ytnova.",
     },
     {
         "filter",
         "Filter Help",
         "prompt.filter,prompt.filter-tagged",
-        "Type one or more filter terms for the current file list.\n`*` means show everything, `*.c` matches by name, `-*.o` excludes, `:r` and `:x` test readable or executable, and `>2023-01-01` or `>1M` test date or size.\nSeparate terms with commas so they all apply together.\nPress `Tab` to switch between all files and tagged files when that extra scope is available.\n\n`Syntax`\n* `*` — show all files\n* `*.c` — glob match\n* `*.c,*.h` — more than one glob term\n* `-*.o` — exclude matches\n* `:r` — readable files\n* `:x` — executable files\n* `>2023-01-01` — newer than a date\n* `>1M` — larger than a size\n* Combine them, for example `*.c,-*.tmp` or `*.log,>2024-01-01,-debug*`.\n\n`Scope`\nThe filter always applies to the current file-list family.\nThat may be a normal file list, an archive file list, Showall, or Global.\nWhen tagged scope is active, the prompt changes to `FILTER [tagged only]:`.\n\n\n- [Tagged](topic:tagged)\n- [Showall](topic:showall)\n- [Global](topic:global)\n- [Command-line Editing](topic:command-line-editing)",
-        4,
-        generated_help_links_en_filter,
+        "Type a pattern and press `Enter` to filter the current file list. The prompt starts with `*`, which shows all files.\nUse `*.c` for one glob pattern or `*.c,*.h` for either pattern.\nPrefix a term with `-` to exclude it, as in `*.c,-test*`.\nUse attributes such as `:r` or `:x`, dates such as `>2024-01-01`, and sizes such as `>1M` with the same comma-separated syntax.\n\nWhen the current scope contains [tagged files](topic:tagged), `Tab` switches the prompt between all files and tagged files without changing any tags.\nThe filter affects only the current normal, archive, Showall, or Global file list. It is different from [/ jump](topic:list-jump), which only moves the selection.",
     },
     {
         "compare",
         "Compare Help",
         NULL,
-        "File compare checks the selected file against one target file.\nDirectory compare checks the selected directory against another directory, the logged tree under it, or an external diff tool.\nThe built-in compare does not change files.\nIt tags the results you asked for so you can act on them next.\n\n`Compare flow`\nChoose the target on the compare prompt.\nUse `F3` to choose file, directory, tree, or external compare.\nUse `F4` to choose how ytnova decides whether two files match.\nUse `F5` to choose which result should be tagged after the compare.\nPress `Enter` when the prompt shows the compare plan you want.\n\n`Compare rules`\n`J compare`: The `J` key keeps the old XTree-family compare key.\n`Logged tree`: Uses the part of the tree that is already logged.\nIt does not auto-log unopened `+` subdirectories.\n`FILEDIFF`: May use `%1` and `%2`.\nWhen those placeholders are missing, ytnova appends source and target paths.\n`External compare`: Launches `DIRDIFF` or `TREEDIFF` instead of tagging results inside ytnova.\n`Tagged compare`: There is no separate compare-tagged-files mode.\n\n\n- [File](topic:file)\n- [Directory](topic:directory)\n- [Navigation](topic:ytnova-navigation)",
-        3,
-        generated_help_links_en_compare,
+        "Press `J` to compare the selected file or directory with another target.\nFirst choose the [target](topic:compare-target).\nFor a directory, choose the [scope](topic:compare-scope).\nChoose the [comparison basis](topic:compare-basis) when more than one is available.\nThen choose which [result](topic:compare-results) to tag on the source side.\n\nLogged-tree comparison uses only directories already logged in the tree; it does not open unread `+` branches.\nExternal directory or tree comparison launches `DIRDIFF` or `TREEDIFF` instead of tagging results.\nFile comparison uses `FILEDIFF`; `%1` and `%2` stand for the two paths, and missing placeholders are appended automatically.\nCompare never changes file contents and has no separate tagged-files mode.",
     },
     {
         "compare-target",
         "Compare Target Help",
         "prompt.compare-target",
-        "The current file, directory, or logged tree is the compare source.\nEnter one target path directly.\nUse `F2` to browse.\nUse `Up` for history.\nPress `F3` for Compare Scope: file, directory, tree, or external compare.\nPress `F4` for Compare Basis: `size`, `date`, `size+date`, or `hash`.\nPress `F5` to choose which result gets tagged after the compare.\nIn split view, the inactive panel seeds the default compare target.\n\n`Target rules`\nEnter one path.\n`F3` cycles directory -> logged tree -> external directory -> external tree.\n`F4` cycles `size+date` -> `size` -> `date` -> `hash`.\n`F5` cycles `Different` -> `Match` -> `Newer` -> `Older` -> `Unique` -> `Type mismatch` -> `Error`.\nExternal compare still shows the saved internal choices so you can switch back without losing them.\n\n\n- [Compare](topic:compare)\n- [Command-line Editing](topic:command-line-editing)",
-        2,
-        generated_help_links_en_compare_target,
+        "Enter the file or directory to compare with the current selection, then press `Enter`.\n`Up` reuses an earlier target.\n`F2` opens the [directory picker](topic:f2-picker) where that target can be browsed.\nIn [F8 split](topic:f8) mode, the other panel supplies the initial target.\nThe later [compare scope](topic:compare-scope) decides whether a directory target means one directory or its logged tree.\n`Esc` cancels the comparison.",
     },
     {
         "change-date",
         "Date Change Help",
         "prompt.change-date",
-        "Enter the new date as `YYYY-MM-DD` or add a time as `YYYY-MM-DD HH:MM[:SS]`.\nPress `F3` to cycle whether the entered value updates the modified time, accessed time, or both.\nTagged date edits use the same prompt and scope cycle.\n\n`Scope choices`\n`modified` changes only the last-modified timestamp.\n`accessed` changes only the access timestamp.\n`both` writes the entered value to both timestamps.\n\n`Format rules`\nIf you omit the time portion, ytnova keeps the existing hour, minute, and second from the current value.\nUse `Up` for prompt history and `Esc` to cancel without changing either timestamp.\n\n\n- [File mode](topic:file)\n- [Directory mode](topic:directory)\n- [Command-line editing](topic:command-line-editing)",
-        3,
-        generated_help_links_en_change_date,
+        "Enter a date as `YYYY-MM-DD`, optionally followed by `HH:MM` or `HH:MM:SS`.\nIf you omit the time, ytnova keeps the existing hour, minute, and second.\n`F3` cycles between changing the modified time, accessed time, or both.\n`Enter` applies the selected choice.\n`Esc` cancels.\nThe tagged-file action uses the same value and choice for each tagged file.",
     },
     {
         "compare-scope",
         "Compare Scope Help",
         NULL,
-        "Directory compares only the current directory.\nLogged tree compares everything already logged under the current directory and never auto-logs unopened branches.\nExternal viewer hands the paths to your configured diff tool instead of tagging results inside ytnova.\n\n`Scope choices`\nUse `Directory` for one level.\nUse `Logged tree` for the currently logged recursive tree.\nUse `External viewer` when you want an external diff tool instead of tagged compare results inside ytnova.\n\n\n- [Compare](topic:compare)",
-        1,
-        generated_help_links_en_compare_scope,
+        "Choose how much of the selected directory to compare.\n`Directory` compares one directory level.\n`Logged tree` includes the recursive tree that ytnova has already logged; unopened `+` branches are not read automatically.\n`External viewer` runs the configured directory or tree diff tool instead of tagging results inside ytnova.\nPress `Enter` to continue or `Esc` to cancel. See [Compare](topic:compare) for the complete flow.",
     },
     {
         "compare-basis",
         "Compare Basis Help",
         NULL,
-        "`Size` is the quickest rough check.\n`size+date` is usually better because it also compares last-modified time.\n`Hash` is the strongest check: ytnova reads both files and compares their actual content, so it is slower.\n\n`Basis choices`\nUse `Size` when you only need a quick rough pass.\nUse `size+date` for the normal “are these probably the same?” check.\nUse `Hash` when you need the strongest answer.\nA hash is a fingerprint made from the file contents, so matching hashes mean the content matches exactly.\n\n\n- [Compare](topic:compare)",
-        1,
-        generated_help_links_en_compare_basis,
+        "Choose the facts used to decide whether entries match.\nName, size, and time comparisons use file metadata.\nUse `Hash` when you need a content-based check and metadata is not sufficient.\nPress `Enter` to compare or `Esc` to cancel. See [Compare](topic:compare) for the complete flow.",
     },
     {
         "compare-results",
         "Compare Result Help",
         NULL,
-        "Choose which compare result should be tagged after the compare.\n`diFferent` tags mismatches, `Unique` tags files that exist only on the selected side, and the other choices tag only that one result.\n\n`Result tagging`\nThe compare command never rewrites files.\nIt tags the chosen result on the selected side so you can inspect, copy, move, or archive that subset next.\n\n\n- [Compare](topic:compare)",
-        1,
-        generated_help_links_en_compare_results,
+        "Choose the comparison result class you want to keep.\nYtreeNova tags matching entries from that class on the active source side.\nYou can then view, copy, move, output, or archive that tagged set.\nThe comparison does not rewrite either side. See [Tagged](topic:tagged) for the resulting working set.",
     },
     {
         "execute-file",
         "Execute File Help",
         "prompt.execute-file",
-        "The prompt starts with `{}` for the selected file path. Type your command before it.\nKeep `{}` where the selected path belongs; type a destination, redirect, pipe, or other shell syntax after it.\nUse `C-x` to repeat the same command once per tagged file.\n\n`Placeholder rules`\n`{}` stands for one selected file path. For example, use `mv {} /tmp` or `wc {} > count`.\nWhen you use the tagged rerun path, the same command is repeated once per tagged file.\n\n\n- [File mode](topic:file)\n- [Command-line editing](topic:command-line-editing)",
-        2,
-        generated_help_links_en_execute_file,
+        "The prompt starts with `{}`, which stands for the selected file path.\nType the command before `{}` and any redirection, pipe, or other shell syntax after it.\nFor example, enter `wc {} > count`.\n`Enter` runs the command once for the selected file.\nThe tagged `C-x` action repeats the same command once for each tagged file.\n`Esc` cancels. See [Command-line Editing](topic:command-line-editing) for editing keys.",
     },
     {
         "execute-dir",
         "Execute Directory Help",
         "prompt.execute-dir",
-        "The prompt starts with `{}` for the current directory path. Type your command before it.\nKeep `{}` where the selected path belongs; type a destination, redirect, pipe, or other shell syntax after it.\nUse `C-x` to repeat the same command once per tagged file in the active list.\n\n`Placeholder rules`\n`{}` stands for the current directory path. For example, use `tar -cf archive.tar {}`.\nThe tagged rerun path still walks tagged files from the active list, not tagged directories from somewhere else.\n\n\n- [Directory mode](topic:directory)\n- [Command-line editing](topic:command-line-editing)",
-        2,
-        generated_help_links_en_execute_dir,
+        "The prompt starts with `{}`, which stands for the selected directory path.\nType the command before `{}` and any following shell syntax after it.\nFor example, enter `tar -cf archive.tar {}`.\n`Enter` runs the command for that directory.\nThe tagged `C-x` action still repeats the command for tagged files in the active list; it does not process tagged directories.\n`Esc` cancels. See [Command-line Editing](topic:command-line-editing) for editing keys.",
     },
     {
         "search-tagged",
         "Search Tagged Help",
         "prompt.search-tagged",
-        "Enter plain search text only.\nytnova builds `grep -i -- PATTERN {}` for you.\nOnly tagged files are searched, and non-matches are untagged.\n\n`Tagged search rules`\nStart by tagging a working set.\nThen search only that set.\nThe result is another, narrower tagged set because files that do not match lose their tags.\n\n\n- [Tagged](topic:tagged)\n- [Command-line editing](topic:command-line-editing)",
-        2,
-        generated_help_links_en_search_tagged,
+        "Type search text and press `Enter` to search only the current [tagged](topic:tagged) files.\nFiles without a match lose their tags, leaving a smaller tagged set.\n`Up` reuses an earlier search.\n`Esc` cancels without changing the set.",
     },
     {
         "create-archive",
         "Create Archive Help",
         "prompt.create-archive",
-        "Use `.tar`, `.tar.gz` or `.tgz`, `.tar.bz2` or `.tbz2`, `.tar.xz` or `.txz`, or `.zip`.\nWhen tags exist, the tagged set wins.\nWhen nothing is tagged, ytnova archives the current file or directory selection.\n\n`Archive creation rules`\nDirectory selections are archived recursively.\nArchive creation picks the tagged set first because tagging is the normal way to build a custom archive batch.\n\n\n- [Tagged](topic:tagged)\n- [Command-line editing](topic:command-line-editing)",
-        2,
-        generated_help_links_en_create_archive,
+        "Enter the new archive path and press `Enter`.\nYtreeNova archives tagged files first. If no files are tagged, it archives the current selection.\nA selected directory is included recursively.\nThe filename suffix chooses the archive format, subject to installed libarchive support.\n`Up` reuses an earlier path.\n`F2` opens the [directory picker](topic:f2-picker).\n`Esc` cancels.",
     },
     {
         "output",
         "Output Help",
         NULL,
-        "Output exports file content to a file path or a printer command.\nChoose file or hardcopy first, then give the final destination.\nOn file output, `F3` cycles `Raw`, `Framed`, and `Page break`.\n`Framed` and `Page break` ask for a separator before the final file path.\n\n`Output model`\n`Output` is an export flow, not an editor.\nIt can write plain content, framed content, or page-break-separated content.\nIt can also send that export to a printer command instead of a file path.\n\n`Prompt order`\nChoose file or hardcopy first.\nOn the file destination prompt, `F3` cycles `Raw`, `Framed`, and `Page break`.\nWhen `Framed` or `Page break` is active, choose the separator before entering the final file path.\nHardcopy asks only for the printer command.\n\n\n- [File mode](topic:file)\n- [Archive file](topic:archive-file)\n- [Command-line editing](topic:command-line-editing)",
-        3,
-        generated_help_links_en_output,
+        "`Output` exports the selected file, or the tagged set when you use its `C-` form.\nChoose a [destination](topic:output-destination): a file path or Hardcopy.\nFor file output, `F3` cycles [Raw, Framed, and Page break](topic:output-format).\nFramed and Page break output then ask for a [separator](topic:output-separator) before returning to the destination prompt.\nHardcopy asks for a printer command and always sends raw output.\n`Enter` accepts each choice; `Esc` cancels the current prompt.",
     },
     {
         "output-format",
         "Output Format Help",
         NULL,
-        "`Raw` writes content with no extra framing.\n`Framed` adds per-file headings or footers.\n`Page break` inserts a separator between files and skips a trailing separator at the end.\n\n`Format choices`\nUse `Raw` when another tool will parse the output.\nUse `Framed` or `Page break` when a human will read the exported batch.\n\n\n- [Output Help](topic:output)",
-        1,
-        generated_help_links_en_output_format,
+        "Use `F3` on the file-destination prompt to choose the output format.\n`Raw` joins the exported file contents without presentation framing.\n`Framed` separates files with the text entered at the separator prompt.\n`Page break` separates files for page-oriented output.\nPress `Enter` to continue. Hardcopy always uses Raw and does not offer this choice. See [Output](topic:output) for the full flow.",
     },
     {
         "output-destination",
         "Output Destination Help",
         "prompt.output-destination",
-        "Choose file or hardcopy first, then enter that destination exactly as ytnova should use it.\nFile output writes exported text to a path.\nBare filenames go to `CWD`, the current working directory.\nHardcopy sends raw exported text to a printer command.\nUse helpers such as `lpr`, `lp`, or `cat > /dev/lp1`.\nPress `F3` on the file destination prompt to cycle `Raw`, `Framed`, and `Page break`.\n`Framed` and `Page break` later ask for a separator.\n\n`Destination choices`\n`File output`: Write exported text to a path.\n`CWD`: Use the current working directory for bare filenames.\n`Hardcopy`: Send raw exported text to a shell printer command such as `lpr`, `lp`, or `cat > /dev/lp1`.\n\n`Format cycle`\n`F3` is available only on the file destination prompt.\nWhen it selects `Framed` or `Page break`, ytnova asks for the separator before returning to the file path prompt.\n\n\n- [Output Help](topic:output)\n- [Output Format Help](topic:output-format)\n- [Command-line editing](topic:command-line-editing)",
-        3,
-        generated_help_links_en_output_destination,
+        "Choose where the exported text goes.\nSelect file output to enter a path. A bare filename is relative to `CWD`, the current working directory shown by the prompt.\nPress `F3` here to change the [output format](topic:output-format).\nSelect Hardcopy to enter a printer command such as `lpr`, `lp`, or `cat > /dev/lp1`; Hardcopy sends raw output.\n`Up` reuses an earlier destination.\n`F2` opens the [directory picker](topic:f2-picker) for file output.\n`Enter` accepts the destination and `Esc` cancels.",
     },
     {
         "output-separator",
         "Output Separator Help",
         "prompt.output-separator",
-        "This prompt appears only when `F3` selects `Framed` or `Page break`.\nLeave it blank to accept the default triple-backtick fence.\nRaw output skips this prompt.\n\n`Separator rules`\nThe separator is reused between files for the current framed or page-break export.\nIt is not appended after the last file.\n\n\n- [Output Help](topic:output)",
-        1,
-        generated_help_links_en_output_separator,
+        "Enter the text placed between exported files when the format is Framed or Page break.\nThe separator is inserted between files, not after the last one.\n`Up` reuses an earlier separator.\n`Enter` returns to the destination prompt.\n`Esc` cancels. Raw and Hardcopy output skip this prompt. See [Output](topic:output) for the full flow.",
     },
     {
         "showall",
         "Showall Help",
         "main.showall",
-        "Showall gathers every file in the current logged volume.\nIts footer acts on the selected result or tagged set.\n\n`View and scope`\n`Scope`: Showall lists every file inside the current logged volume only.\nIt does not cross into other loaded volumes.\n`Return`: Return to the previously selected directory.\n`Open owner`: Jump to the owner directory of the selected file inside the current logged volume.\n`1`: Name only.\nThis is the plain default view.\n`2`: Attributes.\nIn file lists this also shows `name -> target` for symlinks.\n`3`: Owner.\n`4`: Times.\n`Reset rule`: `1` returns to plain Name.\nPressing the already-active `2`, `3`, or `4` again also drops back to Name.\n`Shared-per-panel rule`: By default, `1..4` are shared inside one panel.\nSet `SEPARATE_DIR_FILE_VIEWS=1` to make Showall/file-window and tree-directory base views independent again.\n`5`: Toggle Compact from the current `1` / Name view only.\n`6`: Switch file rows between human-readable and raw size units.\nStats stay human-readable.\n`7`: Show Mini preview text on each visible file row, and leave Compact so you can see it.\n`8`: Show File detail text on each visible file row, and leave Compact so you can see it.\n`9`: Show the Git band when the current directory is inside a Git worktree.\n`0`: Does nothing on filesystem volumes.\n`Sort`: Repeating `S` changes sort without leaving Showall.\n`Jump`: Press `/`, type letters, and press `Enter` to land on the best visible match.\n`Dotfiles`: Show or hide hidden files in the current Showall result set.\n\n`Working set`\n`Filter`: Filter the current Showall result set.\n`C-s` searches only tagged files there.\nInside the prompt, `Tab` narrows the same result set to tagged-only.\n`Tag`: Tag the selected file, and `C-t` tags every visible file in the current Showall result set.\n`Untag`: Remove the tag from the selected file, and `C-u` clears tags in the current Showall result set.\n`I` (`Invert Tags`): Flip tag state only inside the visible Showall result set.\n`Archive`: Archive the tagged set first, or the current selection when nothing is tagged.\n\n`File actions`\n`Attributes`: Open the attributes submenu for the selected file.\n`Copy`: `C` copies the selected file, and `C-c` copies the tagged set through the same prompt.\n`Move`: `M` moves the selected file. `C-m` moves the tagged set when the protocol is available; `C-n` does so otherwise.\n`View`: View the selected file, and `C-v` views the tagged files one after another.\n`Edit`: Open the selected file in the configured editor.\n`Hex`: View the selected file in hex mode.\n`Compare`: Compare the selected file against another file.\n`Output`: Export the selection.\n`C-o` reuses the prompts for the tagged set, and `C-w` stays as a legacy alias.\n`Execute`: Type a shell command.\nUse `{}` where the selected file path should go, leave `{}` unquoted so ytnova can quote it safely, and use `C-x` to repeat the command once per tagged file.\n`Pathcopy`: Copy the selected file while preserving its path relative to the current volume root.\n`Pipe`: Type a shell command and feed it the contents of the selected file on standard input.\n`New File`: Create a new empty file.\n`Rename`: Rename the selected file.\n`Delete`: Delete the selected file.\n`Log`: Log a new directory or archive file without leaving Showall.\n`Volume`: Open the volume picker.\n`Quit`: Quit ytnova.\n\n`Showall function keys`\n`F1`: Open contextual help for the current Showall surface.\n`F5`: Refresh the active panel.\n`F6`: Toggle the statistics strip for the active panel.\nSplit panels keep independent visibility.\n`F7`: Toggle preview for the selected file context.\n`F8`: Toggle split-screen mode.\n`F9`: Open the Applications menu.\n`F10`: Open the configuration command surface.\n\n\n- [Navigation](topic:ytnova-navigation)\n- [Tagged](topic:tagged)\n- [Copy](topic:copy-move-targets)\n- [Filter](topic:filter)\n- [Compare](topic:compare)\n- [Move](topic:copy-move-targets)\n- [Output](topic:output)",
-        7,
-        generated_help_links_en_showall,
+        "`Showall` displays files from every logged directory in the current volume as one list. It does not include other volumes.\n`Esc` returns to the directory you came from.\n`\\` opens the owning directory of the selected file in the current volume.\n\n[File commands](topic:file) act on the selected row or the tagged set, but filtering, sorting, tagging, and `/` use this aggregated result list as their scope.\n[Filter](topic:filter) changes only this Showall list.\n`G` opens [Global](topic:global) when you need every logged volume.\n`F7` opens preview and `F8` opens split mode.",
     },
     {
         "global",
         "Global Help",
         "main.global",
-        "Global gathers files from every logged volume.\nIts footer acts on the selected result or tagged set.\n\n`View and scope`\n`Scope`: Global lists files from every logged volume.\n`Return`: Return to the previously selected directory.\n`Open owner`: Jump to the owner directory of the selected file even when it lives under another logged volume root.\n`1`: Name only.\nThis is the plain default view.\n`2`: Attributes.\nIn file lists this also shows `name -> target` for symlinks.\n`3`: Owner.\n`4`: Times.\n`Reset rule`: `1` returns to plain Name.\nPressing the already-active `2`, `3`, or `4` again also drops back to Name.\n`Shared-per-panel rule`: By default, `1..4` are shared inside one panel.\nSet `SEPARATE_DIR_FILE_VIEWS=1` to make Global/file-window and tree-directory base views independent again.\n`5`: Toggle Compact from the current `1` / Name view only.\n`6`: Switch file rows between human-readable and raw size units.\nStats stay human-readable.\n`7`: Show Mini preview text on each visible file row, and leave Compact so you can see it.\n`8`: Show File detail text on each visible file row, and leave Compact so you can see it.\n`9`: Show the Git band when the current directory is inside a Git worktree.\n`0`: Does nothing on filesystem volumes.\n`Sort`: `S` changes sort without leaving Global.\n`Jump`: Press `/`, type letters, and press `Enter` to land on the best visible match.\n`Dotfiles`: Show or hide hidden files in the current Global result set.\n\n`Working set`\n`Filter`: Filter the current Global result set.\n`C-s` searches only tagged files there.\nInside the prompt, `Tab` narrows the same result set to tagged-only.\n`Tag`: Tag the selected file, and `C-t` tags every visible file in the current Global result set.\n`Untag`: Remove the tag from the selected file, and `C-u` clears tags in the current Global result set.\n`I` (`Invert Tags`): Flip tag state only inside the visible Global result set.\n`Archive`: Archive the tagged set first, or the current selection when nothing is tagged.\n\n`File actions`\n`Attributes`: Open the attributes submenu for the selected file.\n`Copy`: `C` copies the selected file, and `C-c` copies the tagged set through the same prompt.\n`Move`: `M` moves the selected file. `C-m` moves the tagged set when the protocol is available; `C-n` does so otherwise.\n`View`: View the selected file, and `C-v` views the tagged files one after another.\n`Edit`: Open the selected file in the configured editor.\n`Hex`: View the selected file in hex mode.\n`Compare`: Compare the selected file against another file.\n`Output`: Export the selection.\n`C-o` reuses the prompts for the tagged set, and `C-w` stays as a legacy alias.\n`Execute`: Type a shell command.\nUse `{}` where the selected file path should go, leave `{}` unquoted so ytnova can quote it safely, and use `C-x` to repeat the command once per tagged file.\n`Pathcopy`: Copy the selected file while preserving its path relative to the owning volume root.\n`Pipe`: Type a shell command and feed it the contents of the selected file on standard input.\n`New File`: Create a new empty file.\n`Rename`: Rename the selected file.\n`Delete`: Delete the selected file.\n`Log`: Log a new directory or archive file without leaving Global.\n`Volume`: Open the volume picker.\n`Quit`: Quit ytnova.\n\n`Global function keys`\n`F1`: Open contextual help for the current Global surface.\n`F5`: Refresh the active panel.\n`F6`: Toggle the statistics strip for the active panel.\nSplit panels keep independent visibility.\n`F7`: Toggle preview for the selected file context.\n`F8`: Toggle split-screen mode.\n`F9`: Open the Applications menu.\n`F10`: Open the configuration command surface.\n\n\n- [Navigation](topic:ytnova-navigation)\n- [Tagged](topic:tagged)\n- [Copy](topic:copy-move-targets)\n- [Filter](topic:filter)\n- [Compare](topic:compare)\n- [Move](topic:copy-move-targets)\n- [Output](topic:output)",
-        7,
-        generated_help_links_en_global,
+        "`Global` displays files from every logged directory in every logged volume as one list.\n`Esc` returns to the directory view you came from.\n`\\` opens the owning volume and directory of the selected file.\n\n[File commands](topic:file) act on the selected row or the tagged set, but filtering, sorting, tagging, and `/` use the complete Global result list as their scope.\n[Filter](topic:filter) changes only this Global list.\nPressing `G` again has no effect because the Global view is already open.\n`F7` opens preview and `F8` opens split mode.",
     },
     {
         "f7",
         "F7 Preview Help",
         "overlay.f7-dir,overlay.f7-file",
-        "Preview keeps the selected file visible while its footer commands remain available.\nThe preview-only rules below call out the exceptions.\n\n`Preview navigation`\n`Up/Down, PgUp/PgDn, Home/End`: Keep moving the selected file.\n`Shift-Up/Down` or `C-p/C-n`: Scroll preview lines.\n`Shift-PgUp/PgDn`: Scroll preview by pages.\n`Shift-Home/End`: Jump to the start or end of the preview.\n`F7`: Return to the underlying directory or file view.\n`F8`: Split does nothing while preview is active.\n`F9`: Open Applications without leaving preview.\n`Tab`: Do not switch panels while preview is active.\n`Esc`: Leave preview immediately.\n\n`Live commands`\n`Attributes`: Open file attributes.\n`C/^Copy`: `C` copies the selected file.\n`C-c` copies the tagged set.\n`Delete`: Delete the selected file without leaving preview.\n`Edit`: Open the selected file in the configured editor.\n`Filter`: Filter this preview list.\n`C-s` searches only tagged files.\n`I` (`Invert`): Flip tags only on matching visible files in the current preview list.\n`J compare`: Compare the selected file with another file.\n`Move`: `M` moves the selected file.\n`C-m` moves the tagged set when the protocol is available; `C-n` does so otherwise.\n`Newfile`: Create an empty file without leaving preview.\n`Rename`: Rename the selected file without leaving preview.\n`Tag`: Tag the selected file.\n`Untag`: Remove the selected tag.\n`View`: View the selected file.\n`C-v` views the tagged files one after another.\n`Output`: Export the selection.\n`C-o` reuses the prompts for the tagged set.\n`eXecute`: Type a shell command.\nUse `{}` where the selected file path should go, leave `{}` unquoted so ytnova can quote it safely, and use `C-x` to repeat the command once per tagged file.\n`pathcopY`: Copy the selected file while keeping its path relative to the current volume root.\n`Z archive`: Archive the tagged set first, or the current selection when nothing is tagged.\n`/ jump`: Press `/`, type letters, and press `Enter` to land on the best visible match.\n`\\` dotfiles`: Show or hide hidden files in this preview-backed list.\n\n\n- [Navigation](topic:ytnova-navigation)\n- [Tagged](topic:tagged)\n- [Copy/Move Targets](topic:copy-move-targets)\n- [Filter](topic:filter)\n- [Compare](topic:compare)\n- [Applications](topic:applications-menu)\n- [Output](topic:output)",
-        7,
-        generated_help_links_en_f7,
+        "`F7` opens a preview of the selected file without leaving its file-selection context.\n`Up`, `Down`, `Page Up`, `Page Down`, `Home`, and `End` continue to move the file selection.\n`Shift-Up`, `Shift-Down`, `C-p`, and `C-n` scroll the preview by lines.\n`Shift-Page Up` and `Shift-Page Down` scroll it by pages.\n`Shift-Home` and `Shift-End` go to the start or end of the preview.\n`F7` or `Esc` returns to the underlying view.\n\nThe usual [file actions](topic:file) remain available for the selected file. Tagged variants keep their current scope.\n`F8` and `Tab` do not open or switch split panels while preview is active.\n`F9` opens Applications without first closing preview.",
     },
     {
         "f8",
         "F8 Split Help",
         NULL,
-        "Split mode keeps both panels live.\nThe split-only rules below call out the exceptions.\n\n`Split rules`\n`F8`: Return to single-panel mode.\n`Tab`: Switch the active panel and keep the other panel's state intact.\nThis panel switch is only available in F8 split mode; some prompts use Tab for their own choices.\n`Target defaults`: Copy, move, and compare prompts start with the other panel as the default destination or target.\n`Panel independence`: Each panel keeps its own selection, view, tags, volume, and restore state.\n\n\n- [Navigation](topic:ytnova-navigation)\n- [F8 Split Directory](topic:f8-dir)\n- [F8 Split File](topic:f8-file)",
-        3,
-        generated_help_links_en_f8,
+        "`F8` opens a second panel. The highlighted panel is active and receives the next command.\n`Tab` switches the active panel.\nEach panel keeps its own selection, logged volume, tags, view settings, and return state.\n\nCopy, move, and compare prompts use the other panel as their initial destination or target where applicable. You can edit that value before continuing.\nPress `F8` again to return to one panel. See [split directory](topic:f8-dir) or [split file](topic:f8-file) help for local commands.",
     },
     {
         "f8-dir",
         "F8 Split Directory Help",
         "overlay.f8-dir",
-        "This page explains the live split-directory footer commands.\nUse `Tab` to change the active panel, and remember that copy, move, and compare default to the inactive panel.\nEach panel keeps its own selection, view, tags, volume, and restore state.\n\n`Live commands`\n`F8`: Return to single-panel mode.\n`Tab`: Change the active panel.\n`Target defaults`: Copy, move, and compare default to the inactive panel.\n\n`View and scope`\n`1`: Name only.\nThis is the plain default view.\n`2`: Attributes.\nIn file lists this also shows `name -> target` for symlinks.\n`3`: Owner.\n`4`: Times.\n`Reset`: `1` always returns to the plain Name view.\nIf `2`, `3`, or `4` is already active, pressing that same key again also returns to Name.\n`Shared per panel`: By default, `1..4` stay linked inside one panel.\nChanging the tree view also changes that panel's file window.\nSet `SEPARATE_DIR_FILE_VIEWS=1` to split them again.\n`Tree versus file window`: In split directory focus, `5`, `7`, `8`, and `9` do not change the tree rows.\nThey change the active panel's file window.\n`5`: Turn Compact on or off from the current `1` / Name view only.\n`6`: Switch file and directory rows between readable and raw size units.\nStats stay readable.\n`7`: Show a small text preview on each visible file row.\nIt leaves Compact so you can see the text.\n`8`: Show file detail text on each visible file row.\nIt leaves Compact so you can see the summary.\n`9`: Show the Git band when the current directory is inside a Git worktree.\n`0`: Does nothing on filesystem volumes.\n`Attributes`: Open directory attributes.\n`Copy`: Copy the selected directory branch.\nIn split mode the other panel is the default destination.\n`Delete`: Delete the selected directory.\n`Filter`: Filter this file list.\n`Tab` switches between all files and tagged files when tags exist.\n`Global`: Open the cross-volume file list for the active panel.\n`I` (`Invert`): Flip tags only on filter-matching visible files in the selected directory.\n`J compare`: Compare this directory, its logged tree, or another target.\n`K volume`: Open the volume menu.\n`Log`: Log a directory or archive, or reload a logged path from the top.\n`Makedir`: Create a directory.\n`Newfile`: Create an empty file here.\n`Output`: Export the current selection.\n`Pipe`: Type a shell command. ytnova runs it in the selected directory and sends the visible matching names to its standard input, one per line.\n`Quit`: Quit ytnova.\n`Rename`: Rename the selected directory.\n`Showall`: Open the current-volume file list for the active panel.\n`Tag`: Tag the files under the selected directory.\n`Untag`: Remove those tags.\n`moVedir`: Move the selected directory branch.\nIn split mode the other panel is the default destination.\n`eXecute`: Type a shell command.\nUse `{}` where the selected directory path should go, and leave `{}` unquoted so ytnova can quote the path safely.\n`Z archive`: Archive the tagged set first, or the current selection when nothing is tagged.\n`/ jump`: Press `/`, type letters, and press `Enter` to land on the best visible match in this tree.\n`\\` dotfiles`: Show or hide hidden names.\n`F10`: Open configuration.\n\n\n- [Navigation](topic:ytnova-navigation)\n- [F8 Split](topic:f8)\n- [Copy](topic:copy-move-targets)\n- [Filter](topic:filter)\n- [J compare](topic:compare)\n- [moVedir](topic:copy-move-targets)\n- [Output](topic:output)",
-        7,
-        generated_help_links_en_f8_dir,
+        "This is the active directory tree in [F8 split](topic:f8) mode.\n`Tab` activates the other panel.\n`F8` returns to one panel.\n\nThe tree and directory commands are the same as in [Directory Help](topic:directory).\nCopy, move, and compare start with the other panel's selected directory as the target where applicable.\nA prompt may use `Tab` for its own local choice instead of switching panels.\nCommands change only the active panel unless their prompt explicitly names the other panel.",
     },
     {
         "f8-file",
         "F8 Split File Help",
         "overlay.f8-file",
-        "This page explains the live split-file footer commands.\nUse `Tab` to change the active panel, and remember that copy, move, and compare default to the inactive panel.\nEach panel keeps its own selection, view, tags, volume, and restore state.\n\n`Live commands`\n`F8`: Return to single-panel mode.\n`Tab`: Change the active panel.\n`Target defaults`: Copy, move, and compare default to the inactive panel.\n\n`View and scope`\n`1`: Name only.\nThis is the plain default view.\n`2`: Attributes.\nIn file lists this also shows `name -> target` for symlinks.\n`3`: Owner.\n`4`: Times.\n`Reset`: `1` always returns to the plain Name view.\nIf `2`, `3`, or `4` is already active, pressing that same key again also returns to Name.\n`Shared per panel`: By default, `1..4` stay linked inside one panel.\nChanging the tree view also changes that panel's file window.\nSet `SEPARATE_DIR_FILE_VIEWS=1` to split them again.\n`5`: Turn Compact on or off from the current `1` / Name view only.\n`6`: Switch file and directory rows between readable and raw size units.\nStats stay readable.\n`7`: Show a small text preview on each visible file row.\nIt leaves Compact so you can see the text.\n`8`: Show file detail text on each visible file row.\nIt leaves Compact so you can see the summary.\n`9`: Show the Git band when the current directory is inside a Git worktree.\n`Extra state label`: `5`, `7`, `8`, and `9` do not stack in the stats label.\nIt shows only the one extra state you can currently see.\n`0`: Does nothing on filesystem volumes.\n`Attributes`: Open file attributes.\n`C/^Copy`: `C` copies the selected file.\n`C-c` copies the tagged set.\nIn split mode the other panel is the default destination.\n`Delete`: Delete the selected file.\n`Edit`: Open the selected file in the configured editor.\n`Filter`: Filter this list.\n`C-s` searches only tagged files.\n`Tab` switches between all files and tagged files when tags exist.\n`Hex`: Open the selected file in hex view.\n`I` (`Invert`): Flip tags only on matching visible files in the current file list.\n`J compare`: Compare the selected file with another file.\n`K volume`: Open the volume menu.\n`Log`: Log a directory or archive without leaving split file mode.\n`Move`: `M` moves the selected file.\n`C-m` moves the tagged set when the protocol is available; `C-n` does so otherwise.\nIn split mode the other panel is the default destination.\n`Newfile`: Create an empty file.\n`Output`: Export the selection.\n`C-o` reuses the prompts for the tagged set.\n`Pipe`: Type a shell command and feed it the contents of the selected file on standard input.\n`Quit`: Quit ytnova.\n`Rename`: Rename the selected file.\n`Sort`: Change the file-list sort order.\n`Tag`: Tag the selected file.\n`C-t` tags every visible file.\n`Untag`: Remove the selected tag.\n`C-u` clears tags in this scope.\n`View`: View the selected file.\n`C-v` views the tagged files one after another.\n`eXecute`: Type a shell command.\nUse `{}` where the selected file path should go, leave `{}` unquoted so ytnova can quote it safely, and use `C-x` to repeat the command once per tagged file.\n`pathcopY`: Copy the selected file while keeping its path relative to the current volume root.\n`Z archive`: Archive the tagged set first, or the current selection when nothing is tagged.\n`/ jump`: Press `/`, type letters, and press `Enter` to land on the best visible match.\n`\\` dotfiles`: Show or hide hidden files.\n`F10`: Open configuration.\n\n\n- [Navigation](topic:ytnova-navigation)\n- [F8 Split](topic:f8)\n- [Tagged](topic:tagged)\n- [C/^Copy](topic:copy-move-targets)\n- [Filter](topic:filter)\n- [J compare](topic:compare)\n- [Move](topic:copy-move-targets)\n- [Output](topic:output)",
-        8,
-        generated_help_links_en_f8_file,
+        "This is the active file list in [F8 split](topic:f8) mode.\n`Tab` activates the other panel.\n`F8` returns to one panel.\n\nThe file commands are the same as in [File Help](topic:file).\nCopy, move, and compare start with the other panel's selected directory or file as the target where applicable.\nTagged commands use the active panel's tagged set.\nA prompt may use `Tab` for its own local choice instead of switching panels.",
     },
     {
         "history-dialog",
         "History Help",
         "dialog.history",
-        "Use `Up` and `Down` to choose an entry.\nUse `Left` and `Right` to scroll a long entry.\nUse `P` to pin or unpin.\nUse `D` to delete.\nUse `Enter` to accept.\nUse `Esc` to cancel.\n\n`History actions`\n`Select entry`: `Up` and `Down` move through the current history list.\n`Scroll long entry`: `Left` and `Right` shift a long history line horizontally.\n`Pin`: `P` keeps an important entry at the top of the current history list.\n`Delete`: `D` removes the selected entry from the current history list.\n`Accept`: `Enter` reuses the selected entry.\n`Cancel`: `Esc` closes the dialog without reusing an entry.\n\n\n- [Navigation](topic:ytnova-navigation)",
-        1,
-        generated_help_links_en_history_dialog,
+        "Use `Up` and `Down` to select an earlier prompt value.\nUse `Left` and `Right` to scroll a long value horizontally.\n`P` pins or unpins the selected value.\n`D` deletes it.\n`Enter` puts it back into the prompt.\n`Esc` closes history without choosing a value.",
     },
     {
         "volume-menu",
         "Volume Help",
         "dialog.volume-menu",
-        "Use `Up` and `Down` to choose a loaded volume.\nUse `Enter` to switch to it.\nUse `D` to release it, unless it is the last one.\nUse `Esc` to leave the menu.\n\n`Volume actions`\n`Select volume`: `Up` and `Down` move through the loaded-volume list.\n`Switch volume`: `Enter` activates the selected volume.\n`Keep state`: Selecting the already active volume keeps its current in-memory state.\n`Release volume`: `D` unloads the selected volume unless it is the last remaining one.\n`Cancel`: `Esc` closes the menu.\n\n\n- [Navigation](topic:ytnova-navigation)",
-        1,
-        generated_help_links_en_volume_menu,
+        "Use `Up` and `Down` to select a logged volume.\n`Enter` switches to it and restores its in-memory state.\nChoosing the active volume keeps its current state.\n`D` releases the selected volume; the last remaining volume cannot be released.\n`Esc` closes the menu without switching.",
     },
     {
         "applications-menu",
         "Applications Help",
         "dialog.applications",
-        "Use Enter to select the highlighted preset.\nAfter launch, ytnova keeps running and the application continues on its own.\nUse E to edit the applications catalog that backs application presets.\nUse Esc to cancel the menu.\nUse {} for the file or folder currently selected in ytnova.\nUse {input} for the text you type when the preset asks for extra input.\n\n`Applications actions`\n`Select preset`: `Up` and `Down` move through the preset list.\n`Launch behavior`: `F9` starts the selected preset and returns straight to the TUI.\nUse it for repeat-heavy external workflows, not for one-off shell typing.\n`Use `eXecute` for one-offs`: The `X` command prompt stays the ad hoc shell surface with history and terminal-style output.\nUse it when you need a one-off command.\n`Edit presets`: `E` opens the dedicated applications catalog so presets can be changed without leaving the chooser family.\n`Selection and working directory`: `{}` inserts the current file or folder.\nPresets also start in that directory, so scripts without `{}` still run from the place you selected.\n`Prompt text`: `{input}` inserts the extra text you typed for the preset prompt.\n`Starter presets`: The bundled catalog starts with `xdg-open` launchers and includes commented examples for tools such as `mpv` or local helper scripts.\n`Cancel menu`: `Esc` closes the chooser without selecting a preset.\n\n\n- [Navigation](topic:ytnova-navigation)",
-        1,
-        generated_help_links_en_applications_menu,
+        "Use `Up` and `Down` to select a configured application preset.\n`Enter` starts it and returns immediately to ytnova.\n`E` edits the applications catalogue.\n`Esc` closes the menu.\n\n`{}` inserts the selected file or directory. The preset starts in that selection's directory even when `{}` is absent.\n`{input}` inserts text collected by the preset's input prompt.\nUse `F9` for repeatable presets; use `eXecute` for a one-off shell command.",
     },
     {
         "f2-picker",
         "F2 Picker Help",
         "dialog.f2-picker",
-        "Use `Up` and `Down` to move.\nUse `Right` to expand or enter the first child.\nUse `Left` to collapse or go to the parent.\nUse `<` and `>` to cycle loaded volumes.\nUse `L` to log a new path.\nUse `` ` `` to toggle dotfiles.\nUse `Enter` to select the highlighted directory.\nUse `Esc` to cancel.\n\n`Picker actions`\n`Move`: `Up` and `Down` move through the visible directory rows.\n`Expand`: `Right` expands the current directory one level, then moves into the first child when that level is already open.\n`Collapse`: `Left` collapses the current directory, or moves to its parent when the current row is already closed.\n`Select`: `Enter` uses the highlighted directory for the calling prompt.\n`Cancel`: `Esc` closes the picker without changing the prompt.\n\n\n- [Navigation](topic:ytnova-navigation)\n- [Command-line editing](topic:command-line-editing)",
-        2,
-        generated_help_links_en_f2_picker,
+        "Use `F2` from a prompt that accepts a browsed directory.\n`Up` and `Down` move through the tree.\n`Left` collapses a branch or moves to its parent.\n`Right` expands a branch or moves into it.\n`<` and `>` switch between logged volumes.\n`L` logs another directory or archive.\n`Backtick` shows or hides dotfiles.\n`Enter` chooses the highlighted directory and returns it to the prompt.\n`Esc` returns without changing the prompt.",
     },
 };
 
 static const size_t generated_help_topic_count_en = 43;
-
-static const GeneratedHelpLink generated_help_links_de_index[] = {
-    {"Applications", "applications-menu"},
-    {"Archive Directory", "archive-dir"},
-    {"Archive File", "archive-file"},
-    {"Command-line Editing", "command-line-editing"},
-    {"Kommandozeilenparameter", "command-line-parameters"},
-    {"Compare", "compare"},
-    {"Compare Basis", "compare-basis"},
-    {"Compare Result", "compare-results"},
-    {"Compare Scope", "compare-scope"},
-    {"Compare Target", "compare-target"},
-    {"Konfigurationsdateien", "configuration-files"},
-    {"Copy/Move Targets", "copy-move-targets"},
-    {"Create Archive", "create-archive"},
-    {"Date Change", "change-date"},
-    {"Directory", "directory"},
-    {"F10 Config", "f10"},
-    {"F2 Picker", "f2-picker"},
-    {"F7 Preview", "f7"},
-    {"F8 Split", "f8"},
-    {"F8 Split Directory", "f8-dir"},
-    {"F8 Split File", "f8-file"},
-    {"File", "file"},
-    {"Filter", "filter"},
-    {"Global", "global"},
-    {"History", "history-dialog"},
-    {"List Jump", "list-jump"},
-    {"Navigation", "ytnova-navigation"},
-    {"Output", "output"},
-    {"Output Destination", "output-destination"},
-    {"Output Format", "output-format"},
-    {"Output Separator", "output-separator"},
-    {"Search Tagged", "search-tagged"},
-    {"Shared Commands", "shared-commands"},
-    {"Showall", "showall"},
-    {"Tagged", "tagged"},
-    {"Markierungsanzeige", "tagged-viewer"},
-    {"Theming", "theming"},
-    {"Vi Keys", "vi-keys"},
-    {"Volume", "volume-menu"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_list_jump[] = {
-    {"Directory", "directory"},
-    {"File", "file"},
-    {"Showall", "showall"},
-    {"Global", "global"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_shared_commands[] = {
-    {"F7 preview", "f7"},
-    {"F8 split", "f8"},
-    {"Applications menu", "applications-menu"},
-    {"F10 config", "f10"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_command_line_editing[] = {
-    {"VI-Tasten", "vi-keys"},
-    {"Historie", "history-dialog"},
-    {"F2-Auswahl", "f2-picker"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_command_line_parameters[] = {
-    {"Konfigurationsdateien", "configuration-files"},
-    {"Filter", "filter"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_configuration_files[] = {
-    {"F10 Konfiguration", "f10"},
-    {"Theming", "theming"},
-    {"Kommandozeilenparameter", "command-line-parameters"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_vi_keys[] = {
-    {"Navigation", "ytnova-navigation"},
-    {"Bearbeitung in Eingabezeilen", "command-line-editing"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_f10[] = {
-    {"Theming", "theming"},
-    {"Gemeinsame Befehle", "shared-commands"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_theming[] = {
-    {"F10 config", "f10"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_archive_dir[] = {
-    {"Navigation", "ytnova-navigation"},
-    {"Filter", "filter"},
-    {"Compare", "compare"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_archive_file[] = {
-    {"Navigation", "ytnova-navigation"},
-    {"Markiert", "tagged"},
-    {"Kopier-/Verschiebeziele", "copy-move-targets"},
-    {"Filter", "filter"},
-    {"Vergleich", "compare"},
-    {"Output", "output"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_filter[] = {
-    {"Tagged", "tagged"},
-    {"Showall", "showall"},
-    {"Global", "global"},
-    {"Command-line editing", "command-line-editing"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_compare[] = {
-    {"File mode", "file"},
-    {"Directory mode", "directory"},
-    {"Navigation", "ytnova-navigation"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_compare_target[] = {
-    {"Compare Help", "compare"},
-    {"Command-line editing", "command-line-editing"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_compare_scope[] = {
-    {"Compare Help", "compare"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_change_date[] = {
-    {"File mode", "file"},
-    {"Directory mode", "directory"},
-    {"Command-line editing", "command-line-editing"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_compare_basis[] = {
-    {"Compare Help", "compare"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_compare_results[] = {
-    {"Compare Help", "compare"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_execute_file[] = {
-    {"File mode", "file"},
-    {"Command-line editing", "command-line-editing"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_execute_dir[] = {
-    {"Directory mode", "directory"},
-    {"Command-line editing", "command-line-editing"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_search_tagged[] = {
-    {"Tagged", "tagged"},
-    {"Command-line editing", "command-line-editing"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_create_archive[] = {
-    {"Tagged", "tagged"},
-    {"Command-line editing", "command-line-editing"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_output[] = {
-    {"File mode", "file"},
-    {"Archive file", "archive-file"},
-    {"Command-line editing", "command-line-editing"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_output_format[] = {
-    {"Output Help", "output"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_output_destination[] = {
-    {"Output Help", "output"},
-    {"Output Format Help", "output-format"},
-    {"Command-line editing", "command-line-editing"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_output_separator[] = {
-    {"Output Help", "output"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_showall[] = {
-    {"Navigation", "ytnova-navigation"},
-    {"Markiert", "tagged"},
-    {"Kopierziele", "copy-move-targets"},
-    {"Filter", "filter"},
-    {"Vergleich", "compare"},
-    {"Verschiebeziele", "copy-move-targets"},
-    {"Output", "output"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_global[] = {
-    {"Navigation", "ytnova-navigation"},
-    {"Markiert", "tagged"},
-    {"Kopierziele", "copy-move-targets"},
-    {"Filter", "filter"},
-    {"Vergleich", "compare"},
-    {"Verschiebeziele", "copy-move-targets"},
-    {"Output", "output"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_f7[] = {
-    {"Navigation", "ytnova-navigation"},
-    {"Markiert", "tagged"},
-    {"Kopier-/Verschiebeziele", "copy-move-targets"},
-    {"Filter", "filter"},
-    {"Vergleich", "compare"},
-    {"Anwendungsmenue", "applications-menu"},
-    {"Output", "output"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_f8[] = {
-    {"Navigation", "ytnova-navigation"},
-    {"Directory split page", "f8-dir"},
-    {"File split page", "f8-file"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_f8_dir[] = {
-    {"Navigation", "ytnova-navigation"},
-    {"F8-Split", "f8"},
-    {"Kopierziele", "copy-move-targets"},
-    {"Filter", "filter"},
-    {"Vergleich", "compare"},
-    {"Verschiebeziele", "copy-move-targets"},
-    {"Output", "output"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_f8_file[] = {
-    {"Navigation", "ytnova-navigation"},
-    {"F8-Split", "f8"},
-    {"Markiert", "tagged"},
-    {"Kopierziele", "copy-move-targets"},
-    {"Filter", "filter"},
-    {"Vergleich", "compare"},
-    {"Verschiebeziele", "copy-move-targets"},
-    {"Output", "output"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_history_dialog[] = {
-    {"Navigation", "ytnova-navigation"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_volume_menu[] = {
-    {"Navigation", "ytnova-navigation"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_applications_menu[] = {
-    {"Navigation", "ytnova-navigation"},
-};
-
-static const GeneratedHelpLink generated_help_links_de_f2_picker[] = {
-    {"Navigation", "ytnova-navigation"},
-    {"Command-line editing", "command-line-editing"},
-};
 
 static const GeneratedHelpTopic generated_help_topics_de[] = {
     {
         "index",
         "Hilfeindex",
         NULL,
-        "Benutze diesen Index, wenn du die Frage kennst, aber nicht weißt, welche Seite sie beantwortet.\nDrücke auf einem Thema `Enter` oder `Right`, um es zu öffnen.\nTippe `/` und einen Themennamen, um ihn auszuwählen, und drücke dann `Enter` oder `Right`, um ihn zu öffnen.\nGehe mit `Left` zurück hierher.\nVerlasse die Hilfe mit `Esc`.\n\n`Zweck`\nBenutze `F1` für die Aufgabe vor dir und nicht als ein riesiges Handbuch.\nLokale Seiten beantworten zuerst die aktuelle Frage.\nGemeinsame Themen halten die Regeln, die sich wiederholen.\n\n`Benutzung des Index`\nDiese Liste bleibt alphabetisch, damit du sie schnell überfliegen kannst.\nWenn du den aktuellen Bildschirm kennst, starte dort.\nSonst nimm das Thema, das zu deiner Frage passt.\nÖffne ein Thema, lies die kurze Antwort und gehe dann mit `Left` zurück, ohne deinen Platz zu verlieren.\n\n\n- [Applications](topic:applications-menu)\n- [Archive Directory](topic:archive-dir)\n- [Archive File](topic:archive-file)\n- [Command-line Editing](topic:command-line-editing)\n- [Kommandozeilenparameter](topic:command-line-parameters)\n- [Compare](topic:compare)\n- [Compare Basis](topic:compare-basis)\n- [Compare Result](topic:compare-results)\n- [Compare Scope](topic:compare-scope)\n- [Compare Target](topic:compare-target)\n- [Konfigurationsdateien](topic:configuration-files)\n- [Copy/Move Targets](topic:copy-move-targets)\n- [Create Archive](topic:create-archive)\n- [Date Change](topic:change-date)\n- [Directory](topic:directory)\n- [F10 Config](topic:f10)\n- [F2 Picker](topic:f2-picker)\n- [F7 Preview](topic:f7)\n- [F8 Split](topic:f8)\n- [F8 Split Directory](topic:f8-dir)\n- [F8 Split File](topic:f8-file)\n- [File](topic:file)\n- [Filter](topic:filter)\n- [Global](topic:global)\n- [History](topic:history-dialog)\n- [List Jump](topic:list-jump)\n- [Navigation](topic:ytnova-navigation)\n- [Output](topic:output)\n- [Output Destination](topic:output-destination)\n- [Output Format](topic:output-format)\n- [Output Separator](topic:output-separator)\n- [Search Tagged](topic:search-tagged)\n- [Shared Commands](topic:shared-commands)\n- [Showall](topic:showall)\n- [Tagged](topic:tagged)\n- [Markierungsanzeige](topic:tagged-viewer)\n- [Theming](topic:theming)\n- [Vi Keys](topic:vi-keys)\n- [Volume](topic:volume-menu)",
-        39,
-        generated_help_links_de_index,
+        "Wähle mit `Up` und `Down` ein Thema.\nDrücke `Enter` oder `Right`, um es zu öffnen.\n`Left` kehrt zur vorherigen Hilfeseite zurück.\n`Esc` schließt die Hilfe.\n\n`Navigation` in dieser Liste erklärt die Bewegung durch YtreeNova. Der Befehl `Navigation` in der Hilfeleiste erklärt die Bewegung innerhalb des Hilfe-Popups.\n\n- [Anwendungen](topic:applications-menu)\n- [Archiv erstellen](topic:create-archive)\n- [Archivdatei](topic:archive-file)\n- [Archivverzeichnis](topic:archive-dir)\n- [Ausgabe](topic:output)\n- [Ausgabeformat](topic:output-format)\n- [Ausgabetrenner](topic:output-separator)\n- [Ausgabeziel](topic:output-destination)\n- [Datei](topic:file)\n- [Datei ausführen](topic:execute-file)\n- [Datum ändern](topic:change-date)\n- [F10-Konfiguration](topic:f10)\n- [F2-Verzeichnisauswahl](topic:f2-picker)\n- [F7-Vorschau](topic:f7)\n- [F8-Split](topic:f8)\n- [F8-Split-Datei](topic:f8-file)\n- [F8-Split-Verzeichnis](topic:f8-dir)\n- [Filter](topic:filter)\n- [Gemeinsame Befehle](topic:shared-commands)\n- [Global](topic:global)\n- [Kommandozeilenbearbeitung](topic:command-line-editing)\n- [Kommandozeilenparameter](topic:command-line-parameters)\n- [Konfigurationsdateien](topic:configuration-files)\n- [Kopier- und Verschiebeziele](topic:copy-move-targets)\n- [Listensprung](topic:list-jump)\n- [Markierte Dateien](topic:tagged)\n- [Markierte durchsuchen](topic:search-tagged)\n- [Markierungsanzeige](topic:tagged-viewer)\n- [Navigation](topic:ytnova-navigation)\n- [Showall](topic:showall)\n- [Themes](topic:theming)\n- [Vergleich](topic:compare)\n- [Vergleichsbasis](topic:compare-basis)\n- [Vergleichsbereich](topic:compare-scope)\n- [Vergleichsergebnis](topic:compare-results)\n- [Vergleichsziel](topic:compare-target)\n- [Verlauf](topic:history-dialog)\n- [Verzeichnis](topic:directory)\n- [Verzeichnis ausführen](topic:execute-dir)\n- [vi-Tasten](topic:vi-keys)\n- [Volumen](topic:volume-menu)",
     },
     {
         "f1-navigation",
         "Hilfe-Navigation",
         NULL,
         "Mit den Pfeiltasten `Up` und `Down` scrollst du die Hilfe zeilenweise.\nMit den Pfeiltasten `Up` und `Down` wechselst du zwischen Links.\n`Page Up` und `Page Down` bewegen eine Hilfeseite.\n`Home` und `End` gehen zum Anfang und Ende.\n`Enter` oder die Pfeiltaste `Right` öffnet den gewählten Link.\nDie Pfeiltaste `Left` kehrt zur vorherigen Hilfeseite zurück.\nDrücke `H`, um zum `Hilfeindex` zu gehen.\n`Esc` oder `Q` schließt die Hilfe.",
-        0,
-        NULL,
     },
     {
         "ytnova-navigation",
         "YtreeNova-Navigation",
         NULL,
         "YtreeNova ist für die Tastatur gemacht.\nMauseffekte können vorkommen, sind aber keine vorgesehenen Steuerelemente.\nMit den Pfeiltasten `Up` und `Down` bewegst du dich jeweils eine Zeile.\n`Page Up` und `Page Down` bewegen jeweils eine Bildschirmseite.\n`Home` und `End` gehen zur ersten oder letzten sichtbaren Zeile.\n`Enter` öffnet das gewählte Element.\n`Right` öffnet oder erweitert das gewählte Element, wenn die Ansicht das unterstützt.\n`Left` geht zurück oder klappt das gewählte Element ein, wenn die Ansicht das unterstützt.\n[/ Sprung](topic:list-jump) geht beim Tippen zu einem passenden Namen in der aktuellen Liste. `Enter` wählt ihn aus; `Esc` bricht ab.\n`Tab` geht zum nächsten sichtbaren Geschwisterelement im Baum und springt am Ende zum Anfang; `Shift-Tab` kehrt dies um.\n[F8 Split](topic:f8)-Modus: `Tab` wechselt das aktive Panel; manche Prompts geben `Tab` eine eigene lokale Bedeutung.\n[F7 Vorschau](topic:f7): Gewöhnliche Navigationstasten bewegen die Dateiauswahl; ihre Umschaltvarianten scrollen die Vorschau.\n\n`Terminal-Eingabegrenzen`\n`Alt` wird absichtlich nicht unterstützt, weil Terminals es uneinheitlich behandeln.\n`Kitty-Tastaturprotokoll`\nYtreeNova verwendet das Kitty-Tastaturprotokoll, wenn der aktive Terminalpfad es unterstützt. Dadurch kann es `C-m` von Enter unterscheiden, sodass `C-m` markierte Dateien verschiebt.\nFüge in Kitty `keyboard_protocol kitty` zu `~/.config/kitty/kitty.conf` hinzu und starte Kitty neu. Auch andere Terminals mit Protokollunterstützung funktionieren.\nBei einem Multiplexer oder einer Remote-Sitzung muss das Protokoll unverändert durchgereicht werden.\nOhne Protokollunterstützung verwendet YtreeNova stillschweigend `C-n`, um markierte Dateien zu verschieben.\n`C-[` ist Esc.",
-        0,
-        NULL,
     },
     {
         "list-jump",
-        "List Jump",
+        "Listensprung",
         NULL,
-        "Drücke `/`, tippe Buchstaben und drücke `Enter`, um auf dem besten sichtbaren Treffer in der aktuellen Liste zu landen.\nIn Baumansichten wiederholst du den Sprung im nächsten Verzeichnis, wenn du tiefer gehen willst.\n\n`Sprungmodell`\n`/` öffnet einen Live-Sprung-Prompt nur für die aktuelle Liste.\nBaum- und Verzeichnisansichten springen zwischen sichtbaren Verzeichnisnamen.\nDateiorientierte Ansichten springen zwischen den sichtbaren Dateizeilen dieser Oberfläche.\n\n`Übernehmen oder abbrechen`\n`Buchstaben tippen`: Zum besten aktuellen Treffer springen, während du tippst.\n`Enter`: Auf dem aktuellen Treffer landen und dort bleiben.\n`Esc`: Den Sprung abbrechen und die ursprüngliche Auswahl wiederherstellen.\n`Bereichswechsel`: Filter, Showall, Global, Archive und Split-Modus ändern, welche sichtbare Liste `/` durchsucht.\n\n\n- [Directory](topic:directory)\n- [File](topic:file)\n- [Showall](topic:showall)\n- [Global](topic:global)",
-        4,
-        generated_help_links_de_list_jump,
+        "Drücke `/`, tippe einen Teil eines Namens und drücke `Enter`, um den besten sichtbaren Treffer zu behalten.\nDie Auswahl bewegt sich bereits während der Eingabe.\n`Esc` stellt die Auswahl vor dem Sprung wieder her.\n\nDer Sprung durchsucht nur die aktuell sichtbare Liste. In einem Verzeichnisbaum wiederholst du ihn nach dem Öffnen eines Verzeichnisses, wenn du tiefer springen willst.",
     },
     {
         "shared-commands",
         "Gemeinsame Befehle",
         NULL,
-        "Diese Tasten behalten in mehr als einem Modus dieselbe Grundbedeutung.\nBenutze die Modusseite für lokale Befehle und diese Seite für die gemeinsame Funktionstastenfamilie.\n\n`Gemeinsame Funktionstasten`\n`F1`: Kontextuelle Hilfe für die aktive Oberfläche öffnen.\n`F5`: Die aktuelle Ansicht aktualisieren.\n`F6`: Die Statistik- oder Detaildarstellung der aktiven Ansicht ändern.\n`F7`: Die Vorschau für den aktiven Dateikontext umschalten.\n`F8`: Den Split-Screen-Modus umschalten.\n`F9`: Das Anwendungsmenü öffnen.\n`F10`: Die Konfigurationsoberfläche öffnen.\n`Esc`: Das aktuelle Overlay, den Prompt oder das Popup verlassen.\n\n\n- [F7 preview](topic:f7)\n- [F8 split](topic:f8)\n- [Applications menu](topic:applications-menu)\n- [F10 config](topic:f10)",
-        4,
-        generated_help_links_de_shared_commands,
+        "`F1` öffnet die Hilfe für den aktuellen Bildschirm oder Prompt.\n`F5` aktualisiert die aktuelle Ansicht.\n`F6` ändert die Statistik- oder Detailanzeige der aktiven Ansicht.\n[F7 Vorschau](topic:f7) öffnet oder schließt die Dateivorschau.\n[F8 Split](topic:f8) öffnet oder schließt das zweite Panel.\n`F9` öffnet das [Anwendungsmenü](topic:applications-menu).\n`F10` öffnet die [Konfiguration](topic:f10).\n`Esc` verlässt den aktuellen Prompt, das Menü, die Vorschau oder das Popup.\n\nDer Footer zeigt die aktiven Belegungen. `commands.conf` kann Tasten und Beschriftungen ändern.\nMit `C--` und `C-+` verkleinerst oder vergrößerst du die Terminalschrift, wenn der Footer nicht passt.",
     },
     {
         "tagged",
         "Markierungen",
         NULL,
-        "Markierungen wählen mehrere Dateien aus, auf die dann ein Vorgang gemeinsam angewendet wird.\nMarkierte Dateien sind am `*` im Rand zu erkennen.\n\nDrücke in einer Dateiliste `T`, um die gewählte Datei zu markieren, oder `U`, um die Markierung zu entfernen. Die Auswahl geht zur nächsten Datei.\nIn einem Verzeichnisbaum wirken `T` und `U` auf die Dateien, die der aktuelle Filter im gewählten Verzeichnis zulässt, und gehen dann zum nächsten Verzeichnis nach unten.\n\n`i` kehrt die Markierungen der Dateien um, die der aktuelle Filter im aktuellen Bereich zulässt.\n\nWenn Statistiken angezeigt werden, erscheinen dort auch die Gesamtwerte der markierten Dateien.\n\nHalte die Steuerungstaste mit dem Buchstaben nach `C-` gedrückt, um den passenden Vorgang für alle markierten Dateien auszuführen. `^` in einem Footer-Label bedeutet denselben Markierungsvorgang, zum Beispiel `C/^Copy`.\n\n`C-a` öffnet den Attribute-Prompt für markierte Dateien.\n`C-c` öffnet den [Kopier-](topic:copy-move-targets)Prompt für markierte Dateien.\n`C-d` fragt vor dem Löschen markierter Dateien nach.\n`C-m` öffnet bei verfügbarer Protokollunterstützung den [Verschiebe-](topic:copy-move-targets)Prompt; `C-n` ist die Legacy-Belegung.\n`C-o` öffnet den [Ausgabe-](topic:output)Prompt für markierte Dateien.\n`C-p` öffnet den Pipe-Prompt für markierte Dateien.\n`C-r` öffnet den Umbenennen-Prompt für markierte Dateien.\n`C-s` [durchsucht markierte Dateien](topic:search-tagged) und entfernt die Markierung von Dateien ohne Treffer.\n`C-t` markiert alle Dateien in der aktiven Dateiliste. In einem Verzeichnisbaum markiert es die Dateien, die der aktuelle Filter in allen geloggten Verzeichnissen zulässt.\n`C-u` entfernt die Markierungen aller Dateien in der aktiven Dateiliste. In einem Verzeichnisbaum entfernt es die Markierungen der Dateien, die der aktuelle Filter in allen geloggten Verzeichnissen zulässt.\n`C-v` zeigt markierte Dateien nacheinander an.\n`C-x` öffnet einen [Befehlsprompt](topic:execute-file) und führt den Vorgang einmal für jede markierte Datei aus.\n`C-y` [Kopiert Pfade](topic:copy-move-targets) der markierten Dateien.\n`C-z` öffnet den [Archiv-](topic:archive)Prompt für markierte Dateien.\n\nDrücke für einen [Filter](topic:filter)-Bereich nur mit markierten Dateien `F` und dann `Tab`. Das ändert die Markierungen nicht.",
-        0,
-        NULL,
+        "Markierungen wählen mehrere Dateien aus, auf die dann ein Vorgang gemeinsam angewendet wird.\nMarkierte Dateien sind am `*` im Rand zu erkennen.\n\nDrücke in einer Dateiliste `T`, um die gewählte Datei zu markieren, oder `U`, um die Markierung zu entfernen. Die Auswahl geht zur nächsten Datei.\nIn einem Verzeichnisbaum wirken `T` und `U` auf die Dateien, die der aktuelle Filter im gewählten Verzeichnis zulässt, und gehen dann zum nächsten Verzeichnis nach unten.\n\n`I` kehrt die Markierungen der Dateien um, die der aktuelle Filter im aktuellen Bereich zulässt.\n\nWenn Statistiken angezeigt werden, erscheinen dort auch die Gesamtwerte der markierten Dateien.\n\nHalte die Steuerungstaste mit dem Buchstaben nach `C-` gedrückt, um den passenden Vorgang für alle markierten Dateien auszuführen. `^` in einem Footer-Label bedeutet denselben Markierungsvorgang, zum Beispiel `C/^Copy`.\n\n`C-a` öffnet den Attribute-Prompt für markierte Dateien.\n`C-c` öffnet den [Kopier-](topic:copy-move-targets)Prompt für markierte Dateien.\n`C-d` fragt vor dem Löschen markierter Dateien nach.\n`C-m` öffnet bei verfügbarer Protokollunterstützung den [Verschiebe-](topic:copy-move-targets)Prompt; ohne diese Unterstützung verwendest du `C-n`.\n`C-o` öffnet den [Ausgabe-](topic:output)Prompt für markierte Dateien.\n`C-p` öffnet den Pipe-Prompt für markierte Dateien.\n`C-r` öffnet den Umbenennen-Prompt für markierte Dateien.\n`C-s` [durchsucht markierte Dateien](topic:search-tagged) und entfernt die Markierung von Dateien ohne Treffer.\n`C-t` markiert alle Dateien in der aktiven Dateiliste. In einem Verzeichnisbaum markiert es die Dateien, die der aktuelle Filter in allen geloggten Verzeichnissen zulässt.\n`C-u` entfernt die Markierungen aller Dateien in der aktiven Dateiliste. In einem Verzeichnisbaum entfernt es die Markierungen der Dateien, die der aktuelle Filter in allen geloggten Verzeichnissen zulässt.\n`C-v` zeigt markierte Dateien nacheinander an.\n`C-x` öffnet einen [Befehlsprompt](topic:execute-file) und führt den Vorgang einmal für jede markierte Datei aus.\n`C-y` [Kopiert Pfade](topic:copy-move-targets) der markierten Dateien.\n`C-z` öffnet je nach Auswahl den Prompt für ein [Archivverzeichnis](topic:archive-dir) oder eine [Archivdatei](topic:archive-file).\n\nDrücke für einen [Filter](topic:filter)-Bereich nur mit markierten Dateien `F` und dann `Tab`. Das ändert die Markierungen nicht.",
     },
     {
         "tagged-viewer",
         "Markierungsanzeige",
         "viewer.tagged",
-        "`Markierte anzeigen` öffnet die markierten Suchergebnisse in der internen Anzeige.\nMit `n` und `p` wechseln Sie zur nächsten oder vorherigen markierten Datei.\n`Leertaste`, `BildAb`, und `BildAuf` bewegen nur seitenweise in der aktuellen Datei.\nNach `C-s` für die Suche in der Markierung wechselt `/` zum nächsten und `?` zum vorherigen Treffer in der aktuellen Datei.\nAußerhalb dieser Anzeige bleibt `C-s` die Suchaktion für die Markierungsliste.\nMit `TAGGEDVIEWER=external` übernimmt das konfigurierte Anzeigeprogramm Suche und Treffernavigation.\n\n`Navigationsbereiche`\n\nDie interne Anzeige trennt Dateinavigation von Treffernavigation, damit Blättern nie die Datei wechselt.\n\nSiehe [Markierungen](topic:tagged).",
-        0,
-        NULL,
+        "Mit `n` und `p` öffnest du die nächste oder vorherige markierte Datei.\nMit `Space`, `Page Down` und `Page Up` bewegst du dich innerhalb der aktuellen Datei.\nNach einer Suche in markierten Dateien führen `/` und `\?` zum nächsten oder vorherigen Treffer in dieser Datei.\n`Esc` schließt die Anzeige.\n\nBei `TAGGEDVIEWER=external` übernimmt der konfigurierte Pager das Blättern und Suchen. Unter [Markierte Dateien](topic:tagged) steht, wie du die Arbeitsmenge erstellst und verwendest.",
     },
     {
         "command-line-editing",
         "Bearbeitung in Eingabezeilen",
         NULL,
-        "Die meisten Prompts teilen sich dieselben Bearbeitungstasten.\nLerne sie einmal hier und benutze die Prompt-Seite nur noch für Syntax, Vorgaben und Geltungsbereich.\n\n`Bearbeitungstasten`\n`Left/Right`: Innerhalb des aktuellen Prompt-Textes bewegen.\n`Home/End`: Zum Anfang oder Ende des Prompt-Textes springen.\n`Backspace/Delete`: Das Zeichen links oder rechts vom Cursor löschen.\n`Enter`: Den aktuellen Wert übernehmen.\n`Esc`: Abbrechen, ohne den Prompt zu übernehmen.\n\n`Gemeinsame Hilfen`\n`Up`: Die Prompt-Historie öffnen oder darin weitergehen, wenn dieser Prompt eine Historie hat.\n`F2`: Einen Browser oder eine Auswahl öffnen, wenn der aktuelle Prompt Browsing unterstützt.\n`F1`: Syntax- oder Bereichsregeln zeigen, die nur für diesen Prompt gelten.\n\n\n- [VI-Tasten](topic:vi-keys)\n- [Historie](topic:history-dialog)\n- [F2-Auswahl](topic:f2-picker)",
-        3,
-        generated_help_links_de_command_line_editing,
+        "Die meisten Prompts verwenden dieselben Bearbeitungstasten.\n`Left` und `Right` bewegen den Cursor um ein Zeichen.\n`Home` und `End` gehen zum Anfang oder Ende.\n`C-a` und `C-e` tun dasselbe.\n`Backspace` oder `C-h` löscht das Zeichen links vom Cursor.\n`Delete` oder `C-d` löscht das Zeichen unter dem Cursor.\n`C-w` löscht das Wort links vom Cursor.\n`C-u` löscht bis zum Anfang.\n`C-k` löscht bis zum Ende.\n`Up` öffnet oder durchläuft gespeicherte Werte, wenn der Prompt einen Verlauf führt.\n`F2` öffnet die [Verzeichnisauswahl](topic:f2-picker), wenn Browsen möglich ist.\n`F1` öffnet die Hilfe für den aktuellen Prompt.\n`Enter` übernimmt den Wert.\n`Esc` bricht ohne Übernahme ab.",
     },
     {
         "command-line-parameters",
         "Kommandozeilenparameter",
         NULL,
-        "Starten Sie ytnova mit zu protokollierenden Pfaden oder einer Option für das Startverhalten.\nMit `ytnova --init` werden fehlende Konfigurationsdateien erstellt.\n`ytnova --version` gibt die Version aus und beendet das Programm.\n\n`Startoptionen`\n`-d depth`: Setzt die Start-Scan-Tiefe.\nZahlen sowie `min` oder `root` für 0 und `max` oder `all` für 100 sind möglich.\n`-f filter`: Startet mit einem Dateifilter.\nShell-Muster wie `\"*.c\"` bitte quoten, damit die Shell sie nicht vorher erweitert.\n`-h history_file`: Verwendet eine andere Befehlsverlaufsdatei.\n`-p config_file`: Verwendet statt `~/.config/ytnova/ytnova.conf` eine andere Hauptkonfiguration.\n`--init`: Erstellt fehlende Startkonfigurationen und beendet das Programm.\n`-v`, `-V`, `--version`: Gibt Versionsinformationen aus und beendet das Programm.\n`Pfade`: Ein oder mehrere Verzeichnis- oder Archivpfade werden als Start-Volumes protokolliert.\nOhne Pfad protokolliert ytnova das aktuelle Verzeichnis.\n\n\n- [Konfigurationsdateien](topic:configuration-files)\n- [Filter](topic:filter)",
-        2,
-        generated_help_links_de_command_line_parameters,
+        "Gib ytnova beim Start ein oder mehrere Verzeichnis- oder Archivpfade, um sie einzulesen. Ohne Pfad liest es das aktuelle Verzeichnis ein.\n\n`-d Tiefe` setzt die Einlesetiefe beim Start. Verwende eine Zahl, `min` oder `root` für null oder `max` oder `all` für 100.\n`-f Filter` startet mit einem [Dateifilter](topic:filter). Setze Shell-Muster wie `\"*.c\"` in Anführungszeichen, damit die Shell sie nicht vorher erweitert.\n`-h Verlaufsdatei` wählt eine andere Datei für den Befehlsverlauf.\n`-p Konfigurationsdatei` wählt eine andere Hauptkonfiguration.\n`--init` erstellt fehlende [Konfigurationsdateien](topic:configuration-files) und beendet das Programm.\n`-v`, `-V` oder `--version` gibt die Version aus und beendet das Programm.",
     },
     {
         "configuration-files",
         "Konfigurationsdateien",
         NULL,
-        "Bearbeitbare Benutzerkonfigurationen werden normalerweise unter `~/.config/ytnova` erstellt.\nStattdessen können ein explizites Profil, eine vorhandene alte Datei oder mitgelieferte Vorgaben verwendet werden.\n\n`Konfigurationsverzeichnis`\n`ytnova.conf`: Hauptprofil mit Einstellungen wie Start-Scan-Tiefe, `VI_KEYS` und `SEPARATE_DIR_FILE_VIEWS`.\n`commands.conf`: Befehlsnamen, Tastenzuordnungen und Auswahl der Befehlsvorgaben.\n`themes.conf`: Themenauswahl und Überschreibungen für Themenrollen.\n`applications.conf`: Anwendungsvorgaben für `F9`.\n`Verlauf`: Der Befehlsverlauf liegt getrennt von diesen Konfigurationsdateien.\nMit `-h` wählen Sie eine andere Verlaufsdatei.\n\nMit `-p` wählen Sie eine andere `ytnova.conf`.\nVorhandene alte Home-Dotfiles und mitgelieferte Vorgaben bleiben verfügbar, wenn keine bevorzugte Benutzerdatei verwendet wird.\n\n\n- [F10 Konfiguration](topic:f10)\n- [Theming](topic:theming)\n- [Kommandozeilenparameter](topic:command-line-parameters)",
-        3,
-        generated_help_links_de_configuration_files,
+        "Die Benutzerkonfiguration liegt normalerweise unter `~/.config/ytnova`.\n`ytnova.conf` enthält Profileinstellungen wie Einlesetiefe, `VI_KEYS` und `SEPARATE_DIR_FILE_VIEWS`.\n`commands.conf` enthält Befehlsbeschriftungen, Tastenbelegungen und die Preset-Auswahl.\n`themes.conf` wählt ein Theme und überschreibt Theme-Rollen.\n`applications.conf` enthält die mit `F9` geöffneten Presets.\nDer Befehlsverlauf wird getrennt gespeichert; mit `-h` wählst du eine andere Verlaufsdatei.\n\nMit `-p` wählst du eine andere `ytnova.conf`. Vorhandene ältere Dateien im Home-Verzeichnis und paketierte Vorgaben bleiben Rückfalloptionen. Über die [F10-Konfiguration](topic:f10) bearbeitest du die aktiven Dateien.",
     },
     {
         "copy-move-targets",
-        "Copy/Move Targets",
+        "Kopier- und Verschiebeziele",
         NULL,
-        "`Copy`, `move` und `pathcopy` fragen zuerst nach einem Namen oder Umbenennungsmuster, dann nach dem Zielverzeichnis.\n\nBei einer Datei lässt du ihren vorbelegten Namen stehen, um ihn beizubehalten, oder änderst ihn zum Umbenennen. Du kannst in beiden Fällen Wildcards verwenden.\n\nBei [markierten Dateien](topic:tagged) lässt du das vorbelegte `*` stehen, um ihre Namen beizubehalten, oder gibst ein Umbenennungsmuster ein:\n`*` übernimmt den restlichen ursprünglichen Namen. Nutze `copy-*`, um ein Präfix hinzuzufügen, oder `*.bak`, um die Erweiterung zu ändern.\n`?` übernimmt ein Zeichen des ursprünglichen Namens. Zum Beispiel übernimmt `??-*` die ersten beiden Zeichen, fügt `-` hinzu und übernimmt dann den Rest.\nAndere Zeichen werden wie geschrieben verwendet.\n\nNutze `Up`, um einen früheren Namen oder ein früheres Muster wiederzuverwenden.\n\nGib das Zielverzeichnis in `To Directory` ein. Im [F8-Split](topic:f8)-Modus beginnt es mit dem derzeit ausgewählten Verzeichnis des anderen Panels.\n\nNutze `Up`, um ein früheres Ziel wiederzuverwenden, oder drücke [F2](topic:f2-picker), um eines zu wählen.\n\nDieselben Prompts gelten für [Archivdateien](topic:archive-file) und [Archivverzeichnisse](topic:archive-dir). Beim Kopieren einer Archivdatei extrahiert ytnova sie bei Bedarf; beim Verschieben kopiert ytnova sie und entfernt dann das Original. Du kannst auch in ein geloggtes Archiv kopieren.\n\n`pathcopy` stellt den bestehenden Pfad der ausgewählten Datei unterhalb des Zielverzeichnisses wieder her.\n\nWenn das Zielverzeichnis fehlt, fragt ytnova, ob es erstellt werden soll. Existiert bereits eine Zieldatei, fragt ytnova vor dem Ersetzen.",
-        0,
-        NULL,
+        "`Copy`, `move` und `pathcopy` fragen zuerst nach einem Namen oder Umbenennungsmuster, dann nach dem Zielverzeichnis.\n\nBei einer Datei lässt du ihren vorbelegten Namen stehen, um ihn beizubehalten, oder änderst ihn zum Umbenennen. Du kannst in beiden Fällen Wildcards verwenden.\n\nBei [markierten Dateien](topic:tagged) lässt du das vorbelegte `*` stehen, um ihre Namen beizubehalten, oder gibst ein Umbenennungsmuster ein:\n`*` übernimmt den restlichen ursprünglichen Namen. Nutze `copy-*`, um ein Präfix hinzuzufügen, oder `*.bak`, um die Erweiterung zu ändern.\n`\?` übernimmt ein Zeichen des ursprünglichen Namens. Zum Beispiel übernimmt `\?\?-*` die ersten beiden Zeichen, fügt `-` hinzu und übernimmt dann den Rest.\nAndere Zeichen werden wie geschrieben verwendet.\n\nNutze `Up`, um einen früheren Namen oder ein früheres Muster wiederzuverwenden.\n\nGib das Zielverzeichnis in `To Directory` ein. Im [F8-Split](topic:f8)-Modus beginnt es mit dem derzeit ausgewählten Verzeichnis des anderen Panels.\n\nNutze `Up`, um ein früheres Ziel wiederzuverwenden, oder drücke [F2](topic:f2-picker), um eines zu wählen.\n\nDieselben Prompts gelten für [Archivdateien](topic:archive-file) und [Archivverzeichnisse](topic:archive-dir). Beim Kopieren einer Archivdatei extrahiert ytnova sie bei Bedarf; beim Verschieben kopiert ytnova sie und entfernt dann das Original. Du kannst auch in ein geloggtes Archiv kopieren.\n\n`pathcopy` stellt den bestehenden Pfad der ausgewählten Datei unterhalb des Zielverzeichnisses wieder her.\n\nWenn das Zielverzeichnis fehlt, fragt ytnova, ob es erstellt werden soll. Existiert bereits eine Zieldatei, fragt ytnova vor dem Ersetzen.",
     },
     {
         "vi-keys",
         "VI-Tasten",
         NULL,
-        "Mit `VI_KEYS=1` bleiben die vi-Bewegungstasten in Kleinbuchstaben aktiv.\nBefehle, die kollidieren würden, wandern auf Großbuchstaben oder eine andere sichere Taste.\n\n`Navigations-Umlegung`\nMit `VI_KEYS=1` werden `h`, `j`, `k` und `l` zu `Left`, `Down`, `Up` und `Right`.\n`C-u` und `C-d` werden zu Seite hoch und Seite runter.\n\n`Befehlskollisionen`\nBefehle, die diese Kleinbuchstaben stehlen würden, gehen aus dem Weg.\nBeispiele sind `J compare`, `K volume`, `D delete tagged` und `U untag all`, wo diese Aktionen existieren.\n\n\n- [Navigation](topic:ytnova-navigation)\n- [Bearbeitung in Eingabezeilen](topic:command-line-editing)",
-        2,
-        generated_help_links_de_vi_keys,
+        "Setze `VI_KEYS=1`, um die kleinen vi-Bewegungstasten zu verwenden.\n`h`, `j`, `k` und `l` werden zu `Left`, `Down`, `Up` und `Right`.\n`C-u` und `C-d` werden zu Seite hoch und Seite runter.\n\nBefehle mit einer Kollision erhalten eine andere Belegung. Der Footer zeigt die aktiven Tasten; Beispiele sind `J` für Vergleichen, `K` für das Volumenmenü, `D` zum Löschen markierter Dateien und `U` zum Entfernen aller Markierungen.",
     },
     {
         "f10",
         "F10-Konfiguration",
         NULL,
-        "Benutze `F10` für Konfigurationsarbeit, nicht für einmalige Dateiaktionen.\nDort gehören Profil, Befehle, Themes, Reload und ähnliche dauerhafte Einstellungen hin.\n\n`Konfigurationsoberfläche`\nBenutze `F10`, wenn du dauerhaftes Verhalten ändern willst, statt nur die aktuelle Auswahl zu beeinflussen.\nProfileinstellungen, Befehlsbeschriftungen, Themes und Reload leben hier.\n\n`Zugehörige Dateien`\n`ytnova.conf` enthält Profileinstellungen.\n`commands.conf` enthält Benutzerlabels und Bindings für Befehle.\n`themes.conf` enthält Theme-Auswahl und Theme-Overrides.\n\n\n- [Theming](topic:theming)\n- [Gemeinsame Befehle](topic:shared-commands)",
-        2,
-        generated_help_links_de_f10,
+        "Drücke `F10`, wenn du die dauerhafte Einrichtung ändern willst statt eine Dateiaktion auszuführen.\nWähle den Profilbefehl, um `ytnova.conf` zu bearbeiten.\nWähle den Befehlseintrag für Beschriftungen und Belegungen in `commands.conf`.\nWähle den Theme-Eintrag, um `themes.conf` zu bearbeiten.\nWähle Neuladen, um die gespeicherte Konfiguration erneut anzuwenden.\n\nUnter [Konfigurationsdateien](topic:configuration-files) stehen die Speicherorte und unter [Themes](topic:theming) die Hilfe-Rollen.",
     },
     {
         "theming",
-        "Theming",
+        "Themes",
         NULL,
-        "Themes stylen semantische Rollen, nicht einzelne Bildschirmpositionen.\nDadurch bleiben Hilfe, Auswahlfenster, Auswahlmarkierung, Footer und Warnflächen als ein System lesbar.\n\n`Theme-Modell`\nThemes setzen semantische Rollen wie `footer`, `help`, `help_link`, `selection`, `picker` und `warning`.\nSo bleibt eine Theme-Änderung im ganzen UI konsistent.\n\n`Bearbeitungspfad`\nBenutze `F10`, um den Bearbeitungspfad für Theme oder Konfiguration zu öffnen.\nAchte zuerst auf lesbare Flächen mit hoher Nutzung: Auswahl, Picker, Footer und Hilfe.\n\n\n- [F10 config](topic:f10)",
-        1,
-        generated_help_links_de_theming,
+        "Themes weisen benannten Oberflächenrollen Farben und Attribute zu.\n`footer` gestaltet den Footer des Hauptprogramms.\n`help` gestaltet den Textkörper der F1-Hilfe.\n`help_footer` gestaltet die Hilfeleiste.\n`help_keybind` hebt den gebundenen Buchstaben hervor.\n`help_heading` gestaltet Hilfetitel und Überschriften.\n`help_topic` gestaltet Tasten und Begriffe in Backticks.\n`help_link` und `help_link_selection` gestalten Links und den ausgewählten Link.\n`help_box_lines` gestaltet den Rahmen des Popups.\n\nÜber die [F10-Konfiguration](topic:f10) bearbeitest du die aktive Theme-Datei. Auswahl, Footer, Picker und Hilfetext müssen vor dem gewählten Hintergrund lesbar bleiben.",
     },
     {
         "directory",
-        "Directory Help",
+        "Verzeichnishilfe",
         "main.dir",
-        "Dies ist das `Verzeichnisfenster`. Es zeigt den hierarchischen Verzeichnisbaum, den ytnova im aktuellen `Volume` gelesen hat.\nDie Dateien des gewählten Verzeichnisses erscheinen im `kleinen Fenster`.\n\n`+` bedeutet, dass ytnova den Unterverzeichniszweig dieses Verzeichnisses im Baum noch nicht erweitert oder geloggt hat.\n\n`Left` klappt den ausgewählten Zweig ein. Wenn dieser Zweig bereits verborgen ist, geht die Auswahl zum übergeordneten Verzeichnis.\n`Right` geht zum ersten angezeigten Verzeichnis unter dem ausgewählten Verzeichnis. Wenn ytnova es noch nicht gelesen hat, liest es dieses zuerst ein.\n`+` liest das ausgewählte Verzeichnis ein und fügt seinen Zweig zum Baum hinzu, ohne die Auswahl zu bewegen.\n`*` liest jedes Verzeichnis unter dem ausgewählten Verzeichnis ein, ohne die Auswahl zu bewegen.\n`-` klappt das ausgewählte Verzeichnis ein und entfernt seine Dateien aus dem eingelesenen Baum. Sie erscheinen nicht mehr in Showall oder den Statistiken.\nDrücke `Enter`, um in das `Dateifenster` des ausgewählten Verzeichnisses zu wechseln. Wenn dessen Baumzweig noch nicht geloggt ist, liest ytnova ihn zuerst ein.\n\nDer `Footer` zeigt die hier verfügbaren Befehle.\nEinige Befehle haben ihre eigene `F1`-Hilfe.\n\nDie Zahlentasten ändern, was du siehst.\n`1` zeigt Namen, die Standardansicht.\n`2` zeigt Attribute.\n`3` zeigt den Eigentümer.\n`4` zeigt Zeiten.\nDrücke eine aktive `2`, `3` oder `4` erneut, um zu den Namen zurückzukehren.\nDiese Ansichten ändern normalerweise sowohl den Baum als auch das `Dateifenster` dieses Panels.\nSetze `SEPARATE_DIR_FILE_VIEWS=1` in `ytnova.conf`, um sie getrennt zu halten.\n\n`5` schaltet kompakte Namen im `Dateifenster` ein oder aus.\n`6` schaltet die Größeneinheiten in Baum- und Dateizeilen um.\n`7` zeigt eine kleine Textvorschau für jede angezeigte Datei.\n`8` zeigt Dateidetails für jede angezeigte Datei.\n`9` zeigt Git-Informationen für Dateien in einem Git-Projekt.\n`5`, `7`, `8` und `9` ändern nur das `Dateifenster`.\n\n`Attributes` öffnet ein Untermenü, um die Attribute des gewählten Verzeichnisses zu ändern.\n[Copy](topic:copy-move-targets) kopiert das gewählte Verzeichnis mit seinem Inhalt.\n`Delete` löscht das gewählte Verzeichnis.\n[Filter](topic:filter) ändert die Dateien in der aktuellen Ansicht.\n`filter-passend` bedeutet: Dateien, die der aktuelle Filter zulässt.\n`Global` zeigt Dateien aus allen geloggten Volumes in einer Liste.\n`I` (`Invert`) kehrt nur die Markierungen filterpassender sichtbarer Dateien im gewählten Verzeichnis um.\n`J` [compare](topic:compare) vergleicht dieses Verzeichnis mit einem anderen.\n`K volume` öffnet das Volume-Menü.\n`Log` liest das gewählte Verzeichnis oder Archiv oder liest ein geloggtes Verzeichnis erneut.\n`Makedir` erstellt ein Verzeichnis unter dem gewählten Verzeichnis.\n`Newfile` erstellt eine leere Datei im gewählten Verzeichnis.\n[Output](topic:output) exportiert die aktuelle Auswahl.\n`Pipe` führt einen Befehl im gewählten Verzeichnis aus und gibt ihm die angezeigten Dateinamen.\n`Quit` beendet ytnova.\n`Rename` benennt das gewählte Verzeichnis um.\n`Showall` zeigt alle Dateien im aktuellen Volume in einer Liste.\n`T` und `U` markieren oder entmarkieren alle passenden Dateien im gewählten Verzeichnis und gehen dann zum nächsten Verzeichnis.\n`C-t` und `C-u` [markieren oder entmarkieren](topic:tagged) alle passenden Dateien in jedem geloggten Verzeichnis des aktuellen Volumes.\n[moVedir](topic:copy-move-targets) verschiebt das gewählte Verzeichnis mit seinem Inhalt.\n`eXecute` führt einen Befehl für das gewählte Verzeichnis aus.\n`Z archive` erstellt ein Archiv aus der aktuellen Auswahl.\n`/ jump` springt beim Tippen zu einem angezeigten Namen.\n`\\` dotfiles` zeigt oder versteckt versteckte Namen.\n\n`F5` aktualisiert die aktive Ansicht.\n`F6` zeigt oder versteckt Statistiken.\n`F7` schaltet Autoview ein oder aus.\n`F8` schaltet den Split-Screen ein oder aus.\n`F9` öffnet das Anwendungsmenü.\n`F10` öffnet die Konfiguration.\n`Esc` bricht den aktuellen Vorgang ab.",
-        0,
-        NULL,
+        "Dies ist das `Verzeichnisfenster`. Es zeigt den hierarchischen Verzeichnisbaum, den ytnova im aktuellen `Volume` gelesen hat.\nDie Dateien des gewählten Verzeichnisses erscheinen im `kleinen Fenster`.\n\n`+` bedeutet, dass ytnova den Unterverzeichniszweig dieses Verzeichnisses im Baum noch nicht erweitert oder geloggt hat.\n\n`Left` klappt den ausgewählten Zweig ein. Wenn dieser Zweig bereits verborgen ist, geht die Auswahl zum übergeordneten Verzeichnis.\n`Right` geht zum ersten angezeigten Verzeichnis unter dem ausgewählten Verzeichnis. Wenn ytnova es noch nicht gelesen hat, liest es dieses zuerst ein.\n`+` liest das ausgewählte Verzeichnis ein und fügt seinen Zweig zum Baum hinzu, ohne die Auswahl zu bewegen.\n`*` liest jedes Verzeichnis unter dem ausgewählten Verzeichnis ein, ohne die Auswahl zu bewegen.\n`-` klappt das ausgewählte Verzeichnis ein und entfernt seine Dateien aus dem eingelesenen Baum. Sie erscheinen nicht mehr in Showall oder den Statistiken.\nDrücke `Enter`, um in das `Dateifenster` des ausgewählten Verzeichnisses zu wechseln. Wenn dessen Baumzweig noch nicht geloggt ist, liest ytnova ihn zuerst ein.\n\nDer `Footer` zeigt die hier verfügbaren Befehle.\nEinige Befehle haben ihre eigene `F1`-Hilfe.\n\nDie Zahlentasten ändern, was du siehst.\n`1` zeigt Namen, die Standardansicht.\n`2` zeigt Attribute.\n`3` zeigt den Eigentümer.\n`4` zeigt Zeiten.\nDrücke eine aktive `2`, `3` oder `4` erneut, um zu den Namen zurückzukehren.\nDiese Ansichten ändern normalerweise sowohl den Baum als auch das `Dateifenster` dieses Panels.\nSetze `SEPARATE_DIR_FILE_VIEWS=1` in `ytnova.conf`, um sie getrennt zu halten.\n\n`5` schaltet kompakte Namen im `Dateifenster` ein oder aus.\n`6` schaltet die Größeneinheiten in Baum- und Dateizeilen um.\n`7` zeigt eine kleine Textvorschau für jede angezeigte Datei.\n`8` zeigt Dateidetails für jede angezeigte Datei.\n`9` zeigt Git-Informationen für Dateien in einem Git-Projekt.\n`5`, `7`, `8` und `9` ändern nur das `Dateifenster`.\n\n`Attributes` öffnet ein Untermenü, um die Attribute des gewählten Verzeichnisses zu ändern.\n[Copy](topic:copy-move-targets) kopiert das gewählte Verzeichnis mit seinem Inhalt.\n`Delete` löscht das gewählte Verzeichnis.\n[Filter](topic:filter) ändert die Dateien in der aktuellen Ansicht.\n`filter-passend` bedeutet: Dateien, die der aktuelle Filter zulässt.\n`Global` zeigt Dateien aus allen geloggten Volumes in einer Liste.\n`I` (`Invert`) kehrt nur die Markierungen filterpassender sichtbarer Dateien im gewählten Verzeichnis um.\n`J` [compare](topic:compare) vergleicht dieses Verzeichnis mit einem anderen.\n`K volume` öffnet das Volume-Menü.\n`Log` liest das gewählte Verzeichnis oder Archiv oder liest ein geloggtes Verzeichnis erneut.\n`Makedir` erstellt ein Verzeichnis unter dem gewählten Verzeichnis.\n`Newfile` erstellt eine leere Datei im gewählten Verzeichnis.\n[Output](topic:output) exportiert die aktuelle Auswahl.\n`Pipe` führt einen Befehl im gewählten Verzeichnis aus und gibt ihm die angezeigten Dateinamen.\n`Quit` beendet ytnova.\n`Rename` benennt das gewählte Verzeichnis um.\n`Showall` zeigt alle Dateien im aktuellen Volume in einer Liste.\n`T` und `U` markieren oder entmarkieren alle passenden Dateien im gewählten Verzeichnis und gehen dann zum nächsten Verzeichnis.\n`C-t` und `C-u` [markieren oder entmarkieren](topic:tagged) alle passenden Dateien in jedem geloggten Verzeichnis des aktuellen Volumes.\n[moVedir](topic:copy-move-targets) verschiebt das gewählte Verzeichnis mit seinem Inhalt.\n`eXecute` führt einen Befehl für das gewählte Verzeichnis aus.\n`Z archive` erstellt ein Archiv aus der aktuellen Auswahl.\n`/ jump` springt beim Tippen zu einem angezeigten Namen.\n`\\` zeigt oder versteckt verborgene Namen.\n\n`F5` aktualisiert die aktive Ansicht.\n`F6` zeigt oder versteckt Statistiken.\n`F7` schaltet Autoview ein oder aus.\n`F8` schaltet den Split-Screen ein oder aus.\n`F9` öffnet das Anwendungsmenü.\n`F10` öffnet die Konfiguration.\n`Esc` bricht den aktuellen Vorgang ab.",
     },
     {
         "file",
-        "File Help",
+        "Dateihilfe",
         "main.file",
-        "This is the `file window`. The selected row is a `file`.\nCommands in this `footer` act on it unless the line says it uses tagged files.\n\nThe `footer` shows the commands available here.\nSome commands have their own `F1` help.\n\nThe number keys change what you see.\n`1`: Show names.\n`2`: Show attributes, including `name -> target` for symlinks.\n`3`: Show the owner.\n`4`: Show times.\nPress the active `2`, `3`, or `4` again to return to names.\n`5`: Turn `Compact` on or off from the names view.\n`6`: Switch visible file sizes between readable and raw units.\n`7`: Show a small text preview on each visible file row.\n`8`: Show file details on each visible file row.\n`9`: Show the `Git band` when this directory is in a Git worktree.\n\n`A`: Open attributes for the selected file.\n`C-a`: Open attributes for matching [tagged files](topic:tagged).\n`C`: Open [Copy](topic:copy-move-targets) for the selected file.\n`C-c`: Copy matching tagged files.\n`D`: Delete the selected file.\n`C-d`: Delete matching tagged files.\n\n`E`: Edit the selected file in the configured editor.\n`F`: Open [Filter](topic:filter) for this list.\n`H`: Open the selected file in hex view.\n`I`: Reverse tags in the visible list.\n\n`J`: [Compare](topic:compare) the selected file with another file.\n`K`: Open the volume menu.\n`L`: Öffnet `Log Path:`, ohne diese Liste zu verlassen. Der gewählte Pfad ist vorbelegt; `C-u` leert ihn für einen anderen Pfad. Log akzeptiert nur Verzeichnisse und erkannte Archivdateien.\n`M`: Open [Move](topic:copy-move-targets) for the selected file.\n`C-m`: Passende markierte Dateien bei verfügbarer Protokollunterstützung verschieben.\n`C-n`: Passende markierte Dateien ohne Protokollunterstützung verschieben.\n`N`: Create a new empty file.\n\n`O`: Open [Output](topic:output) for the selected file.\n`C-o`: Output matching tagged files.\n`P`: Run a command with the selected file’s contents as input.\n`C-p`: Run that command for matching tagged files.\n`Q`: Quit ytnova.\n`R`: Rename the selected file.\n`C-r`: Rename matching tagged files.\n\n`S`: Choose the file-list sort order.\n`C-s`: Search tagged files.\n`T`: [Tag](topic:tagged) the selected file, then move to the next file.\n`C-t`: Tag every visible file.\n`U`: Remove the selected file’s tag, then move to the next file.\n`C-u`: Remove tags from every visible file.\n\n`V`: View the selected file.\n`C-v`: View matching tagged files one after another.\n`X`: Type a shell command. `{}` is the selected file’s path.\n`C-x`: Run that command once for each matching tagged file.\n`Y`: [Pathcopy](topic:copy-move-targets) the selected file and keep its path relative to the current volume root.\n`C-y`: Pathcopy matching tagged files.\n`Z`: Archive tagged files, or the selected file when none are tagged.\n`C-z`: Archive matching tagged files.\n\n`/ jump` moves to a displayed name as you type.\n`\\` dotfiles` shows or hides hidden names.\n\n`F5`: Refresh the active view.\n`F6`: Show or hide the statistics strip.\n`F7`: Turn autoview on or off.\n`F8`: Turn split-screen on or off.\n`F9`: Open the Applications menu.\n`F10`: Open configuration.\n`Esc`: Cancel the current operation.",
-        0,
-        NULL,
+        "Dies ist das `Dateifenster`. Die ausgewählte Zeile ist eine `Datei`.\nDie Befehle in diesem `Footer` wirken auf sie, sofern die Zeile nicht ausdrücklich markierte Dateien nennt.\n\nDer `Footer` zeigt die hier verfügbaren Befehle.\nEinige Befehle haben eine eigene `F1`-Hilfe.\n\nDie Zifferntasten ändern die Anzeige.\n`1`: Namen anzeigen.\n`2`: Attribute anzeigen, bei symbolischen Links einschließlich `Name -> Ziel`.\n`3`: Eigentümer anzeigen.\n`4`: Zeiten anzeigen.\nDrücke die aktive Taste `2`, `3` oder `4` erneut, um zu den Namen zurückzukehren.\n`5`: In der Namensansicht `Kompakt` ein- oder ausschalten.\n`6`: Sichtbare Dateigrößen zwischen lesbaren und rohen Einheiten umschalten.\n`7`: Für jede sichtbare Datei eine kleine Textvorschau anzeigen.\n`8`: Für jede sichtbare Datei Details anzeigen.\n`9`: Das `Git-Band` anzeigen, wenn dieses Verzeichnis zu einem Git-Worktree gehört.\n\n`A`: Attribute der ausgewählten Datei öffnen.\n`C-a`: Attribute passender [markierter Dateien](topic:tagged) öffnen.\n`C`: [Kopieren](topic:copy-move-targets) für die ausgewählte Datei öffnen.\n`C-c`: Passende markierte Dateien kopieren.\n`D`: Die ausgewählte Datei löschen.\n`C-d`: Passende markierte Dateien löschen.\n\n`E`: Die ausgewählte Datei im konfigurierten Editor bearbeiten.\n`F`: Den [Filter](topic:filter) für diese Liste öffnen.\n`H`: Die ausgewählte Datei in der Hex-Ansicht öffnen.\n`I`: Markierungen in der sichtbaren Liste umkehren.\n\n`J`: Die ausgewählte Datei mit einer anderen Datei [vergleichen](topic:compare).\n`K`: Das Volumenmenü öffnen.\n`L`: `Pfad einlesen:` öffnen, ohne diese Liste zu verlassen. Der ausgewählte Pfad ist vorbelegt; `C-u` leert das Feld für einen anderen Pfad. Eingelesen werden nur Verzeichnisse und erkannte Archivdateien.\n`M`: [Verschieben](topic:copy-move-targets) für die ausgewählte Datei öffnen.\n`C-m`: Passende markierte Dateien verschieben, wenn das Tastaturprotokoll verfügbar ist.\n`C-n`: Passende markierte Dateien ohne Protokollunterstützung verschieben.\n`N`: Eine neue leere Datei anlegen.\n\n`O`: [Ausgabe](topic:output) für die ausgewählte Datei öffnen.\n`C-o`: Passende markierte Dateien ausgeben.\n`P`: Einen Befehl mit dem Inhalt der ausgewählten Datei als Eingabe ausführen.\n`C-p`: Diesen Befehl für passende markierte Dateien ausführen.\n`Q`: ytnova beenden.\n`R`: Die ausgewählte Datei umbenennen.\n`C-r`: Passende markierte Dateien umbenennen.\n\n`S`: Die Sortierreihenfolge der Dateiliste wählen.\n`C-s`: Markierte Dateien durchsuchen.\n`T`: Die ausgewählte Datei [markieren](topic:tagged) und zur nächsten Datei gehen.\n`C-t`: Alle sichtbaren Dateien markieren.\n`U`: Die Markierung der ausgewählten Datei entfernen und zur nächsten Datei gehen.\n`C-u`: Markierungen von allen sichtbaren Dateien entfernen.\n\n`V`: Die ausgewählte Datei ansehen.\n`C-v`: Passende markierte Dateien nacheinander ansehen.\n`X`: Einen Shell-Befehl eingeben. `{}` steht für den Pfad der ausgewählten Datei.\n`C-x`: Diesen Befehl einmal für jede passende markierte Datei ausführen.\n`Y`: Die ausgewählte Datei per [Pfadkopie](topic:copy-move-targets) kopieren und ihren Pfad relativ zum aktuellen Volumenstamm beibehalten.\n`C-y`: Passende markierte Dateien per Pfadkopie kopieren.\n`Z`: Markierte Dateien archivieren, oder die ausgewählte Datei, wenn keine markiert ist.\n`C-z`: Passende markierte Dateien archivieren.\n\n`/ jump` springt beim Tippen zu einem angezeigten Namen.\n`\\` zeigt oder versteckt verborgene Namen.\n\n`F5`: Die aktive Ansicht aktualisieren.\n`F6`: Die Statistikzeile zeigen oder verbergen.\n`F7`: Autoview ein- oder ausschalten.\n`F8`: Den Split-Screen ein- oder ausschalten.\n`F9`: Das Anwendungsmenü öffnen.\n`F10`: Die Konfiguration öffnen.\n`Esc`: Den aktuellen Vorgang abbrechen.",
     },
     {
         "archive-dir",
-        "Archive Directory Help",
+        "Archivverzeichnishilfe",
         "main.archive-dir",
-        "Benutze diese Seite für Befehle im Archivbaum und für Regeln, die nur in Archiven gelten.\nGemeinsame Zeilen öffnen ihr erklärendes Thema.\nEinzeilige Zeilen sagen schon genug zum Handeln.\n\n`Ansicht und Bereich`\n`1`: Nur Name.\nDas ist die schlichte Standardansicht.\n`2`: Attribute.\nIn Dateilisten zeigt das auch `Name -> Ziel` bei Symlinks.\n`3`: Eigentümer.\n`4`: Zeiten.\n`Zurücksetzen`: `1` bringt zur schlichten Namensansicht zurück.\nWenn `2`, `3` oder `4` schon aktiv ist, springt dieselbe Taste ebenfalls zurück zu Name.\n`Archivbaum gegen Dateifenster`: Im Archiv-Verzeichnisfokus ändern `5`, `7` und `8` nicht die Baumzeilen.\nSie ändern das Archiv-Dateifenster dieses Panels.\n`5`: Compact nur aus der aktuellen `1`-Namensansicht umschalten.\n`6`: Archivzeilen zwischen lesbaren und rohen Größeneinheiten umschalten.\nDie Statistik bleibt lesbar.\n`7`: Mini-Vorschautext auf jeder sichtbaren Archiv-Dateizeile zeigen und Compact verlassen, damit du ihn sehen kannst.\n`8`: Datei-Detailtext auf jeder sichtbaren Archiv-Dateizeile zeigen und Compact verlassen, damit du ihn sehen kannst.\n`9`: In Archiven unbenutzt.\n`0`: Schaltet Size, Packed und Ratio für Archiv-Dateizeilen ein oder aus.\n`Showall`: Die Dateiliste für das aktuelle Archiv öffnen.\n`Global`: Archiv-Ergebnisse in die Sammelliste über mehrere Volumes mischen.\n`Root/Exit`: `\\` springt zur Archivwurzel oder verlässt das Archiv, wenn du dort schon bist.\n`Jump`: Drücke `/`, tippe Buchstaben und drücke `Enter`, um auf dem besten sichtbaren Treffer zu landen.\n`Dotfiles`: Versteckte Archiveinträge ein- oder ausblenden, wenn diese Ansicht sie zeigt.\n\n`Arbeitsmenge`\n`Filter`: Den aktuellen archivgestützten Dateibereich filtern.\n`Tag`: Dateien im aktuellen virtuellen Verzeichnisbereich markieren.\n`Untag`: Markierungen im aktuellen virtuellen Verzeichnisbereich entfernen.\n`I` (`Invert`): Nur die Markierungen filterpassender sichtbarer Einträge im gewählten Archivverzeichnis umkehren.\n\n`Archiv-Verzeichnisaktionen`\n`Compare`: Das gewählte Archivverzeichnis oder den aktuellen Archivbaum vergleichen.\n`Output`: Die aktuelle archivgestützte Auswahl über den Output-Ablauf exportieren.\n`Pipe`: Einen Shell-Befehl eingeben. ytnova schickt die sichtbaren passenden Namen aus dem gewählten Archivverzeichnis zeilenweise an seine Standard-Eingabe.\n`Log`: Den gewählten Archiveintrag als weiteres Archiv laden, wenn sein Archivformat unterstützt wird.\n`Volume`: Die Volume-Auswahl öffnen.\n`Makedir`: Ein Verzeichnis anlegen, sofern das Archivformat es unterstützt.\n`Rename`: Den gewählten Archiv-Verzeichniseintrag umbenennen.\n`Delete`: Den gewählten Archiv-Verzeichniseintrag löschen.\n`Quit`: ytnova beenden.\n\n`Archiv-Verzeichnis-Funktionstasten`\n`F1`: Kontextuelle Hilfe für die aktive Archiv-Verzeichnisoberfläche öffnen.\n`F5`: Das aktive Panel aktualisieren.\n`F6`: Die Statistik- oder Detaildarstellung des aktiven Panels ändern.\n`F7`: Die Vorschau für den aktuellen Dateikontext umschalten.\n`F8`: Den Split-Screen-Modus umschalten.\n`F9`: Das Anwendungsmenü öffnen.\n`F10`: Die Konfigurationsoberfläche öffnen.\n\n\n- [Navigation](topic:ytnova-navigation)\n- [Filter](topic:filter)\n- [Compare](topic:compare)",
-        3,
-        generated_help_links_de_archive_dir,
+        "Dies ist ein Verzeichnisbaum innerhalb eines Archivs. Seine Zeilen beschreiben Archiveinträge und keine normalen Dateisystemverzeichnisse.\nMit `Enter`, `Left` und `Right` bewegst du dich durch den Archivbaum.\n`\\` geht zur Archivwurzel; an der Wurzel verlässt es das Archiv.\n\n`1` bis `8` ändern die Archivansicht.\n`9` hat keine Wirkung, weil Archiveinträge keinen Git-Status haben.\n`0` zeigt oder verbirgt Größe, gepackte Größe und Verhältnis der Archivdateien.\n\n[Kopieren](topic:copy-move-targets) und `Pathcopy` extrahieren Einträge an ein Ziel.\n`Move`, `Delete`, `Rename` und `Makedir` werden nur angeboten, wenn das Archiv und die installierte libarchive das Schreiben des Ergebnisses unterstützen.\n[Filter](topic:filter), `Showall`, `Global`, `Tag`, `Untag` und `I` arbeiten im jeweiligen Bereich mit den Archiveinträgen.\n[Vergleichen](topic:compare), `Output` und `Pipe` lesen archivgestützte Pfade.\n`Log` öffnet einen unterstützten Archiveintrag als weiteres Archiv.\n`K` öffnet das Volumenmenü.\n`F5` aktualisiert die Ansicht.\n`F6` ändert die angezeigte Statistik.\n`F7` öffnet die Vorschau.\n`F8` öffnet den Split-Modus.\n`F9` öffnet Anwendungen.\n`F10` öffnet die Konfiguration.\n`Q` beendet ytnova.",
     },
     {
         "archive-file",
-        "Archive File Help",
+        "Archivdateihilfe",
         "main.archive-file",
-        "Benutze diese Seite für Befehle in Archiv-Dateilisten und für dateispezifische Archivregeln.\nGemeinsame Zeilen öffnen ihr erklärendes Thema.\nEinzeilige Zeilen sagen schon genug zum Handeln.\n\n`Ansicht und Bereich`\n`1`: Nur Name.\nDas ist die schlichte Standardansicht.\n`2`: Attribute.\nIn Dateilisten zeigt das auch `Name -> Ziel` bei Symlinks.\n`3`: Eigentümer.\n`4`: Zeiten.\n`Zurücksetzen`: `1` bringt zur schlichten Namensansicht zurück.\nWenn `2`, `3` oder `4` schon aktiv ist, springt dieselbe Taste ebenfalls zurück zu Name.\n`5`: Compact nur aus der aktuellen `1`-Namensansicht umschalten.\n`6`: Archivzeilen zwischen lesbaren und rohen Größeneinheiten umschalten.\nDie Statistik bleibt lesbar.\n`7`: Mini-Vorschautext auf jeder sichtbaren Archiv-Dateizeile zeigen und Compact verlassen, damit du ihn sehen kannst.\n`8`: Datei-Detailtext auf jeder sichtbaren Archiv-Dateizeile zeigen und Compact verlassen, damit du ihn sehen kannst.\n`9`: In Archiven unbenutzt.\n`Zusatzstatus`: `5`, `7` und `8` ersetzen einander im Statistiklabel, statt sich zu stapeln.\n`0`: Schaltet Size, Packed und Ratio für Archiv-Dateizeilen ein oder aus.\n`Sort`: Die Sortierung der aktuellen Archiv-Dateiliste ändern.\n`Jump`: Drücke `/`, tippe Buchstaben und drücke `Enter`, um auf dem besten sichtbaren Treffer zu landen.\n`Dotfiles`: Versteckte Archiveinträge ein- oder ausblenden, wenn diese Ansicht sie zeigt.\n\n`Arbeitsmenge`\n`Filter`: Die aktuelle archivgestützte Liste filtern.\n`C-s` durchsucht nur markierte Archiveinträge und entmarkiert Nicht-Treffer.\n`Tag`: Den gewählten Archiveintrag markieren, und `C-t` markiert alle sichtbaren Zeilen im aktuellen Bereich.\n`Untag`: Die Markierung des gewählten Archiveintrags entfernen, und `C-u` löscht Archiv-Markierungen im aktuellen Bereich.\n`I` (`Invert Tags`): Nur die Markierungen passender sichtbarer Einträge im aktuellen Archivverzeichnis umkehren.\n\n`Archiv-Dateiaktionen`\n`Copy`: `C` kopiert den gewählten Archiveintrag, und `C-k` kopiert die markierten Archiveinträge über denselben Prompt.\n`Move`: `M` verschiebt den gewählten Archiveintrag. `C-m` verschiebt die markierten Archiveinträge bei verfügbarer Protokollunterstützung; `C-n` tut dies andernfalls.\n`View`: Den gewählten Archiveintrag anzeigen, und `C-v` zeigt die markierten Archiveinträge nacheinander an.\n`Hex`: Den gewählten Archiveintrag in der Hex-Ansicht öffnen.\n`Compare`: Den gewählten Archiveintrag mit einer anderen Datei vergleichen.\n`Output`: Den gewählten Archiveintrag über den Output-Ablauf exportieren.\n`Pathcopy`: Den gewählten Archiveintrag kopieren und seinen relativen Pfad erhalten.\n`Pipe`: Einen Shell-Befehl eingeben und ihm den Inhalt des gewählten Archiveintrags über Standard-Eingabe zuführen.\n`Rename`: Den gewählten Archiveintrag umbenennen.\n`Delete`: Den gewählten Archiveintrag löschen.\n`Log`: Ein weiteres Verzeichnis oder eine Archivdatei loggen.\n`Volume`: Die Volume-Auswahl öffnen.\n`Quit`: ytnova beenden.\n\n`Archiv-Datei-Funktionstasten`\n`F1`: Kontextuelle Hilfe für die aktive Archiv-Dateioberfläche öffnen.\n`F5`: Das aktive Panel aktualisieren.\n`F6`: Die Statistik- oder Detaildarstellung des aktiven Panels ändern.\n`F7`: Die Vorschau für den aktuellen Dateikontext umschalten.\n`F8`: Den Split-Screen-Modus umschalten.\n`F9`: Das Anwendungsmenü öffnen.\n`F10`: Die Konfigurationsoberfläche öffnen.\n\n\n- [Navigation](topic:ytnova-navigation)\n- [Markiert](topic:tagged)\n- [Kopier-/Verschiebeziele](topic:copy-move-targets)\n- [Filter](topic:filter)\n- [Vergleich](topic:compare)\n- [Output](topic:output)",
-        6,
-        generated_help_links_de_archive_file,
+        "Dies ist eine Dateiliste innerhalb eines Archivs. Die ausgewählte Zeile ist ein Archiveintrag und keine normale beschreibbare Datei.\n`Enter` kehrt zum Archivverzeichnisbaum zurück.\n`Left` und `Right` bewegen sich zwischen Dateispalten.\n\n`1` bis `8` ändern die Archivansicht.\n`9` hat keine Wirkung, weil Archiveinträge keinen Git-Status haben.\n`0` zeigt oder verbirgt Größe, gepackte Größe und Verhältnis.\n\n`V` zeigt den ausgewählten Eintrag an und `H` öffnet ihn hexadezimal.\n[Kopieren](topic:copy-move-targets) und `Y` Pathcopy extrahieren den ausgewählten Eintrag; ihre `C-`-Varianten verwenden markierte Einträge.\n`Move`, `Delete` und `Rename` sind nur verfügbar, wenn das Zurückschreiben ins Archiv unterstützt wird.\n`eXecute` ist für Archiveinträge nicht verfügbar.\n[Filter](topic:filter), `Sort`, `Tag`, `Untag`, `I` und die Suche in markierten Dateien bleiben in der archivgestützten Liste.\n[Vergleichen](topic:compare), `Output` und `Pipe` lesen den ausgewählten Eintrag oder die markierte Menge.\n`Log` öffnet den ausgewählten Eintrag als weiteres Archiv, wenn sein Format unterstützt wird.\n`K` öffnet das Volumenmenü.\n`F5` aktualisiert die Ansicht.\n`F6` ändert die angezeigte Statistik.\n`F7` öffnet die Vorschau.\n`F8` öffnet den Split-Modus.\n`F9` öffnet Anwendungen.\n`F10` öffnet die Konfiguration.\n`Q` beendet ytnova.",
     },
     {
         "filter",
-        "Filter Help",
+        "Filterhilfe",
         "prompt.filter,prompt.filter-tagged",
-        "Gib einen oder mehrere Filterbegriffe ein und trenne sie mit Kommas.\nDer Prompt startet mit `*`; das bedeutet „alles anzeigen“.\nAlle Begriffe wirken zusammen auf den aktuellen Dateibereich.\n\n`Häufige Begriffe`\n* `*` — alle Dateien anzeigen\n* `*.c` — Glob-Muster\n* `*.c,*.h` — mehrere Glob-Muster\n* `-*.o` — Treffer ausschließen\n* `:r` — Attributtest\n* `:x` — Attributtest\n* `>2023-01-01` — Datumstest\n* `>1M` — Größentest\n\n`Kombinationsregeln`\nStapele Begriffe mit Kommas in einem Filter, zum Beispiel `*.c,-*.tmp` oder `*.log,>2024-01-01,-debug*`.\nZitiere den Filter am Shell-Prompt nur dann, wenn deine Shell ihn vorher expandieren würde.\n\n`Bereich`\nDer Filter wirkt immer auf die aktuelle Dateilisten-Familie.\nDas kann eine normale Dateiliste, eine Archiv-Dateiliste, Showall oder Global sein.\nMit `Tab` schaltest du zwischen allen Dateien und nur markierten Dateien um, wenn der Markierungsbereich verfügbar ist.\nWenn der Markierungsbereich aktiv ist, zeigt der Prompt `FILTER [tagged only]:`.\n\n\n- [Tagged](topic:tagged)\n- [Showall](topic:showall)\n- [Global](topic:global)\n- [Command-line editing](topic:command-line-editing)",
-        4,
-        generated_help_links_de_filter,
+        "Tippe ein Muster und drücke `Enter`, um die aktuelle Dateiliste zu filtern. Der Prompt beginnt mit `*`; das zeigt alle Dateien.\nVerwende `*.c` für ein Glob-Muster oder `*.c,*.h` für eines von beiden.\nEin vorangestelltes `-` schließt Treffer aus, zum Beispiel `*.c,-test*`.\nAttribute wie `:r` oder `:x`, Daten wie `>2024-01-01` und Größen wie `>1M` verwenden dieselbe kommagetrennte Syntax.\n\nWenn der aktuelle Bereich [markierte Dateien](topic:tagged) enthält, wechselt `Tab` zwischen allen und nur markierten Dateien, ohne Markierungen zu ändern.\nDer Filter betrifft nur die aktuelle normale, Archiv-, Showall- oder Global-Dateiliste. Er unterscheidet sich vom [/ Sprung](topic:list-jump), der nur die Auswahl bewegt.",
     },
     {
         "compare",
-        "Compare Help",
+        "Vergleichshilfe",
         NULL,
-        "Compare startet von der aktuellen Datei, dem aktuellen Verzeichnis oder dem aktuellen geloggten Baum im aktiven Panel.\nDateivergleich prüft eine Datei gegen ein Ziel.\nVerzeichnisvergleich kann das aktuelle Verzeichnis, den geloggten Baum oder ein externes Viewer-Ziel vergleichen.\nInterner Vergleich markiert Ergebnisse nur auf der Quellseite.\n\n`Vergleichsablauf`\nWähle zuerst das Ziel.\nWähle dann den Vergleichsbereich, wenn die Quelle ein Verzeichnis ist.\nWähle dann die Vergleichsbasis, wenn die Laufzeit mehr als eine Basis anbietet.\nZum Schluss wähle die Ergebnisklasse, die auf der Quellseite markiert werden soll.\n\n`Vergleichsregeln`\n* Geloggter-Baum-Vergleich benutzt nur bereits geloggte Inhalte.\nUngeöffnete `+`-Äste werden nicht automatisch geloggt.\n* `FILEDIFF` darf `%1` und `%2` verwenden.\nFehlen diese Platzhalter, hängt ytnova Quell- und Zielpfad an den Hilfsbefehl an.\n* Ein externer Verzeichnis- oder Baumvergleich startet `DIRDIFF` oder `TREEDIFF`, statt Laufzeitergebnisse zu markieren.\n* Es gibt keinen separaten Modus „markierte Dateien vergleichen“.\n\n\n- [File mode](topic:file)\n- [Directory mode](topic:directory)\n- [Navigation](topic:ytnova-navigation)",
-        3,
-        generated_help_links_de_compare,
+        "Drücke `J`, um die ausgewählte Datei oder das Verzeichnis mit einem anderen Ziel zu vergleichen.\nWähle zuerst das [Ziel](topic:compare-target).\nWähle bei einem Verzeichnis den [Bereich](topic:compare-scope).\nWähle die [Vergleichsbasis](topic:compare-basis), wenn mehrere Möglichkeiten verfügbar sind.\nWähle danach, welches [Ergebnis](topic:compare-results) auf der Quellseite markiert wird.\n\nEin Vergleich des eingelesenen Baums verwendet nur bereits eingelesene Verzeichnisse; ungeöffnete `+`-Zweige werden nicht geöffnet.\nEin externer Verzeichnis- oder Baumvergleich startet `DIRDIFF` oder `TREEDIFF`, statt Ergebnisse zu markieren.\nDer Dateivergleich verwendet `FILEDIFF`; `%1` und `%2` stehen für die beiden Pfade, fehlende Platzhalter werden automatisch angehängt.\nDer Vergleich verändert keine Dateiinhalte und hat keinen eigenen Modus für markierte Dateien.",
     },
     {
         "compare-target",
-        "Compare Target Help",
+        "Vergleichsziel",
         "prompt.compare-target",
-        "Die aktuelle Datei, das aktuelle Verzeichnis oder der aktuelle geloggte Baum ist die Vergleichsquelle.\nGib genau einen Zielpfad direkt ein.\nBenutze `F2` zum Browsen.\nBenutze `Up` für die Historie.\nDrücke `F3` für den Vergleichsbereich: Datei, Verzeichnis, Baum oder externer Vergleich.\nDrücke `F4` für die Vergleichsbasis: `size`, `date`, `size+date` oder `hash`.\nDrücke `F5`, um das Ergebnis zu wählen, das nach dem Vergleich markiert wird.\nIm Split-Modus liefert das inaktive Panel das Standardziel für den Vergleich.\n\n`Zielregeln`\nGib genau einen Pfad ein.\nDer Vergleichsbereich entscheidet danach, ob dieser eine Pfad als Dateiziel, Verzeichnisziel oder geloggtes Baumziel behandelt wird.\n\n\n- [Compare Help](topic:compare)\n- [Command-line editing](topic:command-line-editing)",
-        2,
-        generated_help_links_de_compare_target,
+        "Gib die Datei oder das Verzeichnis für den Vergleich mit der aktuellen Auswahl ein und drücke `Enter`.\n`Up` verwendet ein früheres Ziel.\n`F2` öffnet die [Verzeichnisauswahl](topic:f2-picker), wenn das Ziel gebrowst werden kann.\nIm [F8-Split](topic:f8) liefert das andere Panel das anfängliche Ziel.\nDer spätere [Vergleichsbereich](topic:compare-scope) entscheidet, ob ein Verzeichnisziel nur dieses Verzeichnis oder den eingelesenen Baum meint.\n`Esc` bricht den Vergleich ab.",
     },
     {
         "compare-scope",
-        "Compare Scope Help",
+        "Vergleichsbereich",
         NULL,
-        "`Directory` vergleicht nur das aktuelle Verzeichnis.\n`Logged tree` vergleicht den aktuellen geloggten Baum und loggt ungeöffnete Äste nicht automatisch nach.\n`External viewer` startet den konfigurierten externen Vergleich statt Laufzeitergebnisse zu markieren.\n\n`Bereichswahl`\nBenutze `Directory` für eine Ebene.\nBenutze `Logged tree` für den aktuell geloggten rekursiven Baum.\nBenutze `External viewer`, wenn du ein externes Diff-Werkzeug statt markierter Vergleichsergebnisse in ytnova willst.\n\n\n- [Compare Help](topic:compare)",
-        1,
-        generated_help_links_de_compare_scope,
+        "Wähle, wie viel vom ausgewählten Verzeichnis verglichen wird.\n`Directory` vergleicht eine Verzeichnisebene.\n`Logged tree` schließt den rekursiven Baum ein, den ytnova bereits eingelesen hat; ungeöffnete `+`-Zweige werden nicht automatisch gelesen.\n`External viewer` startet das konfigurierte Verzeichnis- oder Baumvergleichsprogramm, statt Ergebnisse in ytnova zu markieren.\nDrücke `Enter`, um fortzufahren, oder `Esc`, um abzubrechen. Unter [Vergleichen](topic:compare) steht der gesamte Ablauf.",
     },
     {
         "change-date",
-        "Date Change Help",
+        "Datum ändern",
         "prompt.change-date",
-        "Gib das neue Datum als `YYYY-MM-DD` ein oder ergänze eine Zeit als `YYYY-MM-DD HH:MM[:SS]`.\n`F3` wechselt, ob der eingegebene Wert die Änderungszeit, die Zugriffszeit oder beide aktualisiert.\nMarkierte Datumsänderungen benutzen denselben Prompt und dieselbe Bereichsumschaltung.\n\n`Bereichswahl`\n`modified` ändert nur den Zeitstempel der letzten Änderung.\n`accessed` ändert nur den Zugriffszeitstempel.\n`both` schreibt den eingegebenen Wert in beide Zeitstempel.\n\n`Formatregeln`\nWenn du den Zeitanteil weglässt, behält ytnova Stunde, Minute und Sekunde aus dem aktuellen Wert bei.\nBenutze `Up` für die Prompt-Historie und `Esc`, um ohne Änderung abzubrechen.\n\n\n- [File mode](topic:file)\n- [Directory mode](topic:directory)\n- [Command-line editing](topic:command-line-editing)",
-        3,
-        generated_help_links_de_change_date,
+        "Gib ein Datum als `YYYY-MM-DD` ein, optional gefolgt von `HH:MM` oder `HH:MM:SS`.\nOhne Uhrzeit behält ytnova die vorhandene Stunde, Minute und Sekunde.\n`F3` wechselt zwischen Änderungszeit, Zugriffszeit und beiden Zeiten.\n`Enter` wendet die gewählte Einstellung an.\n`Esc` bricht ab.\nDie Aktion für markierte Dateien verwendet denselben Wert und dieselbe Auswahl für jede Datei.",
     },
     {
         "compare-basis",
-        "Compare Basis Help",
+        "Vergleichsbasis",
         NULL,
-        "`Size` vergleicht die Dateilänge.\n`Date` vergleicht die Änderungszeit.\n`siZe+date` behandelt jede Abweichung als Unterschied.\n`Hash` öffnet beide Dateien und vergleicht den Inhalt exakt, ist also langsamer.\n\n`Basiswahl`\nWähle die billigste Basis, die deine eigentliche Frage beantwortet.\nBenutze `Hash` nur dann, wenn Metadaten nicht zuverlässig genug sind.\n\n\n- [Compare Help](topic:compare)",
-        1,
-        generated_help_links_de_compare_basis,
+        "Wähle die Merkmale, anhand derer Einträge verglichen werden.\nNamens-, Größen- und Zeitvergleiche verwenden Dateimetadaten.\nVerwende `Hash`, wenn ein Inhaltsvergleich nötig ist und Metadaten nicht genügen.\nDrücke `Enter` zum Vergleichen oder `Esc` zum Abbrechen. Unter [Vergleichen](topic:compare) steht der gesamte Ablauf.",
     },
     {
         "compare-results",
-        "Compare Result Help",
+        "Vergleichsergebnis",
         NULL,
-        "Wähle die Ergebnisklasse, die auf der Quellseite markiert werden soll.\n`diFferent` markiert Unterschiede, `Unique` markiert nur Quell-eigene Einträge.\n`Match`, `Newer`, `Older`, `Type mismatch` und `Error` markieren jeweils nur diese eine Klasse.\n\n`Ergebnismarkierung`\nDer Vergleich überschreibt keine Dateien.\nEr markiert die gewählte Ergebnisklasse auf der aktiven Quellseite, damit du diese Teilmenge danach prüfen, kopieren, verschieben oder archivieren kannst.\n\n\n- [Compare Help](topic:compare)",
-        1,
-        generated_help_links_de_compare_results,
+        "Wähle die Ergebnisgruppe, die du behalten willst.\nYtreeNova markiert passende Einträge dieser Gruppe auf der aktiven Quellseite.\nDanach kannst du diese markierte Menge anzeigen, kopieren, verschieben, ausgeben oder archivieren.\nDer Vergleich überschreibt keine Seite. Unter [Markierte Dateien](topic:tagged) steht mehr zur entstehenden Arbeitsmenge.",
     },
     {
         "execute-file",
-        "Execute File Help",
+        "Datei ausführen",
         "prompt.execute-file",
-        "Der Prompt beginnt mit `{}` für den Pfad der gewählten Datei. Gib den Befehl davor ein.\nLasse `{}` dort, wo der gewählte Pfad stehen soll; Ziele, Umleitungen, Pipes und andere Shell-Syntax folgen danach.\nBenutze `C-x`, um denselben Befehl einmal pro markierter Datei zu wiederholen.\n\n`Platzhalterregeln`\n`{}` steht für genau einen ausgewählten Dateipfad. Zum Beispiel: `mv {} /tmp` oder `wc {} > count`.\nWenn du den markierten Wiederholungspfad benutzt, wird derselbe Befehl einmal pro markierter Datei wiederholt.\n\n\n- [File mode](topic:file)\n- [Command-line editing](topic:command-line-editing)",
-        2,
-        generated_help_links_de_execute_file,
+        "Der Prompt beginnt mit `{}`; das steht für den Pfad der ausgewählten Datei.\nTippe den Befehl vor `{}` und Umleitung, Pipe oder andere Shell-Syntax dahinter.\nEin Beispiel ist `wc {} > count`.\n`Enter` führt den Befehl einmal für die ausgewählte Datei aus.\nDie markierte Aktion `C-x` wiederholt denselben Befehl für jede markierte Datei.\n`Esc` bricht ab. Unter [Kommandozeilenbearbeitung](topic:command-line-editing) stehen die Bearbeitungstasten.",
     },
     {
         "execute-dir",
-        "Execute Directory Help",
+        "Verzeichnis ausführen",
         "prompt.execute-dir",
-        "Der Prompt beginnt mit `{}` für den aktuellen Verzeichnispfad. Gib den Befehl davor ein.\nLasse `{}` dort, wo der Pfad stehen soll; Ziele, Umleitungen, Pipes und andere Shell-Syntax folgen danach.\nBenutze `C-x`, um denselben Befehl einmal pro markierter Datei in der aktiven Liste zu wiederholen.\n\n`Platzhalterregeln`\n`{}` steht für den aktuellen Verzeichnispfad. Zum Beispiel: `tar -cf archive.tar {}`.\nDer markierte Wiederholungspfad läuft trotzdem über markierte Dateien aus der aktiven Liste, nicht über markierte Verzeichnisse aus irgendeiner anderen Stelle.\n\n\n- [Directory mode](topic:directory)\n- [Command-line editing](topic:command-line-editing)",
-        2,
-        generated_help_links_de_execute_dir,
+        "Der Prompt beginnt mit `{}`; das steht für den Pfad des ausgewählten Verzeichnisses.\nTippe den Befehl vor `{}` und weitere Shell-Syntax dahinter.\nEin Beispiel ist `tar -cf archive.tar {}`.\n`Enter` führt den Befehl für dieses Verzeichnis aus.\nDie markierte Aktion `C-x` wiederholt den Befehl weiterhin für markierte Dateien der aktiven Liste und nicht für markierte Verzeichnisse.\n`Esc` bricht ab. Unter [Kommandozeilenbearbeitung](topic:command-line-editing) stehen die Bearbeitungstasten.",
     },
     {
         "search-tagged",
-        "Search Tagged Help",
+        "Markierte durchsuchen",
         "prompt.search-tagged",
-        "Gib nur den Suchtext ein.\nytnova baut `grep -i -- PATTERN {}` für dich.\nNur markierte Dateien werden durchsucht, und Nicht-Treffer werden entmarkiert.\n\n`Regeln für markierte Suche`\nBaue zuerst eine markierte Arbeitsmenge auf.\nDurchsuche dann nur diese Menge.\nDas Ergebnis ist wieder eine kleinere markierte Menge, weil Dateien ohne Treffer ihre Markierung verlieren.\n\n\n- [Tagged](topic:tagged)\n- [Command-line editing](topic:command-line-editing)",
-        2,
-        generated_help_links_de_search_tagged,
+        "Tippe einen Suchtext und drücke `Enter`, um nur die aktuellen [markierten](topic:tagged) Dateien zu durchsuchen.\nDateien ohne Treffer verlieren ihre Markierung; übrig bleibt eine kleinere markierte Menge.\n`Up` verwendet eine frühere Suche.\n`Esc` bricht ab, ohne die Menge zu ändern.",
     },
     {
         "create-archive",
-        "Create Archive Help",
+        "Archiv erstellen",
         "prompt.create-archive",
-        "Benutze `.tar`, `.tar.gz` oder `.tgz`, `.tar.bz2` oder `.tbz2`, `.tar.xz` oder `.txz` oder `.zip`.\nWenn Markierungen existieren, gewinnt die markierte Menge.\nWenn nichts markiert ist, archiviert ytnova die aktuelle Datei- oder Verzeichnisauswahl.\n\n`Archivierungsregeln`\nVerzeichnisauswahlen werden rekursiv archiviert.\nArchivieren nimmt zuerst die markierte Menge, weil Markieren der normale Weg ist, um einen benutzerdefinierten Archivsatz aufzubauen.\n\n\n- [Tagged](topic:tagged)\n- [Command-line editing](topic:command-line-editing)",
-        2,
-        generated_help_links_de_create_archive,
+        "Gib den Pfad des neuen Archivs ein und drücke `Enter`.\nYtreeNova archiviert zuerst markierte Dateien. Sind keine Dateien markiert, archiviert es die aktuelle Auswahl.\nEin ausgewähltes Verzeichnis wird rekursiv aufgenommen.\nDie Dateiendung wählt das Archivformat, soweit die installierte libarchive es unterstützt.\n`Up` verwendet einen früheren Pfad.\n`F2` öffnet die [Verzeichnisauswahl](topic:f2-picker).\n`Esc` bricht ab.",
     },
     {
         "output",
-        "Output Help",
+        "Ausgabehilfe",
         NULL,
-        "Output exportiert Dateiinhalte in einen Pfad oder an einen Druckbefehl.\nWähle zuerst Datei oder Hardcopy und gib dann das endgültige Ziel an.\nBei Dateiausgabe schaltet `F3` zwischen `Raw`, `Framed` und `Page break` um.\n`Framed` und `Page break` fragen den Trenner ab, bevor der endgültige Dateipfad folgt.\n\n`Output-Modell`\n`Output` ist ein Exportablauf, kein Editor.\nEr kann reinen Inhalt, gerahmten Inhalt oder durch Seitentrenner getrennten Inhalt ausgeben.\nEr kann diese Ausgabe auch an einen Druckbefehl schicken statt an einen Dateipfad.\n\n`Prompt-Reihenfolge`\nWähle zuerst Datei oder Hardcopy.\nIm Datei-Ziel-Prompt schaltet `F3` zwischen `Raw`, `Framed` und `Page break` um.\nWenn `Framed` oder `Page break` aktiv ist, wähle zuerst den Trenner und gib danach den endgültigen Dateipfad ein.\nHardcopy fragt nur nach dem Druckbefehl.\n\n\n- [File mode](topic:file)\n- [Archive file](topic:archive-file)\n- [Command-line editing](topic:command-line-editing)",
-        3,
-        generated_help_links_de_output,
+        "`Output` exportiert die ausgewählte Datei oder bei der `C-`-Variante die markierte Menge.\nWähle ein [Ziel](topic:output-destination): einen Dateipfad oder Hardcopy.\nBei Dateiausgabe wechselt `F3` zwischen [Raw, Framed und Page break](topic:output-format).\nFramed und Page break fragen danach nach einem [Trenner](topic:output-separator) und kehren zum Zielprompt zurück.\nHardcopy fragt nach einem Druckbefehl und sendet immer Rohdaten.\n`Enter` übernimmt jede Auswahl; `Esc` bricht den aktuellen Prompt ab.",
     },
     {
         "output-format",
-        "Output Format Help",
+        "Ausgabeformat",
         NULL,
-        "`Raw` schreibt Inhalt ohne zusätzlichen Rahmen.\n`Framed` fügt Kopf- oder Fußzeilen pro Datei hinzu.\n`Page break` fügt zwischen Dateien einen Trenner ein und lässt am Ende keinen zusätzlichen Trenner stehen.\n\n`Formatwahl`\nBenutze `Raw`, wenn ein anderes Werkzeug die Ausgabe parsen soll.\nBenutze `Framed` oder `Page break`, wenn ein Mensch den exportierten Satz lesen soll.\n\n\n- [Output Help](topic:output)",
-        1,
-        generated_help_links_de_output_format,
+        "Mit `F3` wählst du im Dateiziel-Prompt das Ausgabeformat.\n`Raw` verbindet die exportierten Dateiinhalte ohne Darstellungsrahmen.\n`Framed` trennt Dateien mit dem Text aus dem Trenner-Prompt.\n`Page break` trennt Dateien für eine seitenorientierte Ausgabe.\nDrücke `Enter`, um fortzufahren. Hardcopy verwendet immer Raw und bietet diese Wahl nicht an. Unter [Ausgabe](topic:output) steht der gesamte Ablauf.",
     },
     {
         "output-destination",
-        "Output Destination Help",
+        "Ausgabeziel",
         "prompt.output-destination",
-        "Wähle zuerst Datei oder Hardcopy und gib dieses Ziel dann genau so ein, wie ytnova es benutzen soll.\nDateiausgabe schreibt in einen Pfad, und einfache Dateinamen landen in `CWD`.\nHardcopy schickt rohe Ausgabe an einen Druckbefehl wie `lpr`, `lp` oder `cat > /dev/lp1`.\nDrücke `F3` im Datei-Ziel-Prompt, um zwischen `Raw`, `Framed` und `Page break` umzuschalten.\n\n`Zielarten`\n`Dateiausgabe`: Exportierten Text in einen Pfad schreiben.\n`CWD`: Das aktuelle Arbeitsverzeichnis für einfache Dateinamen benutzen.\n`Hardcopy`: Rohe Ausgabe an einen Shell-Druckbefehl wie `lpr`, `lp` oder `cat > /dev/lp1` schicken.\n\n`Formatumschaltung`\n`F3` ist nur im Datei-Ziel-Prompt verfügbar.\nWenn `Framed` oder `Page break` gewählt ist, fragt ytnova zuerst den Trenner und kehrt dann zum Datei-Prompt zurück.\n\n\n- [Output Help](topic:output)\n- [Output Format Help](topic:output-format)\n- [Command-line editing](topic:command-line-editing)",
-        3,
-        generated_help_links_de_output_destination,
+        "Wähle, wohin der exportierte Text geschrieben wird.\nWähle Dateiausgabe, um einen Pfad einzugeben. Ein einfacher Dateiname ist relativ zu `CWD`, dem im Prompt gezeigten Arbeitsverzeichnis.\nMit `F3` änderst du hier das [Ausgabeformat](topic:output-format).\nWähle Hardcopy für einen Druckbefehl wie `lpr`, `lp` oder `cat > /dev/lp1`; Hardcopy sendet Rohdaten.\n`Up` verwendet ein früheres Ziel.\n`F2` öffnet bei Dateiausgabe die [Verzeichnisauswahl](topic:f2-picker).\n`Enter` übernimmt das Ziel und `Esc` bricht ab.",
     },
     {
         "output-separator",
-        "Output Separator Help",
+        "Ausgabetrenner",
         "prompt.output-separator",
-        "Dieser Prompt erscheint nur, wenn `F3` `Framed` oder `Page break` auswählt.\nLasse ihn leer, um den Standard mit dreifachen Backticks zu nehmen.\nRaw-Ausgabe überspringt diesen Prompt.\n\n`Trennerregeln`\nDer Trenner wird zwischen Dateien für den aktuellen Framed- oder Page-break-Export wiederverwendet.\nNach der letzten Datei wird er nicht angehängt.\n\n\n- [Output Help](topic:output)",
-        1,
-        generated_help_links_de_output_separator,
+        "Gib den Text ein, der bei Framed oder Page break zwischen exportierten Dateien steht.\nDer Trenner wird zwischen Dateien und nicht hinter der letzten Datei eingefügt.\n`Up` verwendet einen früheren Trenner.\n`Enter` kehrt zum Zielprompt zurück.\n`Esc` bricht ab. Raw und Hardcopy überspringen diesen Prompt. Unter [Ausgabe](topic:output) steht der gesamte Ablauf.",
     },
     {
         "showall",
-        "Showall Help",
+        "Showall-Hilfe",
         "main.showall",
-        "Showall sammelt alle Dateien des aktuellen geloggten Volumes.\nBenutze diese Seite für die Regeln der Sammelansicht und ihre Footer-Befehle.\n\n`Ansicht und Bereich`\n`Scope`: Showall listet jede Datei nur innerhalb des aktuellen geloggten Volumes auf.\n`Return`: Zum zuvor gewählten Verzeichnis zurückkehren.\n`Open owner`: Zum Besitzerverzeichnis der gewählten Datei im aktuellen Volume springen.\n`1`: Nur Name.\nDas ist die schlichte Standardansicht.\n`2`: Attribute.\nIn Dateilisten zeigt das auch `Name -> Ziel` bei Symlinks.\n`3`: Eigentümer.\n`4`: Zeiten.\n`Zurücksetzen`: `1` bringt zur schlichten Namensansicht zurück.\nWenn `2`, `3` oder `4` schon aktiv ist, springt dieselbe Taste ebenfalls zurück zu Name.\n`Gemeinsam pro Panel`: Standardmäßig sind `1..4` innerhalb eines Panels gekoppelt.\nMit `SEPARATE_DIR_FILE_VIEWS=1` trennst du Showall-/Dateifenster und Baum-/Verzeichnis-Grundansichten wieder.\n`5`: Compact nur aus der aktuellen `1`-Namensansicht umschalten.\n`6`: Datei- und Verzeichniszeilen zwischen lesbaren und rohen Größeneinheiten umschalten.\nDie Statistik bleibt lesbar.\n`7`: Mini-Vorschautext auf jeder sichtbaren Dateizeile zeigen und Compact verlassen, damit du ihn sehen kannst.\n`8`: Datei-Detailtext auf jeder sichtbaren Dateizeile zeigen und Compact verlassen, damit du ihn sehen kannst.\n`9`: Das Git-Band einschalten, wenn das aktuelle Verzeichnis in einem Git-Worktree liegt.\n`0`: Auf Dateisystemen ohne Funktion.\n`Sort`: `S` ändert die Sortierung, ohne Showall zu verlassen.\n`Jump`: Drücke `/`, tippe Buchstaben und drücke `Enter`, um auf dem besten sichtbaren Treffer zu landen.\n`Dotfiles`: Versteckte Dateien in der aktuellen Showall-Ergebnismenge ein- oder ausblenden.\n\n`Arbeitsmenge`\n`Filter`: Die aktuelle Showall-Ergebnismenge filtern.\n`C-s` durchsucht dort nur markierte Dateien.\nIm Prompt verengt `Tab` dieselbe Ergebnismenge auf nur markierte Zeilen.\n`Tag`: Die gewählte Datei markieren, und `C-t` markiert alle sichtbaren Dateien in der aktuellen Showall-Ergebnismenge.\n`Untag`: Die Markierung der gewählten Datei entfernen, und `C-u` löscht Markierungen in der aktuellen Showall-Ergebnismenge.\n`I` (`Invert Tags`): Nur die Markierungen in der sichtbaren Showall-Ergebnismenge umkehren.\n`Archive`: Zuerst die markierte Menge archivieren oder, wenn nichts markiert ist, die aktuelle Auswahl.\n\n`Dateiaktionen`\n`Attributes`: Das Attribut-Untermenü für die gewählte Datei öffnen.\n`Copy`: `C` kopiert die gewählte Datei, und `C-k` kopiert die markierte Menge über denselben Prompt.\n`Move`: `M` verschiebt die gewählte Datei. `C-m` verschiebt die markierte Menge bei verfügbarer Protokollunterstützung; `C-n` tut dies andernfalls.\n`View`: Die gewählte Datei anzeigen, und `C-v` zeigt die markierten Dateien nacheinander an.\n`Edit`: Die gewählte Datei im konfigurierten Editor öffnen.\n`Hex`: Die gewählte Datei in der Hex-Ansicht öffnen.\n`Compare`: Die gewählte Datei mit einer anderen Datei vergleichen.\n`Output`: Die Auswahl exportieren.\n`C-o` benutzt dieselben Prompts für die markierte Menge, und `C-w` bleibt ein Legacy-Alias.\n`Execute`: Einen Shell-Befehl eingeben.\nGib den Befehl vor dem vorausgefüllten `{}`-Platzhalter ein. `C-x` wiederholt ihn einmal pro markierter Datei.\n`Pathcopy`: Die gewählte Datei kopieren und ihren Pfad relativ zur aktuellen Volume-Wurzel erhalten.\n`Pipe`: Einen Shell-Befehl eingeben und ihm den Inhalt der gewählten Datei über Standard-Eingabe zuführen.\n`New File`: Eine neue leere Datei anlegen.\n`Rename`: Die gewählte Datei umbenennen.\n`Delete`: Die gewählte Datei löschen.\n`Log`: Ein neues Verzeichnis oder eine Archivdatei loggen, ohne Showall zu verlassen.\n`Volume`: Die Volume-Auswahl öffnen.\n`Quit`: ytnova beenden.\n\n`Showall-Funktionstasten`\n`F1`: Kontextuelle Hilfe für die aktuelle Showall-Oberfläche öffnen.\n`F5`: Das aktive Panel aktualisieren.\n`F6`: Die Statistik- oder Detaildarstellung des aktiven Panels ändern.\n`F7`: Die Vorschau für den aktuellen Dateikontext umschalten.\n`F8`: Den Split-Screen-Modus umschalten.\n`F9`: Das Anwendungsmenü öffnen.\n`F10`: Die Konfigurationsoberfläche öffnen.\n\n\n- [Navigation](topic:ytnova-navigation)\n- [Markiert](topic:tagged)\n- [Kopierziele](topic:copy-move-targets)\n- [Filter](topic:filter)\n- [Vergleich](topic:compare)\n- [Verschiebeziele](topic:copy-move-targets)\n- [Output](topic:output)",
-        7,
-        generated_help_links_de_showall,
+        "`Showall` zeigt Dateien aus allen eingelesenen Verzeichnissen des aktuellen Volumens in einer Liste. Andere Volumen sind nicht enthalten.\n`Esc` kehrt zum vorherigen Verzeichnis zurück.\n`\\` öffnet das besitzende Verzeichnis der ausgewählten Datei im aktuellen Volumen.\n\n[Dateibefehle](topic:file) wirken auf die ausgewählte Zeile oder die markierte Menge; Filter, Sortierung, Markierungen und `/` verwenden jedoch diese zusammengefasste Ergebnisliste als Bereich.\nDer [Filter](topic:filter) ändert nur diese Showall-Liste.\n`G` öffnet [Global](topic:global), wenn du alle eingelesenen Volumen brauchst.\n`F7` öffnet die Vorschau und `F8` den Split-Modus.",
     },
     {
         "global",
-        "Global Help",
+        "Global-Hilfe",
         "main.global",
-        "Global sammelt Dateien aus allen geloggten Volumes.\nBenutze diese Seite für die volumenübergreifenden Regeln und ihre Footer-Befehle.\n\n`Ansicht und Bereich`\n`Scope`: Global listet Dateien aus allen geloggten Volumes auf.\n`Return`: Zum zuvor gewählten Verzeichnis zurückkehren.\n`Open owner`: Zum Besitzerverzeichnis der gewählten Datei springen, auch wenn es unter einer anderen Volume-Wurzel liegt.\n`1`: Nur Name.\nDas ist die schlichte Standardansicht.\n`2`: Attribute.\nIn Dateilisten zeigt das auch `Name -> Ziel` bei Symlinks.\n`3`: Eigentümer.\n`4`: Zeiten.\n`Zurücksetzen`: `1` bringt zur schlichten Namensansicht zurück.\nWenn `2`, `3` oder `4` schon aktiv ist, springt dieselbe Taste ebenfalls zurück zu Name.\n`Gemeinsam pro Panel`: Standardmäßig sind `1..4` innerhalb eines Panels gekoppelt.\nMit `SEPARATE_DIR_FILE_VIEWS=1` trennst du Global-/Dateifenster und Baum-/Verzeichnis-Grundansichten wieder.\n`5`: Compact nur aus der aktuellen `1`-Namensansicht umschalten.\n`6`: Datei- und Verzeichniszeilen zwischen lesbaren und rohen Größeneinheiten umschalten.\nDie Statistik bleibt lesbar.\n`7`: Mini-Vorschautext auf jeder sichtbaren Dateizeile zeigen und Compact verlassen, damit du ihn sehen kannst.\n`8`: Datei-Detailtext auf jeder sichtbaren Dateizeile zeigen und Compact verlassen, damit du ihn sehen kannst.\n`9`: Das Git-Band einschalten, wenn das aktuelle Verzeichnis in einem Git-Worktree liegt.\n`0`: Auf Dateisystemen ohne Funktion.\n`Sort`: `S` ändert die Sortierung, ohne Global zu verlassen.\n`Jump`: Drücke `/`, tippe Buchstaben und drücke `Enter`, um auf dem besten sichtbaren Treffer zu landen.\n`Dotfiles`: Versteckte Dateien in der aktuellen Global-Ergebnismenge ein- oder ausblenden.\n\n`Arbeitsmenge`\n`Filter`: Die aktuelle Global-Ergebnismenge filtern.\n`C-s` durchsucht dort nur markierte Dateien.\nIm Prompt verengt `Tab` dieselbe Ergebnismenge auf nur markierte Zeilen.\n`Tag`: Die gewählte Datei markieren, und `C-t` markiert alle sichtbaren Dateien in der aktuellen Global-Ergebnismenge.\n`Untag`: Die Markierung der gewählten Datei entfernen, und `C-u` löscht Markierungen in der aktuellen Global-Ergebnismenge.\n`I` (`Invert Tags`): Nur die Markierungen in der sichtbaren Global-Ergebnismenge umkehren.\n`Archive`: Zuerst die markierte Menge archivieren oder, wenn nichts markiert ist, die aktuelle Auswahl.\n\n`Dateiaktionen`\n`Attributes`: Das Attribut-Untermenü für die gewählte Datei öffnen.\n`Copy`: `C` kopiert die gewählte Datei, und `C-k` kopiert die markierte Menge über denselben Prompt.\n`Move`: `M` verschiebt die gewählte Datei. `C-m` verschiebt die markierte Menge bei verfügbarer Protokollunterstützung; `C-n` tut dies andernfalls.\n`View`: Die gewählte Datei anzeigen, und `C-v` zeigt die markierten Dateien nacheinander an.\n`Edit`: Die gewählte Datei im konfigurierten Editor öffnen.\n`Hex`: Die gewählte Datei in der Hex-Ansicht öffnen.\n`Compare`: Die gewählte Datei mit einer anderen Datei vergleichen.\n`Output`: Die Auswahl exportieren.\n`C-o` benutzt dieselben Prompts für die markierte Menge, und `C-w` bleibt ein Legacy-Alias.\n`Execute`: Einen Shell-Befehl eingeben.\nGib den Befehl vor dem vorausgefüllten `{}`-Platzhalter ein. `C-x` wiederholt ihn einmal pro markierter Datei.\n`Pathcopy`: Die gewählte Datei kopieren und ihren Pfad relativ zur Volume-Wurzel behalten.\n`Pipe`: Einen Shell-Befehl eingeben und ihm den Inhalt der gewählten Datei über Standard-Eingabe zuführen.\n`New File`: Eine neue leere Datei anlegen.\n`Rename`: Die gewählte Datei umbenennen.\n`Delete`: Die gewählte Datei löschen.\n`Log`: Ein neues Verzeichnis oder eine Archivdatei loggen, ohne Global zu verlassen.\n`Volume`: Die Volume-Auswahl öffnen.\n`Quit`: ytnova beenden.\n\n`Global-Funktionstasten`\n`F1`: Kontextuelle Hilfe für die aktuelle Global-Oberfläche öffnen.\n`F5`: Das aktive Panel aktualisieren.\n`F6`: Die Statistik- oder Detaildarstellung des aktiven Panels ändern.\n`F7`: Die Vorschau für den aktuellen Dateikontext umschalten.\n`F8`: Den Split-Screen-Modus umschalten.\n`F9`: Das Anwendungsmenü öffnen.\n`F10`: Die Konfigurationsoberfläche öffnen.\n\n\n- [Navigation](topic:ytnova-navigation)\n- [Markiert](topic:tagged)\n- [Kopierziele](topic:copy-move-targets)\n- [Filter](topic:filter)\n- [Vergleich](topic:compare)\n- [Verschiebeziele](topic:copy-move-targets)\n- [Output](topic:output)",
-        7,
-        generated_help_links_de_global,
+        "`Global` zeigt Dateien aus allen eingelesenen Verzeichnissen aller eingelesenen Volumen in einer Liste.\n`Esc` kehrt zur vorherigen Verzeichnisansicht zurück.\n`\\` öffnet das besitzende Volumen und Verzeichnis der ausgewählten Datei.\n\n[Dateibefehle](topic:file) wirken auf die ausgewählte Zeile oder die markierte Menge; Filter, Sortierung, Markierungen und `/` verwenden jedoch die vollständige Global-Ergebnisliste als Bereich.\nDer [Filter](topic:filter) ändert nur diese Global-Liste.\nErneutes `G` hat keine Wirkung, weil Global bereits geöffnet ist.\n`F7` öffnet die Vorschau und `F8` den Split-Modus.",
     },
     {
         "f7",
-        "F7 Preview Help",
+        "F7-Vorschau",
         "overlay.f7-dir,overlay.f7-file",
-        "Die Vorschau hält die aktuelle Datei offen, während ein kleinerer Befehlssatz aktiv bleibt.\nBenutze diese Seite für die Vorschau-Regeln und die Befehle, die ohne Verlassen der Vorschau weiterlaufen.\n\n`Vorschau-Regeln`\n`F7`: Zur darunterliegenden Verzeichnis- oder Dateiansicht zurückkehren.\n`F8`: Split hat keine Wirkung, solange die Vorschau aktiv ist.\n`F9`: Das Anwendungsmenü öffnen, ohne die Vorschau zu verlassen.\n`Tab`: Panels nicht wechseln, solange die Vorschau aktiv ist.\n`Esc`: Die Vorschau sofort verlassen.\n\n`Arbeitsmenge`\n`Filter`: Die aktuelle Vorschau-Liste filtern.\n`C-s` durchsucht dort nur markierte Dateien.\n`Tag`: Die gewählte Datei markieren, und `C-t` markiert alle sichtbaren Dateien im aktuellen Bereich.\n`Untag`: Die Markierung der gewählten Datei entfernen, und `C-u` löscht Markierungen im aktuellen Bereich.\n`I` (`Invert Tags`): Nur die Markierungen passender sichtbarer Dateien in der aktuellen Vorschau umkehren.\n`Archive`: Zuerst die markierte Menge archivieren oder, wenn nichts markiert ist, die aktuelle Auswahl.\n`Jump`: Drücke `/`, tippe Buchstaben und drücke `Enter`, um auf dem besten sichtbaren Treffer zu landen.\n`Dotfiles`: Versteckte Dateien im aktuellen Vorschau-Bereich ein- oder ausblenden.\n\n`Dateiaktionen`\n`Attributes`: Das Attribut-Untermenü für die gewählte Datei öffnen.\n`Copy`: `C` kopiert die gewählte Datei, und `C-k` kopiert die markierte Menge über denselben Prompt.\n`Move`: `M` verschiebt die gewählte Datei. `C-m` verschiebt die markierte Menge bei verfügbarer Protokollunterstützung; `C-n` tut dies andernfalls.\n`View`: Die gewählte Datei anzeigen, und `C-v` zeigt die markierten Dateien nacheinander an.\n`Edit`: Die gewählte Datei im konfigurierten Editor öffnen.\n`Compare`: Die gewählte Datei mit einer anderen Datei vergleichen.\n`Output`: Die Auswahl exportieren.\n`C-o` benutzt dieselben Prompts für die markierte Menge, und `C-w` bleibt ein Legacy-Alias.\n`Execute`: Einen Shell-Befehl eingeben.\nGib den Befehl vor dem vorausgefüllten `{}`-Platzhalter ein. `C-x` wiederholt ihn einmal pro markierter Datei.\n`Pathcopy`: Die gewählte Datei kopieren und ihren Pfad relativ zur aktuellen Volume-Wurzel erhalten.\n`Pipe`: Einen Shell-Befehl eingeben und ihm den Inhalt der gewählten Datei über Standard-Eingabe zuführen.\n`New File`: Eine neue leere Datei anlegen, ohne die Vorschau zu verlassen.\n`Rename`: Die gewählte Datei umbenennen, ohne die Vorschau zu verlassen.\n`Delete`: Die gewählte Datei löschen, ohne die Vorschau zu verlassen.\n\n\n- [Navigation](topic:ytnova-navigation)\n- [Markiert](topic:tagged)\n- [Kopier-/Verschiebeziele](topic:copy-move-targets)\n- [Filter](topic:filter)\n- [Vergleich](topic:compare)\n- [Anwendungsmenue](topic:applications-menu)\n- [Output](topic:output)",
-        7,
-        generated_help_links_de_f7,
+        "`F7` öffnet eine Vorschau der ausgewählten Datei, ohne ihren Auswahlkontext zu verlassen.\n`Up`, `Down`, `Page Up`, `Page Down`, `Home` und `End` bewegen weiterhin die Dateiauswahl.\n`Shift-Up`, `Shift-Down`, `C-p` und `C-n` scrollen die Vorschau zeilenweise.\n`Shift-Page Up` und `Shift-Page Down` scrollen seitenweise.\n`Shift-Home` und `Shift-End` gehen zum Anfang oder Ende der Vorschau.\n`F7` oder `Esc` kehrt zur darunterliegenden Ansicht zurück.\n\nDie üblichen [Dateiaktionen](topic:file) bleiben für die ausgewählte Datei verfügbar. Markierte Varianten behalten ihren aktuellen Bereich.\n`F8` und `Tab` öffnen oder wechseln keine Split-Panels, solange die Vorschau aktiv ist.\n`F9` öffnet Anwendungen, ohne zuerst die Vorschau zu schließen.",
     },
     {
         "f8",
-        "F8 Split Help",
+        "F8-Split",
         NULL,
-        "Der Split-Modus hält beide Panels aktiv.\nLaufzeit-`F1` öffnet die Split-Seite des aktiven Panels; diese Seite erklärt die gemeinsamen Split-Regeln.\n\n`Split-Regeln`\n`F8`: Zum Ein-Panel-Modus zurückkehren.\n`Tab`: Das aktive Panel wechseln und den Zustand des passiven Panels behalten.\n`Target defaults`: Copy-, Move- und Compare-Prompts nehmen das inaktive Panel als Standardziel.\n`Panel independence`: Jedes Panel behält eigene Auswahl, Ansicht, Markierungen, Volume und Restore-Zustand.\n\n\n- [Navigation](topic:ytnova-navigation)\n- [Directory split page](topic:f8-dir)\n- [File split page](topic:f8-file)",
-        3,
-        generated_help_links_de_f8,
+        "`F8` öffnet ein zweites Panel. Das hervorgehobene Panel ist aktiv und erhält den nächsten Befehl.\n`Tab` wechselt das aktive Panel.\nJedes Panel behält seine Auswahl, sein eingelesenes Volumen, seine Markierungen, Ansichtseinstellungen und seinen Rückkehrzustand.\n\nKopier-, Verschiebe- und Vergleichsprompts verwenden gegebenenfalls das andere Panel als anfängliches Ziel. Du kannst den Wert vor dem Fortfahren ändern.\nDrücke erneut `F8`, um zu einem Panel zurückzukehren. Unter [Split-Verzeichnis](topic:f8-dir) oder [Split-Datei](topic:f8-file) stehen die lokalen Befehle.",
     },
     {
         "f8-dir",
-        "F8 Split Directory Help",
+        "F8-Split-Verzeichnis",
         "overlay.f8-dir",
-        "Benutze diese Seite für den Footer des aktiven Split-Verzeichnisses.\nSie verbindet die gemeinsamen Split-Regeln mit den Befehlen des aktiven Panels.\n\n`Split-Regeln`\n`F8`: Zum Ein-Panel-Modus zurückkehren.\n`Tab`: Das aktive Panel wechseln und den Zustand des passiven Panels behalten.\n`Target defaults`: Copy-, Move- und Compare-Prompts nehmen das inaktive Panel als Standardziel.\n`Panel independence`: Jedes Panel behält eigene Auswahl, Ansicht, Markierungen, Volume und Restore-Zustand.\n\n`Ansicht und Bereich`\n`1`: Nur Name.\nDas ist die schlichte Standardansicht.\n`2`: Attribute.\nIn Dateilisten zeigt das auch `Name -> Ziel` bei Symlinks.\n`3`: Eigentümer.\n`4`: Zeiten.\n`Zurücksetzen`: `1` bringt zur schlichten Namensansicht zurück.\nWenn `2`, `3` oder `4` schon aktiv ist, springt dieselbe Taste ebenfalls zurück zu Name.\n`Gemeinsam pro Panel`: Standardmäßig sind `1..4` innerhalb eines Panels gekoppelt.\nWenn du also die Split-Baumansicht änderst, ändert sich auch das Dateifenster dieses Panels.\nMit `SEPARATE_DIR_FILE_VIEWS=1` trennst du beide wieder.\n`Baum gegen Dateifenster`: Im Split-Verzeichnisfokus ändern `5`, `7`, `8` und `9` nicht die Baumzeilen.\nSie ändern das Dateifenster des aktiven Panels.\n`5`: Compact nur aus der aktuellen `1`-Namensansicht umschalten.\n`6`: Datei- und Verzeichniszeilen zwischen lesbaren und rohen Größeneinheiten umschalten.\nDie Statistik bleibt lesbar.\n`7`: Mini-Vorschautext auf jeder sichtbaren Dateizeile zeigen und Compact verlassen, damit du ihn sehen kannst.\n`8`: Datei-Detailtext auf jeder sichtbaren Dateizeile zeigen und Compact verlassen, damit du ihn sehen kannst.\n`9`: Das Git-Band einschalten, wenn das aktuelle Verzeichnis in einem Git-Worktree liegt.\n`0`: Auf Dateisystemen ohne Funktion.\n`Showall`: Die Sammelliste des aktuellen Volumes für das aktive Panel öffnen.\n`Global`: Die Sammelliste über mehrere Volumes für das aktive Panel öffnen.\n`Jump`: Drücke `/`, tippe Buchstaben und drücke `Enter`, um auf dem besten sichtbaren Treffer im aktiven Baum zu landen.\n`Dotfiles`: Versteckte Namen im aktiven Baum ein- oder ausblenden.\n\n`Arbeitsmenge`\n`Filter`: Den aktuellen Dateibereich filtern.\nIm Prompt schaltet `Tab` zwischen allen Dateien und nur markierten Dateien um, wenn Markierungen existieren.\n`Tag`: Dateien im gewählten Verzeichnisbereich markieren.\n`Untag`: Dateien im gewählten Verzeichnisbereich entmarkieren.\n`I` (`Invert Tags`): Nur die Markierungen filterpassender sichtbarer Dateien im gewählten Verzeichnis umkehren.\n`Archive`: Zuerst die markierte Menge archivieren oder, wenn nichts markiert ist, die aktuelle Auswahl.\n\n`Verzeichnisaktionen`\n`Attributes`: Das Attribut-Untermenü für das gewählte Verzeichnis öffnen.\n`Copy`: Den gewählten Verzeichniszweig kopieren.\nIm Split-Modus ist das inaktive Panel das Standardziel.\n`MoveDir`: Den gewählten Verzeichniszweig verschieben.\nIm Split-Modus ist das inaktive Panel das Standardziel.\n`Compare`: Das gewählte Verzeichnis, den aktuellen geloggten Baum oder ein anderes Ziel vergleichen.\n`Output`: Die aktuelle Auswahl über den Output-Ablauf exportieren.\n`Execute`: Einen Shell-Befehl eingeben.\nSetze `{}` dort ein, wo der gewählte Verzeichnispfad stehen soll, und lasse `{}` unzitiert, damit ytnova den Pfad sicher quoten kann.\n`Pipe`: Einen Shell-Befehl eingeben. ytnova führt ihn im gewählten Verzeichnis aus und schickt die sichtbaren passenden Namen zeilenweise an seine Standard-Eingabe.\n`Makedir`: Ein neues Verzeichnis anlegen.\n`New File`: Eine neue leere Datei im aktuellen Verzeichnis anlegen.\n`Rename`: Das gewählte Verzeichnis umbenennen.\n`Delete`: Das gewählte Verzeichnis löschen.\n`Log`: Ein neues Verzeichnis oder eine Archivdatei loggen oder einen bereits geloggten Pfad von oben neu laden.\n`Volume`: Die Volume-Auswahl öffnen.\n`Quit`: ytnova beenden.\n\n`Split-Verzeichnis-Funktionstasten`\n`F1`: Kontextuelle Hilfe für die aktive Split-Verzeichnisoberfläche öffnen.\n`F5`: Das aktive Panel aktualisieren.\n`F6`: Die Statistik- oder Detaildarstellung des aktiven Panels ändern.\n`F7`: Die Vorschau für den aktuellen Dateikontext umschalten.\n`F8`: Zum Ein-Panel-Modus zurückkehren.\n`F9`: Das Anwendungsmenü öffnen.\n`F10`: Die Konfigurationsoberfläche öffnen.\n\n\n- [Navigation](topic:ytnova-navigation)\n- [F8-Split](topic:f8)\n- [Kopierziele](topic:copy-move-targets)\n- [Filter](topic:filter)\n- [Vergleich](topic:compare)\n- [Verschiebeziele](topic:copy-move-targets)\n- [Output](topic:output)",
-        7,
-        generated_help_links_de_f8_dir,
+        "Dies ist der aktive Verzeichnisbaum im [F8-Split](topic:f8).\n`Tab` aktiviert das andere Panel.\n`F8` kehrt zu einem Panel zurück.\n\nBaum- und Verzeichnisbefehle entsprechen der [Verzeichnishilfe](topic:directory).\nKopieren, Verschieben und Vergleichen beginnen gegebenenfalls mit dem ausgewählten Verzeichnis des anderen Panels als Ziel.\nEin Prompt kann `Tab` für seine eigene lokale Wahl verwenden, statt das Panel zu wechseln.\nBefehle ändern nur das aktive Panel, sofern ihr Prompt das andere Panel nicht ausdrücklich nennt.",
     },
     {
         "f8-file",
-        "F8 Split File Help",
+        "F8-Split-Datei",
         "overlay.f8-file",
-        "Benutze diese Seite für den Footer der aktiven Split-Dateiliste.\nSie verbindet die gemeinsamen Split-Regeln mit den Befehlen des aktiven Panels.\n\n`Split-Regeln`\n`F8`: Zum Ein-Panel-Modus zurückkehren.\n`Tab`: Das aktive Panel wechseln und den Zustand des passiven Panels behalten.\n`Target defaults`: Copy-, Move- und Compare-Prompts nehmen das inaktive Panel als Standardziel.\n`Panel independence`: Jedes Panel behält eigene Auswahl, Ansicht, Markierungen, Volume und Restore-Zustand.\n\n`Ansicht und Bereich`\n`1`: Nur Name.\nDas ist die schlichte Standardansicht.\n`2`: Attribute.\nIn Dateilisten zeigt das auch `Name -> Ziel` bei Symlinks.\n`3`: Eigentümer.\n`4`: Zeiten.\n`Zurücksetzen`: `1` bringt immer zur schlichten Namensansicht zurück.\nWenn `2`, `3` oder `4` schon aktiv ist, springt dieselbe Taste ebenfalls zurück zu Name.\n`Gemeinsam pro Panel`: Standardmäßig sind `1..4` innerhalb eines Panels gekoppelt.\nEine Split-Baum-Änderung ändert also auch das Dateifenster dieses Panels.\nMit `SEPARATE_DIR_FILE_VIEWS=1` machst du beide wieder unabhängig.\n`5`: Compact nur aus der aktuellen `1`-Namensansicht umschalten.\n`6`: Datei- und Verzeichniszeilen zwischen lesbaren und rohen Größeneinheiten umschalten.\nDie Statistik bleibt lesbar.\n`7`: Mini-Vorschautext auf jeder sichtbaren Dateizeile zeigen und Compact verlassen, damit du ihn sehen kannst.\n`8`: Datei-Detailtext auf jeder sichtbaren Dateizeile zeigen und Compact verlassen, damit du ihn sehen kannst.\n`9`: Das Git-Band einschalten, wenn das aktuelle Verzeichnis in einem Git-Worktree liegt.\n`Zusatzstatus`: `5`, `7`, `8` und `9` stapeln sich nicht im Statistiklabel; dort steht immer nur der eine sichtbare Zusatzstatus.\n`0`: Auf Dateisystemen ohne Funktion.\n`Sort`: Die Sortierung der aktiven Dateiliste ändern.\n`Jump`: Drücke `/`, tippe Buchstaben und drücke `Enter`, um auf dem besten sichtbaren Treffer zu landen.\n`Dotfiles`: Versteckte Dateien im aktuellen Bereich ein- oder ausblenden.\n\n`Arbeitsmenge`\n`Filter`: Die aktuelle Liste filtern.\n`C-s` durchsucht nur markierte Dateien.\nIm Prompt schaltet `Tab` zwischen allen Dateien und nur markierten Dateien um, wenn Markierungen existieren.\n`Tag`: Die gewählte Datei markieren, und `C-t` markiert alle sichtbaren Dateien im aktuellen Bereich.\n`Untag`: Die Markierung der gewählten Datei entfernen, und `C-u` löscht Markierungen im aktuellen Bereich.\n`I` (`Invert Tags`): Nur die Markierungen passender sichtbarer Dateien in der aktuellen Dateiliste umkehren.\n`Archive`: Zuerst die markierte Menge archivieren oder, wenn nichts markiert ist, die aktuelle Auswahl.\n\n`Dateiaktionen`\n`Attributes`: Das Attribut-Untermenü für die gewählte Datei öffnen.\n`Copy`: `C` kopiert die gewählte Datei, und `C-k` kopiert die markierte Menge über denselben Prompt.\nIm Split-Modus ist das inaktive Panel das Standardziel.\n`Move`: `M` verschiebt die gewählte Datei. `C-m` verschiebt die markierte Menge bei verfügbarer Protokollunterstützung; `C-n` tut dies andernfalls.\nIm Split-Modus ist das inaktive Panel das Standardziel.\n`View`: Die gewählte Datei anzeigen, und `C-v` zeigt die markierten Dateien nacheinander an.\n`Edit`: Die gewählte Datei im konfigurierten Editor öffnen.\n`Hex`: Die gewählte Datei in der Hex-Ansicht öffnen.\n`Compare`: Die gewählte Datei mit einer anderen Datei vergleichen.\n`Output`: Die Auswahl exportieren.\n`C-o` benutzt dieselben Prompts für die markierte Menge, und `C-w` bleibt ein Legacy-Alias.\n`Execute`: Einen Shell-Befehl eingeben.\nGib den Befehl vor dem vorausgefüllten `{}`-Platzhalter ein. `C-x` wiederholt ihn einmal pro markierter Datei.\n`Pathcopy`: Die gewählte Datei kopieren und ihren Pfad relativ zur aktuellen Volume-Wurzel erhalten.\n`Pipe`: Einen Shell-Befehl eingeben und ihm den Inhalt der gewählten Datei über Standard-Eingabe zuführen.\n`New File`: Eine neue leere Datei anlegen.\n`Rename`: Die gewählte Datei umbenennen.\n`Delete`: Die gewählte Datei löschen.\n`Log`: Ein neues Verzeichnis oder eine Archivdatei loggen, ohne den Split-Dateimodus zu verlassen.\n`Volume`: Die Volume-Auswahl öffnen.\n`Quit`: ytnova beenden.\n\n`Split-Datei-Funktionstasten`\n`F1`: Kontextuelle Hilfe für die aktive Split-Dateioberfläche öffnen.\n`F5`: Das aktive Panel aktualisieren.\n`F6`: Die Statistik- oder Detaildarstellung des aktiven Panels ändern.\n`F7`: Die Vorschau für den aktuellen Dateikontext umschalten.\n`F8`: Zum Ein-Panel-Modus zurückkehren.\n`F9`: Das Anwendungsmenü öffnen.\n`F10`: Die Konfigurationsoberfläche öffnen.\n\n\n- [Navigation](topic:ytnova-navigation)\n- [F8-Split](topic:f8)\n- [Markiert](topic:tagged)\n- [Kopierziele](topic:copy-move-targets)\n- [Filter](topic:filter)\n- [Vergleich](topic:compare)\n- [Verschiebeziele](topic:copy-move-targets)\n- [Output](topic:output)",
-        8,
-        generated_help_links_de_f8_file,
+        "Dies ist die aktive Dateiliste im [F8-Split](topic:f8).\n`Tab` aktiviert das andere Panel.\n`F8` kehrt zu einem Panel zurück.\n\nDateibefehle entsprechen der [Dateihilfe](topic:file).\nKopieren, Verschieben und Vergleichen beginnen gegebenenfalls mit dem ausgewählten Verzeichnis oder der Datei des anderen Panels als Ziel.\nMarkierte Befehle verwenden die markierte Menge des aktiven Panels.\nEin Prompt kann `Tab` für seine eigene lokale Wahl verwenden, statt das Panel zu wechseln.",
     },
     {
         "history-dialog",
-        "History Help",
+        "Verlauf",
         "dialog.history",
-        "Benutze `Up` und `Down`, um einen Eintrag zu wählen.\nBenutze `Left` und `Right`, um einen langen Eintrag horizontal zu verschieben.\nBenutze `P` zum Anheften oder Lösen.\nBenutze `D` zum Löschen.\nBenutze `Enter` zum Übernehmen.\nBenutze `Esc` zum Abbrechen.\n\n`Historienaktionen`\n`Select entry`: `Up` und `Down` bewegen sich durch die aktuelle Historienliste.\n`Scroll long entry`: `Left` und `Right` verschieben eine lange Historienzeile horizontal.\n`Pin`: `P` hält einen wichtigen Eintrag oben in der aktuellen Historienliste.\n`Delete`: `D` entfernt den gewählten Eintrag aus der aktuellen Historienliste.\n`Accept`: `Enter` übernimmt den gewählten Eintrag erneut.\n`Cancel`: `Esc` schließt den Dialog ohne Übernahme.\n\n\n- [Navigation](topic:ytnova-navigation)",
-        1,
-        generated_help_links_de_history_dialog,
+        "Mit `Up` und `Down` wählst du einen früheren Prompt-Wert.\nMit `Left` und `Right` scrollst du einen langen Wert waagerecht.\n`P` heftet den gewählten Wert an oder löst ihn.\n`D` löscht ihn.\n`Enter` setzt ihn wieder in den Prompt ein.\n`Esc` schließt den Verlauf ohne Auswahl.",
     },
     {
         "volume-menu",
-        "Volume Help",
+        "Volumen",
         "dialog.volume-menu",
-        "Benutze `Up` und `Down`, um ein geladenes Volume zu wählen.\nBenutze `Enter`, um dorthin zu wechseln.\nBenutze `D`, um es freizugeben, außer es ist das letzte.\nBenutze `Esc`, um das Menü zu verlassen.\n\n`Volume-Aktionen`\n`Select volume`: `Up` und `Down` bewegen sich durch die Liste geladener Volumes.\n`Switch volume`: `Enter` aktiviert das gewählte Volume.\n`Keep state`: Wenn du das bereits aktive Volume auswählst, bleibt sein Zustand im Speicher erhalten.\n`Release volume`: `D` entlädt das gewählte Volume, außer es ist das letzte verbleibende.\n`Cancel`: `Esc` schließt das Menü.\n\n\n- [Navigation](topic:ytnova-navigation)",
-        1,
-        generated_help_links_de_volume_menu,
+        "Mit `Up` und `Down` wählst du ein eingelesenes Volumen.\n`Enter` wechselt dorthin und stellt seinen Zustand im Speicher wieder her.\nDie Wahl des aktiven Volumens behält dessen aktuellen Zustand.\n`D` gibt das gewählte Volumen frei; das letzte verbleibende Volumen kann nicht freigegeben werden.\n`Esc` schließt das Menü ohne Wechsel.",
     },
     {
         "applications-menu",
-        "Applications Help",
+        "Anwendungen",
         "dialog.applications",
-        "Benutze `Up` und `Down`, um eine Voreinstellung zu wählen.\nBenutze `Enter`, um sie zu starten.\nBenutze `Esc`, um abzubrechen.\nBenutze `E`, um den Anwendungskatalog zu bearbeiten.\n`{}` setzt die aktuelle Datei oder den aktuellen Ordner ein.\n`{input}` setzt den zusätzlichen Prompt-Text der Voreinstellung ein.\n\n`Anwendungsaktionen`\n`Select preset`: `Up` und `Down` bewegen sich durch die Voreinstellungs-Liste.\n`Launch behavior`: `F9` startet die gewählte Voreinstellung und kehrt direkt zur TUI zurück.\nBenutze es für wiederkehrende externe Abläufe, nicht für spontane Shell-Befehle.\n`Use `eXecute` for one-offs`: Der `X`-Prompt bleibt die Ad-hoc-Shell mit Historie und Terminalausgabe.\nBenutze ihn, wenn du einen einmaligen Befehl brauchst.\n`Edit presets`: `E` öffnet den Anwendungskatalog, damit Voreinstellungen ohne Verlassen der Auswähler-Familie geändert werden können.\n`Selection and working directory`: `{}` setzt die aktuelle Datei oder den aktuellen Ordner ein.\nVoreinstellungen starten außerdem in diesem Verzeichnis, sodass Skripte auch ohne `{}` vom gewählten Ort aus laufen.\n`Prompt text`: `{input}` setzt den zusätzlichen Text ein, den du im Voreinstellungs-Prompt eingegeben hast.\n`Starter presets`: Der mitgelieferte Katalog startet mit `xdg-open`-Startern und enthält auskommentierte Beispiele für Werkzeuge wie `mpv` oder lokale Hilfsskripte.\n`Cancel menu`: `Esc` schließt den Auswähler, ohne eine Voreinstellung zu starten.\n\n\n- [Navigation](topic:ytnova-navigation)",
-        1,
-        generated_help_links_de_applications_menu,
+        "Mit `Up` und `Down` wählst du ein konfiguriertes Anwendungs-Preset.\n`Enter` startet es und kehrt sofort zu ytnova zurück.\n`E` bearbeitet den Anwendungskatalog.\n`Esc` schließt das Menü.\n\n`{}` setzt die ausgewählte Datei oder das Verzeichnis ein. Das Preset startet auch ohne `{}` im Verzeichnis dieser Auswahl.\n`{input}` setzt den Text ein, den der Eingabeprompt des Presets erfragt.\nVerwende `F9` für wiederholbare Presets und `eXecute` für einen einmaligen Shell-Befehl.",
     },
     {
         "f2-picker",
         "F2-Auswahl",
         "dialog.f2-picker",
-        "Benutze `Up` und `Down` zum Bewegen.\nBenutze `Right`, um aufzuklappen oder in das erste Kind zu gehen.\nBenutze `Left`, um einzuklappen oder zum Elternknoten zu gehen.\nBenutze `<` und `>`, um durch geladene Volumes zu wechseln.\nBenutze `L`, um einen neuen Pfad zu protokollieren.\nBenutze `` ` ``, um Dotfiles umzuschalten.\nBenutze `Enter`, um das markierte Verzeichnis zu wählen.\nBenutze `Esc` zum Abbrechen.\n\n`Auswahlaktionen`\n`Move`: `Up` und `Down` bewegen sich durch die sichtbaren Verzeichniszeilen.\n`Expand`: `Right` klappt das aktuelle Verzeichnis um eine Ebene auf und geht dann in das erste Kind, wenn diese Ebene schon offen ist.\n`Collapse`: `Left` klappt das aktuelle Verzeichnis ein oder geht zum Elternknoten, wenn die aktuelle Zeile schon geschlossen ist.\n`Select`: `Enter` benutzt das markierte Verzeichnis für den aufrufenden Prompt.\n`Cancel`: `Esc` schließt die Auswahl, ohne den Prompt zu ändern.\n\n\n- [Navigation](topic:ytnova-navigation)\n- [Command-line editing](topic:command-line-editing)",
-        2,
-        generated_help_links_de_f2_picker,
+        "Verwende `F2` in einem Prompt, der ein gebrowstes Verzeichnis akzeptiert.\n`Up` und `Down` bewegen sich durch den Baum.\n`Left` klappt einen Zweig zu oder geht zum übergeordneten Verzeichnis.\n`Right` klappt einen Zweig auf oder geht hinein.\n`<` und `>` wechseln zwischen eingelesenen Volumen.\n`L` liest ein weiteres Verzeichnis oder Archiv ein.\n`Backtick` zeigt oder verbirgt versteckte Einträge.\n`Enter` übernimmt das hervorgehobene Verzeichnis in den Prompt.\n`Esc` kehrt zurück, ohne den Prompt zu ändern.",
     },
 };
 
@@ -1245,7 +562,7 @@ static const GeneratedHelpCatalog generated_help_catalogs[] = {
             "I",
             "Navigation",
             "N",
-            "Right/Enter follow",
+            "Enter/Right follow",
             "Esc/Q quit",
         },
     },
@@ -1258,8 +575,8 @@ static const GeneratedHelpCatalog generated_help_catalogs[] = {
             "Inhalt",
             "H",
             "Navigation",
-            "W",
-            "Right/Enter folgen",
+            "N",
+            "Enter/Right folgen",
             "Esc/Q schließen",
         },
     },

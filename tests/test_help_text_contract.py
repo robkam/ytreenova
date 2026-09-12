@@ -70,6 +70,31 @@ def _follow_any_link(tui, key):
     ) or tui.get_screen_dump() != before
 
 
+def _open_next_index_topic(tui, index_topic, expected_topic):
+    def open_selected(lines):
+        if not any(index_topic["title"] in line for line in lines):
+            return False
+        tui.send_and_wait_for_screen_change(Keys.ENTER, timeout=0.2)
+        rendered = tui.get_screen_dump()
+        if any(expected_topic["title"] in line for line in rendered):
+            return rendered
+        if not any(index_topic["title"] in line for line in rendered):
+            assert tui.send_and_wait_for_condition(
+                Keys.LEFT, _has_title(index_topic), timeout=1.0
+            ), screen_text(tui)
+        return False
+
+    rendered = drive_action_until(
+        tui, Keys.DOWN, open_selected, max_actions=150, timeout=0.2
+    )
+    if not rendered:
+        return False
+    assert tui.send_and_wait_for_condition(
+        Keys.LEFT, _has_title(index_topic), timeout=1.0
+    ), screen_text(tui)
+    return rendered
+
+
 def _create_tar(path):
     with tarfile.open(path, "w") as archive:
         payload = b"inside\n"
@@ -88,6 +113,20 @@ def test_directory_help_opens_and_returns_to_invoking_view(tmp_path):
         tui.quit()
 
 
+def test_command_strip_preserves_utf8_labels_used_by_localized_help(tmp_path):
+    root = _root(tmp_path, "utf8_command_strip")
+    config_dir = root / ".config" / "ytnova"
+    config_dir.mkdir(parents=True)
+    (config_dir / "commands.conf").write_text(
+        "[DIR]\nA | A | Ändern | ACTION_CMD_A |\n", encoding="utf-8"
+    )
+    tui = _spawn(root)
+    try:
+        assert tui.wait_for_content("Ändern", timeout=1.5), screen_text(tui)
+    finally:
+        tui.quit()
+
+
 def test_help_accepts_arrow_sequences_without_leaving_popup(tmp_path):
     tui = _spawn(_root(tmp_path, "arrow_help"))
     try:
@@ -99,8 +138,23 @@ def test_help_accepts_arrow_sequences_without_leaving_popup(tmp_path):
         tui.quit()
 
 
+def test_help_navigation_keys_do_not_trigger_locale_mnemonics(tmp_path):
+    env = {
+        "LC_ALL": "de_DE.UTF-8",
+        "LANG": "de_DE.UTF-8",
+        "LANGUAGE": "de",
+    }
+    tui = _spawn(_root(tmp_path, "locale_navigation_key"), env_extra=env)
+    try:
+        origin = _open(tui, "main.dir", locale="de")
+        assert tui.send_and_wait_for_screen_change(Keys.END, timeout=1.5), screen_text(tui)
+        assert any(origin["title"] in line for line in tui.get_screen_dump()), screen_text(tui)
+    finally:
+        tui.quit()
+
+
 def test_authored_link_supports_right_and_enter_and_left_returns(tmp_path):
-    for index, key in enumerate((Keys.RIGHT,)):
+    for index, key in enumerate((Keys.RIGHT, Keys.ENTER)):
         tui = _spawn(_root(tmp_path, f"link_{index}"))
         try:
             assert tui.wait_for_content("alpha.txt", timeout=1.5), screen_text(tui)
@@ -149,10 +203,44 @@ def test_help_remains_usable_after_supported_resize(tmp_path):
     try:
         assert tui.wait_for_content("alpha.txt", timeout=1.5), screen_text(tui)
         _open(tui, "main.dir")
-        tui.child.setwinsize(24, 70)
-        tui.screen.resize(24, 70)
+        tui.child.setwinsize(24, 80)
+        tui.screen.resize(24, 80)
         assert tui.send_and_wait_for_screen_change(Keys.DOWN, timeout=1.5), screen_text(tui)
+        quit_label = re.search(
+            r"quit-label: (?P<label>[^\n]+)",
+            F1_SOURCES["en"].read_text(encoding="utf-8"),
+        ).group("label")
+        assert any(quit_label in line for line in tui.get_screen_dump()), screen_text(tui)
         _return_to(tui, lambda lines: lines if any("alpha.txt" in line for line in lines) else False)
+    finally:
+        tui.quit()
+
+
+def test_every_topic_renders_and_returns_at_supported_narrow_size(tmp_path):
+    topics = _topics()
+    index = topics["index"]
+    index_targets = re.findall(r"\[[^\]]+\]\(topic:([a-z0-9-]+)\)", index["body"])
+    source = F1_SOURCES["en"].read_text(encoding="utf-8")
+    quit_label = re.search(r"quit-label: (?P<label>[^\n]+)", source).group("label")
+    navigation_key = re.search(r"navigation-key: (?P<key>.)", source).group("key")
+    tui = _spawn(_root(tmp_path, "all_narrow_help"), dimensions=(24, 80))
+    try:
+        assert tui.wait_for_content("alpha.txt", timeout=1.5), screen_text(tui)
+        _open(tui, "main.dir")
+        assert tui.send_and_wait_for_condition("i", _has_title(index), timeout=1.5), screen_text(tui)
+        assert any(quit_label in line for line in tui.get_screen_dump()), screen_text(tui)
+
+        for target in index_targets:
+            rendered = _open_next_index_topic(tui, index, topics[target])
+            assert rendered, f"narrow help did not open {target!r}\n{screen_text(tui)}"
+            assert any(quit_label in line for line in rendered), (
+                f"narrow help clipped its help strip for {target!r}\n{screen_text(tui)}"
+            )
+
+        assert set(index_targets) == set(topics) - {"index", "f1-navigation"}
+        assert tui.send_and_wait_for_condition(
+            navigation_key, _has_title(topics["f1-navigation"]), timeout=1.5
+        ), screen_text(tui)
     finally:
         tui.quit()
 
