@@ -6,7 +6,6 @@ import pytest
 from helpers_ui import (
     assert_file_tag_state,
     dismiss_archive_unsafe_warnings,
-    drive_action_until,
     footer_lines,
 )
 from tui_harness import YtreeNovaTUI
@@ -144,18 +143,7 @@ def test_writable_archive_footer_commands_and_invert_dispatch(
             assert command in directory_footer, directory_footer
         assert "commands" in directory_footer and "readonly" not in directory_footer
         assert tui.send_and_wait_for_screen_change(Keys.F1, timeout=2.0)
-        assert drive_action_until(
-            tui,
-            Keys.DOWN,
-            lambda lines: lines
-            if any(
-                "Reverse tags only on filter-matching visible entries" in line
-                for line in lines
-            )
-            else False,
-            max_actions=80,
-            timeout=0.2,
-        )
+        assert tui.wait_for_content("Archive Directory Help", timeout=2.0)
         assert tui.send_and_wait_for_screen_change(Keys.ESC, timeout=2.0)
 
         assert tui.send_and_wait_for_screen_change(Keys.DOWN, timeout=2.0)

@@ -560,6 +560,7 @@ static int ShowHelpPopupInternal(ViewContext *ctx, const char *title,
   int win_x;
   int win_y;
   BOOL use_history_geometry;
+  int required_footer_width = 0;
 
   if (ctx == NULL || title == NULL || rows == NULL || row_count == 0)
     return -1;
@@ -574,8 +575,13 @@ static int ShowHelpPopupInternal(ViewContext *ctx, const char *title,
       max_row_width = row_width;
   }
 
+  if (footer_spec != NULL && footer_spec->commands != NULL)
+    required_footer_width =
+        HelpPopupFooterWidth(footer_spec->commands, footer_spec->command_count) +
+        4;
   use_history_geometry =
       ctx->layout.main_win_width >= HELP_POPUP_HISTORY_MIN_WIDTH &&
+      ctx->layout.main_win_width >= required_footer_width &&
       (LINES - HELP_POPUP_HISTORY_VERTICAL_MARGIN) >=
           HELP_POPUP_HISTORY_VERTICAL_MARGIN;
   if (use_history_geometry) {
@@ -698,8 +704,9 @@ static int ShowHelpPopupInternal(ViewContext *ctx, const char *title,
         continue;
     }
 
-    if (ch == KEY_F(1) || ch == ESC || ch == CR || ch == LF || ch == 'q' ||
-        ch == 'Q')
+    if (ch == KEY_F(1) || ch == ESC || ch == 'q' || ch == 'Q' ||
+        ((ch == CR || ch == LF) &&
+         (footer_spec == NULL || footer_spec->key_handler == NULL)))
       break;
     if (dismiss_any_key)
       break;

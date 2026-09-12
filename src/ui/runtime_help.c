@@ -9,6 +9,7 @@
 #include "../../include/ytnova_appstate_render.h"
 #include "../core/generated_help_topics.h"
 #include <ctype.h>
+#include <limits.h>
 #include <string.h>
 
 #define GENERATED_HELP_MAX_FOOTER_COMMANDS 10
@@ -29,7 +30,6 @@
 #define GENERATED_HELP_WRAP_PADDING 4
 #define GENERATED_HELP_INTRO_RESERVED_FOOTER_COMMANDS 1
 #define GENERATED_HELP_STANDARD_RESERVED_FOOTER_COMMANDS 3
-#define GENERATED_HELP_RELATED_LINK_MIN_ROWS 3
 
 typedef struct {
   char label[GENERATED_HELP_MAX_ITEM_LABEL];
@@ -90,10 +90,6 @@ typedef struct {
   size_t inline_span_count;
   size_t inline_link_count;
   size_t active_inline_link_index;
-  size_t related_link_start_index;
-  size_t related_link_first_row;
-  size_t related_link_count;
-  size_t active_related_link_index;
   size_t reselection_anchor_index;
   size_t previous_visible_start;
   size_t previous_visible_end;
@@ -132,6 +128,8 @@ static BOOL FooterKeyMatches(int ch, const char *footer_key) {
   int key;
 
   if (footer_key == NULL || footer_key[0] == '\0' || footer_key[1] != '\0')
+    return FALSE;
+  if (ch < 0 || ch > UCHAR_MAX)
     return FALSE;
   key = islower((unsigned char)ch) ? toupper((unsigned char)ch) : ch;
   return key == toupper((unsigned char)footer_key[0]);
@@ -816,9 +814,6 @@ static size_t BuildFooterCommands(RuntimeHelpPopupState *state) {
   if (state == NULL || state->topic == NULL || footer == NULL)
     return 0;
 
-  state->related_link_first_row = GENERATED_HELP_NO_SELECTION;
-  state->related_link_count = 0;
-  state->active_related_link_index = GENERATED_HELP_NO_SELECTION;
   show_index = !TopicIdEquals(state->topic, "index");
   show_navigation = !TopicIdEquals(state->topic, "f1-navigation");
 
@@ -859,21 +854,6 @@ static size_t BuildContextListRows(RuntimeHelpPopupState *state,
   for (index = 0;
        index < state->item_count && row_count < GENERATED_HELP_MAX_ROWS;
        ++index) {
-    if (index == state->related_link_start_index &&
-        row_count + 2 <= GENERATED_HELP_MAX_ROWS) {
-      state->rows[row_count].kind = UI_HELP_POPUP_TEXT;
-      state->rows[row_count].prefix = NP_("runtime-help", "Related help");
-      state->rows[row_count].text = NULL;
-      state->rows[row_count].commands = NULL;
-      state->rows[row_count].spans = NULL;
-      state->rows[row_count].command_count = 0;
-      state->rows[row_count].span_count = 0;
-      state->rows[row_count].selected_link_index = GENERATED_HELP_NO_SELECTION;
-      state->rows[row_count].selected = FALSE;
-      state->rows[row_count].compact_with_previous = FALSE;
-      state->row_item_index[row_count] = GENERATED_HELP_NO_SELECTION;
-      row_count++;
-    }
     AppendWrappedContextListRows(state, &row_count, &line_index, index,
                                  selected_item_index);
   }
@@ -1302,55 +1282,7 @@ static int HandleGeneratedHelpFooterKey(ViewContext *ctx, int ch,
       return -1;
     }
 
-    if (state->related_link_count == 0)
-      return 0;
-    if (state->active_related_link_index >= state->related_link_count) {
-      size_t first_visible =
-          (size_t)MAXIMUM(state->visible_row_offset, 0);
-      size_t visible_end =
-          first_visible + (size_t)MAXIMUM(state->visible_row_count, 0);
-      size_t index;
-
-      if (reverse) {
-        for (index = state->related_link_count; index > 0; --index) {
-          size_t row = state->related_link_first_row + index - 1;
-
-          if (row >= first_visible && row < visible_end) {
-            state->active_related_link_index = index - 1;
-            return -1;
-          }
-        }
-      } else {
-        for (index = 0; index < state->related_link_count; ++index) {
-          size_t row = state->related_link_first_row + index;
-
-          if (row >= first_visible && row < visible_end) {
-            state->active_related_link_index = index;
-            return -1;
-          }
-        }
-      }
-      return 0;
-    }
-
-    if (reverse) {
-      if (state->active_related_link_index == 0)
-        return 0;
-      if (!GeneratedHelpRowIsVisible(
-              state, state->related_link_first_row +
-                         state->active_related_link_index - 1))
-        return 0;
-      state->active_related_link_index--;
-    } else {
-      if (state->active_related_link_index + 1 >= state->related_link_count)
-        return 0;
-      if (!GeneratedHelpRowIsVisible(
-              state, state->related_link_first_row +
-                         state->active_related_link_index + 1))
-        return 0;
-      state->active_related_link_index++;
-    }
-    return -1;
+    return 0;
   }
 
   if (ch == KEY_RIGHT || ch == CR || ch == LF) {
@@ -1360,14 +1292,7 @@ static int HandleGeneratedHelpFooterKey(ViewContext *ctx, int ch,
           state->inline_links[state->active_inline_link_index].target_topic_id;
       return 1;
     }
-    if (state->related_link_count == 0 ||
-        state->active_related_link_index >= state->related_link_count)
-      return 0;
-
-    state->next_topic_id =
-        state->topic->explainer_links[state->active_related_link_index]
-            .target_topic_id;
-    return 1;
+    return 0;
   }
 
   return 0;
@@ -1385,14 +1310,6 @@ static int GetGeneratedHelpActiveRow(const void *user_data) {
       InlineHelpLinkIsAvailable(state, state->active_inline_link_index)) {
     size_t row =
         state->inline_links[state->active_inline_link_index].row_index;
-
-    return GeneratedHelpRowIsVisible(state, row) ? (int)row : -1;
-  }
-
-  if (!state->contextual_list_mode && state->related_link_count > 0 &&
-      state->active_related_link_index < state->related_link_count) {
-    size_t row =
-        state->related_link_first_row + state->active_related_link_index;
 
     return GeneratedHelpRowIsVisible(state, row) ? (int)row : -1;
   }
@@ -1466,7 +1383,6 @@ int UI_ShowGeneratedContextHelpWithOverrides(
     state.has_history = history_count > 0;
     state.prefix_row_count = prefix_row_count;
     state.reselection_anchor_index = GENERATED_HELP_NO_SELECTION;
-    state.related_link_start_index = GENERATED_HELP_NO_SELECTION;
     state.previous_visible_start = 0;
     state.previous_visible_end = 0;
     state.viewport_valid = FALSE;

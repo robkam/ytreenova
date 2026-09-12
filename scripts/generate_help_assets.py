@@ -337,7 +337,7 @@ class HelpTopic:
     title: str
     contexts: tuple[str, ...]
     contextual_f1: str
-    explainer_links: tuple[HelpLink, ...]
+    inline_links: tuple[HelpLink, ...]
     reference_sections: tuple[ReferenceSection, ...]
     help_strip: HelpStrip
 
@@ -348,7 +348,8 @@ class HelpSourceError(ValueError):
 
 TOPIC_ID_RE = re.compile(r"^[a-z0-9-]+$")
 CONTEXTS_RE = re.compile(r"^[a-z0-9.-]+(?:,[a-z0-9.-]+)*$")
-LINK_RE = re.compile(r"^- \[([^\]]+)\]\(topic:([a-z0-9-]+)\)$")
+INLINE_LINK_RE = re.compile(r"\[([^\]\n]+)\]\(topic:([a-z0-9-]+)\)")
+INDEX_EXCLUDED_TOPIC_IDS = {"f1-navigation"}
 HELP_STRIP_RE = re.compile(
     r"^```ytnova-help-strip\n(?P<body>.*?)^```$", re.MULTILINE | re.DOTALL
 )
@@ -389,6 +390,11 @@ def parse_help_strip(source_text: str, *, required: bool) -> HelpStrip:
         key = values[field]
         if not re.fullmatch(r"[A-Za-z]", key):
             raise HelpSourceError(f"ytnova-help-strip {field} must be one ASCII letter")
+        label_field = field.replace("-key", "-label")
+        if key.casefold() not in values[label_field].casefold():
+            raise HelpSourceError(
+                f"ytnova-help-strip {field} must occur in {label_field}"
+            )
     keys = {values["index-key"].upper(), values["navigation-key"].upper()}
     if len(keys) != 2:
         raise HelpSourceError("ytnova-help-strip Index and Navigation keys must be distinct")
@@ -476,11 +482,11 @@ def parse_help_source(
             if pos >= len(block) or block[pos] != "### Contextual F1":
                 raise HelpSourceError(f"line {line_no + pos}: topic {topic_id!r} must declare ### Contextual F1")
             pos += 1
-            while (
-                pos < len(block)
-                and block[pos] != "### Explainer links"
-                and not (require_reference_sections and block[pos].startswith("#### "))
-            ):
+            while pos < len(block):
+                if block[pos].startswith("### "):
+                    raise HelpSourceError(
+                        f"line {line_no + pos}: F1 topic {topic_id!r} may contain only ### Contextual F1"
+                    )
                 contextual_lines.append(block[pos])
                 pos += 1
             contextual_f1 = "\n".join(contextual_lines).strip()
@@ -489,29 +495,7 @@ def parse_help_source(
         else:
             contextual_f1 = ""
 
-        links: list[HelpLink] = []
-        if pos < len(block) and block[pos] == "### Explainer links":
-            pos += 1
-            link_lines: list[str] = []
-            while (
-                pos < len(block)
-                and not (require_reference_sections and block[pos].startswith("#### "))
-            ):
-                link_lines.append(block[pos])
-                pos += 1
-            for offset, link_line in enumerate(link_lines, start=1):
-                stripped = link_line.strip()
-                if not stripped:
-                    continue
-                match = LINK_RE.fullmatch(stripped)
-                if not match:
-                    raise HelpSourceError(
-                        f"line {line_no + pos - len(link_lines) + offset - 1}: topic {topic_id!r} has invalid explainer link {stripped!r}"
-                    )
-                links.append(HelpLink(match.group(1), match.group(2)))
-            if link_lines:
-                contextual_lines.extend(link_lines)
-                contextual_f1 = "\n".join(contextual_lines).strip()
+        links = _parse_inline_links(topic_id, line_no + metadata_start + 4, contextual_f1)
 
         sections: list[ReferenceSection] = []
         if require_reference_sections:
@@ -526,7 +510,7 @@ def parse_help_source(
                 title=title,
                 contexts=contexts,
                 contextual_f1=contextual_f1,
-                explainer_links=tuple(links),
+                inline_links=tuple(links),
                 reference_sections=tuple(sections),
                 help_strip=help_strip,
             )
@@ -534,13 +518,30 @@ def parse_help_source(
 
     known_topics = {topic.topic_id for topic in topics}
     for topic in topics:
-        for link in topic.explainer_links:
+        for link in topic.inline_links:
             if link.target_topic_id not in known_topics:
                 raise HelpSourceError(
                     f"topic {topic.topic_id!r} links to unknown topic {link.target_topic_id!r}"
                 )
+            if link.target_topic_id == topic.topic_id:
+                raise HelpSourceError(f"topic {topic.topic_id!r} links to itself")
 
     return topics
+
+
+def _parse_inline_links(topic_id: str, start_line: int, text: str) -> list[HelpLink]:
+    links: list[HelpLink] = []
+
+    for offset, line in enumerate(text.splitlines()):
+        matches = list(INLINE_LINK_RE.finditer(line))
+        unmatched = INLINE_LINK_RE.sub("", line)
+        if re.search(r"\btopic\s*:", unmatched, re.IGNORECASE):
+            raise HelpSourceError(
+                f"line {start_line + offset}: topic {topic_id!r} has malformed inline topic link"
+            )
+        links.extend(HelpLink(match.group(1), match.group(2)) for match in matches)
+
+    return links
 
 
 def _parse_reference_sections(topic_id: str, start_line: int, lines: list[str]) -> list[ReferenceSection]:
@@ -610,11 +611,7 @@ def render_manpage_markdown(
 
 
 def render_contextual_projection(topic: HelpTopic, heading: str) -> str:
-    lines = [f"### {heading}", "", topic.contextual_f1.strip()]
-    if topic.explainer_links:
-        link_text = ", ".join(link.label for link in topic.explainer_links)
-        lines.extend(["", f"See also: {link_text}."])
-    return "\n".join(lines)
+    return "\n".join([f"### {heading}", "", topic.contextual_f1.strip()])
 
 
 def render_reference_projection(topic: HelpTopic, heading: str, *, include_heading: bool = True) -> str:
@@ -648,17 +645,10 @@ def render_runtime_header(
         "#include <stddef.h>",
         "",
         "typedef struct {",
-        "    const char *label;",
-        "    const char *target_topic_id;",
-        "} GeneratedHelpLink;",
-        "",
-        "typedef struct {",
         "    const char *topic_id;",
         "    const char *title;",
         "    const char *contexts_csv;",
         "    const char *contextual_f1;",
-        "    size_t explainer_link_count;",
-        "    const GeneratedHelpLink *explainer_links;",
         "} GeneratedHelpTopic;",
         "",
         "typedef struct {",
@@ -682,25 +672,9 @@ def render_runtime_header(
 
     for locale_id, _, locale_catalog_topics in catalogs:
         locale_suffix = locale_id.replace("-", "_")
-        for topic in locale_catalog_topics:
-            stem = f"{locale_suffix}_{topic.topic_id.replace('-', '_')}"
-            if topic.explainer_links:
-                lines.append(
-                    f"static const GeneratedHelpLink generated_help_links_{stem}[] = {{"
-                )
-                for link in topic.explainer_links:
-                    lines.append(
-                        f"    {{{c_literal(link.label)}, {c_literal(link.target_topic_id)}}},"
-                    )
-                lines.append("};")
-                lines.append("")
         lines.append(f"static const GeneratedHelpTopic generated_help_topics_{locale_suffix}[] = {{")
         for topic in locale_catalog_topics:
-            stem = f"{locale_suffix}_{topic.topic_id.replace('-', '_')}"
             contexts_csv = ",".join(topic.contexts)
-            link_array = (
-                f"generated_help_links_{stem}" if topic.explainer_links else "NULL"
-            )
             lines.append("    {")
             lines.append(f"        {c_literal(topic.topic_id)},")
             lines.append(f"        {c_literal(topic.title)},")
@@ -708,8 +682,6 @@ def render_runtime_header(
                 f"        {c_literal(contexts_csv) if contexts_csv else 'NULL'},"
             )
             lines.append(f"        {c_literal(topic.contextual_f1)},")
-            lines.append(f"        {len(topic.explainer_links)},")
-            lines.append(f"        {link_array},")
             lines.append("    },")
         lines.append("};")
         lines.append("")
@@ -879,6 +851,7 @@ def escape_roff_leading(text: str) -> str:
 def c_literal(text: str) -> str:
     escaped = (
         text.replace("\\", r"\\")
+        .replace("?", r"\?")
         .replace('"', r'\"')
         .replace("\n", r"\n")
     )
@@ -898,6 +871,31 @@ def validate_topic_inventory(f1_topics: list[HelpTopic]) -> None:
                     f"{owner!r}, {topic.topic_id!r}"
                 )
             context_owners[context_id] = topic.topic_id
+
+
+def validate_index_organization(f1_topics: list[HelpTopic]) -> None:
+    topic_map = {topic.topic_id: topic for topic in f1_topics}
+    index = topic_map.get("index")
+    if index is None:
+        raise HelpSourceError("F1 help is missing the index topic")
+
+    expected_targets = set(topic_map) - {"index"} - INDEX_EXCLUDED_TOPIC_IDS
+    actual_targets = [link.target_topic_id for link in index.inline_links]
+    if len(actual_targets) != len(set(actual_targets)):
+        raise HelpSourceError("Help Index repeats an inline link target")
+    if set(actual_targets) != expected_targets:
+        missing = sorted(expected_targets - set(actual_targets))
+        extra = sorted(set(actual_targets) - expected_targets)
+        details = []
+        if missing:
+            details.append(f"missing: {', '.join(missing)}")
+        if extra:
+            details.append(f"unexpected: {', '.join(extra)}")
+        raise HelpSourceError("Help Index target inventory is incorrect: " + "; ".join(details))
+
+    labels = [link.label.casefold() for link in index.inline_links]
+    if labels != sorted(labels):
+        raise HelpSourceError("Help Index links must be alphabetical by label")
 
 
 def help_locale_id_from_path(path: Path) -> str:
@@ -933,11 +931,11 @@ def validate_locale_topic_projection(
             raise HelpSourceError(
                 f"locale {locale_id} topic {master_topic.topic_id!r} changed contexts ownership"
             )
-        master_targets = [link.target_topic_id for link in master_topic.explainer_links]
-        locale_targets = [link.target_topic_id for link in locale_topic.explainer_links]
+        master_targets = [link.target_topic_id for link in master_topic.inline_links]
+        locale_targets = [link.target_topic_id for link in locale_topic.inline_links]
         if sorted(locale_targets) != sorted(master_targets):
             raise HelpSourceError(
-                f"locale {locale_id} topic {master_topic.topic_id!r} changed explainer link targets"
+                f"locale {locale_id} topic {master_topic.topic_id!r} changed inline link targets"
             )
 
 
@@ -963,11 +961,14 @@ def build_outputs(
     )
     locale_f1_catalogs: list[tuple[str, str, list[HelpTopic]]] = []
     validate_topic_inventory(f1_topics)
+    validate_index_organization(f1_topics)
     for locale_path in f1_locale_source_paths:
         locale_id = help_locale_id_from_path(locale_path)
         locale_topics = parse_help_source(
             locale_path.read_text(encoding="utf-8"), require_help_strip=True
         )
+        validate_topic_inventory(locale_topics)
+        validate_index_organization(locale_topics)
         validate_locale_topic_projection(f1_topics, locale_topics, locale_id=locale_id)
         locale_f1_catalogs.append((locale_id, str(locale_path), locale_topics))
     outputs: dict[str, str] = {}

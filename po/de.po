@@ -90,11 +90,7 @@ msgctxt "runtime-help.footer"
 msgid "Quit"
 msgstr "Beenden"
 
-#: src/ui/runtime_help.c
-msgctxt "runtime-help"
-msgid "Related help"
-msgstr "Weiterführende Hilfe"
-
+#: src/ui/help_popup.c
 msgctxt "help-popup.footer"
 msgid "close"
 msgstr "schliessen"
