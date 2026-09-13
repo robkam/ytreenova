@@ -28,7 +28,7 @@ This manual is the fuller reference path for ytnova modes, commands, prompts, an
 
 #### Purpose
 
-This file is the fuller reference source for the manpage and generated `docs/USAGE.md`.
+Use this reference for detailed mode, command, prompt, and support information.
 
 #### Contents
 
