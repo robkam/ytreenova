@@ -23,7 +23,7 @@ google-api-core[grpc]==2.33.0
     #   google-generativeai
 google-api-python-client==2.200.0
     # via google-generativeai
-google-auth==2.57.1
+google-auth==2.58.0
     # via
     #   google-ai-generativelanguage
     #   google-api-core
@@ -99,9 +99,9 @@ requests==2.34.2
     # via google-api-core
 temporalio==1.32.0
     # via -r scripts/requirements.in
-tqdm==4.70.0
+tqdm==4.70.1
     # via google-generativeai
-types-protobuf==7.35.1.20260827
+types-protobuf==7.35.1.20260906
     # via temporalio
 typing-extensions==4.16.0
     # via

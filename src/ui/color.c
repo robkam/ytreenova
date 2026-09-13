@@ -7,6 +7,8 @@
 
 #include "ytnova_ui.h"
 
+#include <limits.h>
+
 #ifdef COLOR_SUPPORT
 
 UIColor ui_colors[] = {{"dynamic_text", UI_ROLE_DYNAMIC_TEXT, 7, 0},
@@ -321,31 +323,66 @@ static int FindReusableFileColorPair(const FileColorRule *head,
   return FILE_COLOR_PAIR_UNASSIGNED;
 }
 
+static int UsableColorPairLimit(void) {
+  int limit = COLOR_PAIRS;
+
+  if (limit > SHRT_MAX + 1)
+    limit = SHRT_MAX + 1;
+  return limit;
+}
+
+static BOOL ReserveColorPairStorage(void) {
+  int limit = UsableColorPairLimit();
+
+  if (limit <= 1)
+    return FALSE;
+
+  /* ncurses indexes color-pair records by address, so later table growth can
+   * invalidate its lookup tree.  Grow the table before defining live pairs. */
+#if defined(NCURSES_VERSION) && defined(NCURSES_EXT_COLORS)
+  return init_extended_pair(limit - 1, COLOR_WHITE, COLOR_BLACK) != ERR;
+#else
+  return TRUE;
+#endif
+}
+
+static void InitUsableColorPair(int pair_id, int fg, int bg, int pair_limit) {
+  if (pair_id <= 0 || pair_id >= pair_limit)
+    return;
+  (void)init_pair((short)pair_id, (short)fg, (short)bg);
+}
+
 void ReinitColorPairs(ViewContext *ctx) {
   int i;
   FileColorRule *rule;
+  int pair_limit;
   int next_pair_id = F_COLOR_PAIR_BASE;
 
   if (!ctx->color_enabled)
     return;
+  pair_limit = UsableColorPairLimit();
 
   /* Initialize UI colors */
   for (i = 0; i < NUM_UI_COLORS; i++) {
-    init_pair(ui_colors[i].id, NormalizeColorIndex(ui_colors[i].fg, COLORS),
-              NormalizeColorIndex(ui_colors[i].bg, COLORS));
+    InitUsableColorPair(ui_colors[i].id,
+                        NormalizeColorIndex(ui_colors[i].fg, COLORS),
+                        NormalizeColorIndex(ui_colors[i].bg, COLORS), pair_limit);
   }
-  init_pair(UI_VIEWER_FRAME_PAIR,
-            NormalizeColorIndex(UIColorForeground(UI_ROLE_BOX_LINES), COLORS),
-            NormalizeColorIndex(UIColorBackground(UI_ROLE_DYNAMIC_TEXT), COLORS));
+  InitUsableColorPair(
+      UI_VIEWER_FRAME_PAIR,
+      NormalizeColorIndex(UIColorForeground(UI_ROLE_BOX_LINES), COLORS),
+      NormalizeColorIndex(UIColorBackground(UI_ROLE_DYNAMIC_TEXT), COLORS),
+      pair_limit);
   for (i = UI_ROLE_DYNAMIC_TEXT; i < NUM_UI_COLOR_PAIRS; ++i) {
-    init_pair(UI_KEYBIND_BASE_PAIR + (i - 1),
-              NormalizeColorIndex(UIColorForeground(UI_ROLE_KEYBIND), COLORS),
-              NormalizeColorIndex(UIColorBackground(i), COLORS));
-    init_pair(UI_HELP_KEYBIND_BASE_PAIR + (i - 1),
-              NormalizeColorIndex(UIColorForeground(UI_ROLE_HELP_KEYBIND),
-                                  COLORS),
-              NormalizeColorIndex(UIColorBackground(UI_ROLE_HELP_KEYBIND),
-                                  COLORS));
+    InitUsableColorPair(
+        UI_KEYBIND_BASE_PAIR + (i - 1),
+        NormalizeColorIndex(UIColorForeground(UI_ROLE_KEYBIND), COLORS),
+        NormalizeColorIndex(UIColorBackground(i), COLORS), pair_limit);
+    InitUsableColorPair(
+        UI_HELP_KEYBIND_BASE_PAIR + (i - 1),
+        NormalizeColorIndex(UIColorForeground(UI_ROLE_HELP_KEYBIND), COLORS),
+        NormalizeColorIndex(UIColorBackground(UI_ROLE_HELP_KEYBIND), COLORS),
+        pair_limit);
   }
 
   /* File-type selectors with the same style share one terminal color pair. */
@@ -353,24 +390,28 @@ void ReinitColorPairs(ViewContext *ctx) {
     if (rule->pair_id == FILE_COLOR_PAIR_UNASSIGNED) {
       rule->pair_id = FindReusableFileColorPair(ctx->file_color_rules_head, rule);
       if (rule->pair_id == FILE_COLOR_PAIR_UNASSIGNED) {
-        if (next_pair_id >= COLOR_PAIRS)
+        if (next_pair_id >= pair_limit)
           continue;
         rule->pair_id = next_pair_id++;
       }
     }
-    if (rule->pair_id < F_COLOR_PAIR_BASE || rule->pair_id >= COLOR_PAIRS)
+    if (rule->pair_id < F_COLOR_PAIR_BASE || rule->pair_id >= pair_limit)
       continue;
-    init_pair(rule->pair_id, NormalizeColorIndex(rule->fg, COLORS),
-              NormalizeColorIndex(rule->bg, COLORS));
+    InitUsableColorPair(rule->pair_id, NormalizeColorIndex(rule->fg, COLORS),
+                        NormalizeColorIndex(rule->bg, COLORS), pair_limit);
   }
 }
 
 void StartColors(ViewContext *ctx) {
-  start_color();
+  ctx->color_enabled = FALSE;
+  if (start_color() == ERR)
+    return;
   if (COLORS < 8 ||
       COLOR_PAIRS < 64) { /* Check for a reasonable number of pairs */
     return;               /* No color support */
   }
+  if (!ReserveColorPairStorage())
+    return;
 
   ctx->color_enabled = TRUE;
   ReinitColorPairs(ctx);
@@ -378,7 +419,7 @@ void StartColors(ViewContext *ctx) {
 
 static int FileColorPairOrDefault(const FileColorRule *rule) {
   if (rule == NULL || rule->pair_id < F_COLOR_PAIR_BASE ||
-      rule->pair_id >= COLOR_PAIRS)
+      rule->pair_id >= UsableColorPairLimit())
     return UI_ROLE_DYNAMIC_TEXT;
   return rule->pair_id;
 }
