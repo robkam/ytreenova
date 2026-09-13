@@ -1907,7 +1907,7 @@ Ordering policy (for all editors, including AI editors):
 #### **Task 94.2: Triage Split-Panel Selection-Isolation Failures**
 *   **Finding:** `qa-all` failed `tests/test_panel_isolation.py::test_split_screen_memory_isolation`, and `qa-pytest-coverage` failed `tests/test_panel_isolation.py::test_split_from_file_keeps_inactive_file_selection_independent`.
 *   **Fix:** Reproduce both paths as one initial panel-state inventory. Correct their shared owner, state-restoration, or event-ordering defect when one exists; split implementation only if reproduction proves distinct owner boundaries. Preserve panel isolation and inactive-panel independence, with focused proof through both normal and coverage gates.
-*   - [ ] **Status:** Not Started.
+*   - [x] **Status:** Completed. Split-from-file and split-navigation paths preserve inactive-panel selection ownership in normal and coverage builds; repeated reproducers and the complete focused suite found no shared runtime or synchronization defect.
 
 #### **Task 94.3: Classify and Repair Sanitizer-Mode Interactive Failures**
 *   **Finding:** `qa-sanitize` reported 29 interactive TUI failures across archive, copy/move, output, panel/volume selection, and stats workflows, without an AddressSanitizer or UndefinedBehaviorSanitizer diagnostic.
