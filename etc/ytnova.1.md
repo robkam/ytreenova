@@ -47,7 +47,7 @@ ytnova monitors the **currently selected directory** for changes (created/delete
 This manual is the fuller reference path for ytnova modes, commands, prompts, and support topics.
 
 #### Purpose
-This file is the fuller reference source for the manpage and generated `docs/USAGE.md`.
+Use this reference for detailed mode, command, prompt, and support information.
 
 #### Contents
 * **Modes and navigation**: `Directory`, `File`, `Archive-Dir`, `Archive-File`, `Showall`, `Global`, `F7 Preview`, and `F8 Split` explain what each runtime surface owns.

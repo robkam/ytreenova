@@ -106,7 +106,7 @@ The project documentation lives under `docs/` and is split into focused user, de
 
 | Document | Purpose |
 | :--- | :--- |
-| **[USAGE.md](docs/USAGE.md)** | **User Guide**: How to navigate, tag, and use command keys. (Generated from `ytnova.1.md`). |
+| **[USAGE.md](docs/USAGE.md)** | **User Guide**: How to navigate, tag, and use command keys. (Generated from `etc/help/man.en.md`). |
 | **[quickstart.md](docs/quickstart.md)** | **Developer Setup**: How to set up the environment, run tests, and work on the codebase. |
 | **[BUGS.md](docs/BUGS.md)** | **Known Issues**: Current defects, reproductions, and fix status. |
 | **[CONTRIBUTING.md](docs/CONTRIBUTING.md)** | **Developer Setup**: How to set up the environment, run tests, and submit code. |

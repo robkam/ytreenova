@@ -510,7 +510,7 @@ Ordering policy (for all editors, including AI editors):
 *   `F2` destination-directory picker behavior remains unchanged.
 *   Rendering stays concise and non-repetitive: single-line summary with deterministic clipping (middle truncation) when width is constrained.
 *   Add focused regression tests for preview correctness and resulting destination path in representative filesystem scenarios (including nested roots and absolute destination input).
-*   Update `docs/SPECIFICATION.md`, `etc/ytnova.1.md`, generated `docs/USAGE.md`, and F1/context help text so include-path root/relative/result contract and `[`/`]` controls are explicit and consistent.
+*   Update `docs/SPECIFICATION.md`, `etc/help/man.en.md`, generated `docs/USAGE.md`, and F1/context help text so include-path root/relative/result contract and `[`/`]` controls are explicit and consistent.
  *   - [x] **Status:** Complete.
 
 ### **Task 16: Proactive Missing-Destination Directory Creation Prompt**
@@ -523,7 +523,7 @@ Ordering policy (for all editors, including AI editors):
 *   Choosing `N`/`Esc` leaves filesystem state unchanged and returns control to destination input flow.
 *   On creation failure (permissions/path errors), show a precise actionable error and do not continue the mutation command.
 *   Add focused regression coverage for `yes`, `no/cancel`, and failure-path behavior.
-*   Update `etc/ytnova.1.md` and regenerate `docs/USAGE.md` (`make docs`) when behavior lands.
+*   Update `etc/help/man.en.md` and regenerate `docs/USAGE.md` (`make help-assets`) when behavior lands.
 *   - [x] **Status:** Completed.
 
 ### **Task 17: Add Inline `Shift+N` Create-Link Flow (Symlink/Hardlink)**
@@ -540,7 +540,7 @@ Ordering policy (for all editors, including AI editors):
 *   Destination resolution in showall/global targets the owner directory of the highlighted entry (not unrelated tree cursor state).
 *   Existing `n`/`N` newfile behavior is remapped to preserve intuitive command grouping while keeping help/footer truthfully synchronized.
 *   Add focused regression coverage for: symlink create, hardlink create, cancel/no-op behavior, showall/global owner-directory resolution, split-panel isolation, and error-path messaging.
-*   Update `etc/ytnova.1.md` and regenerate `docs/USAGE.md` (`make docs`) when behavior lands.
+*   Update `etc/help/man.en.md` and regenerate `docs/USAGE.md` (`make help-assets`) when behavior lands.
 *   - [ ] **Status:** Not Started.
 
 ### **Task 18: F7 Top Path Line Must Preserve Full `filename.ext`**
@@ -552,7 +552,7 @@ Ordering policy (for all editors, including AI editors):
 *   When width is insufficient, truncate middle of path segment; keep full selected `filename.ext` visible.
 *   The same identity-preservation rule applies in filesystem and archive preview contexts.
 *   Add focused regression tests for F7 top-line truncation/identity behavior.
-*   Update `etc/ytnova.1.md` and regenerate `docs/USAGE.md` (`make docs`) when behavior lands.
+*   Update `etc/help/man.en.md` and regenerate `docs/USAGE.md` (`make help-assets`) when behavior lands.
 *   - [x] **Status:** Complete.
 
 ### **Task 19: Manual File-Column Width Controls (`[` Narrower, `]` Wider, `{` / `}` Reset)**
@@ -703,7 +703,7 @@ Ordering policy (for all editors, including AI editors):
 *   Regression tests verify option visibility/behavior parity across at least filesystem + archive contexts.
 *   Regression tests verify destination semantics (plain filename file-output default, hardcopy prompt behavior, and no-crash error paths).
 *   F1/help text, footer labels, prompt text, and runtime behavior stay synchronized with the same contract.
-*   `docs/SPECIFICATION.md`, `etc/ytnova.1.md`, and generated `docs/USAGE.md` are updated in the same delivery so docs match runtime behavior.
+*   `docs/SPECIFICATION.md`, `etc/help/man.en.md`, and generated `docs/USAGE.md` are updated in the same delivery so docs match runtime behavior.
 *   No crash on printer-command failure or destination-open failure.
 *   - [x] **Status:** Completed.
 
@@ -934,7 +934,7 @@ Ordering policy (for all editors, including AI editors):
 *   Default behavior remains unchanged when quick/preset config is absent.
 *   Compare-mode prompt/menu/help surfaces stay synchronized with the persisted option model and modal key contract.
 *   Add focused regression coverage for compare behavior and split-panel isolation.
-*   Update compare docs/help text in `etc/ytnova.1.md` and regenerate `docs/USAGE.md`.
+*   Update compare docs/help text in `etc/help/man.en.md` and regenerate `docs/USAGE.md`.
 *   - [ ] **Status:** Not Started.
 
 ### **Task 30: Add Recursive Directory Compare in `J` Flow**
@@ -946,7 +946,7 @@ Ordering policy (for all editors, including AI editors):
 *   Recursive and non-recursive directory compare are both available from the same `J`-entry compare flow.
 *   The recursive choice is explicit and discoverable in compare prompts/help.
 *   Compare target confirmation and split-panel isolation behavior remain unchanged.
-*   `etc/ytnova.1.md` and generated `docs/USAGE.md` are updated when behavior lands.
+*   `etc/help/man.en.md` and generated `docs/USAGE.md` are updated when behavior lands.
 *   - [ ] **Status:** Not Started.
 
 ### **Task 31: Unified Split-Panel State/Restore Architecture**
@@ -1036,7 +1036,7 @@ Ordering policy (for all editors, including AI editors):
 *   `F8` and `Tab` are explicit no-ops in `F7` mode.
 *   Footer keybinding hints and F1 help in `F7` accurately reflect allowed actions and blocked keys.
 *   Add focused regression tests for allowed-command execution in `F7` and blocked-key enforcement (`F8`, `Tab`).
-*   Update `etc/ytnova.1.md` and regenerate `docs/USAGE.md` when behavior lands.
+*   Update `etc/help/man.en.md` and regenerate `docs/USAGE.md` when behavior lands.
 *   - [ ] **Status:** Not Started.
 
 ### **Phase Follow-On Work**
@@ -1147,7 +1147,7 @@ Ordering policy (for all editors, including AI editors):
 *   **Rationale:** Replaces the limited static help lines with a comprehensive and user-friendly help system, making the application easier to learn and use without consulting external documentation.
 *   **Context Contract:** `F1` help must be contextual by active runtime surface, not a single generic command dump. The help surface must resolve against the currently active directory/tree view, file view, archive view, Showall/Global view, split/preview layout, and prompt/dialog state.
 *   **Sequencing Note:** Prefer to land Task 43's final portable footer keybinding/F1 wording contract before this task so the integrated help system documents the intended low-noise runtime guidance surfaces rather than an abandoned transient-footer idea.
-*   **Delivered Scope:** Shared modal help now opens from the main runtime surfaces plus active picker/prompt/dialog flows, stays brief enough for in-task consultation, and leaves longer semantics/examples to `etc/ytnova.1.md` and generated `docs/USAGE.md`.
+*   **Delivered Scope:** Shared modal help now opens from the main runtime surfaces plus active picker/prompt/dialog flows, stays brief enough for in-task consultation, and leaves longer semantics/examples to `etc/help/man.en.md` and generated `docs/USAGE.md`.
 *   - [x] **Status:** Completed.
 
 ### **Task 43: Refine In-App Help Text**
@@ -1161,7 +1161,7 @@ Ordering policy (for all editors, including AI editors):
 
 ### **Task 44: Refine Contextual F1 Content and Footer-Parity Contract (gettext-ready)**
 *   **Goal:** Ensure each contextual `F1` surface is concise, useful, complete, and readable under popup constraints: it must cover every footer command for the active surface while also clarifying the non-obvious behavior the footer cannot carry.
-*   **Rationale:** Footer and `F1` are the primary in-app guidance surfaces. Pure parity without added clarification degenerates into "the footer again," while essay-length help steals attention from the task at hand. `F1` must stay contextual, plain-English, and newcomer-friendly; `etc/ytnova.1.md`/`docs/USAGE.md` remain the terser reference path.
+*   **Rationale:** Footer and `F1` are the primary in-app guidance surfaces. Pure parity without added clarification degenerates into "the footer again," while essay-length help steals attention from the task at hand. `F1` must stay contextual, plain-English, and newcomer-friendly; `etc/help/man.en.md`/`docs/USAGE.md` remain the terser reference path.
 *   **Related Bugs:** `BUG-10.1` / `BUG-10.2` / `BUG-10.3` / `BUG-10.4` — footer keybinding/F1/prompt mismatch (discoverability + confidence).
 *   **Dependency:** Sequence after Task 41 establishes the structured footer layout engine and after Task 11.2 establishes the structured label/key-token split.
 *   **Sequencing Note:** Land Task 43's portable low-noise footer keybinding/F1 wording decisions before this task so parity is enforced against the final portable footer contract rather than a transient modifier-held variant.
@@ -1177,13 +1177,13 @@ Ordering policy (for all editors, including AI editors):
 *   First-pass required contexts: FS dir, FS file, VFS dir, VFS file, F7, F8, Showall, Global, tagged flows, prompt/dialog flows with genuinely non-obvious semantics, and `VI_KEYS=1` variants.
 *   Help popup body text wraps within the available popup width; narrow layouts preserve readable content through wrapping and scrolling instead of right-edge truncation.
 *   Numeric FileInfo band coverage is explicit: when the footer compresses `1..9 dir view` / `1..9 file view`, the matching `F1` help must decode each advertised number's active-surface meaning for Name, Attributes, Owner, Times, Compact, size units, Mini preview, File detail, and Git, and must also explain the active volume's `0` behavior.
-*   Context-sensitive actions keep short in-app summaries while full semantics remain in `etc/ytnova.1.md`/`docs/USAGE.md` (for example compare `J` modes, compare basis/tag/hash meaning, useful command-line editing, and archive/compress format behavior).
+*   Context-sensitive actions keep short in-app summaries while full semantics remain in `etc/help/man.en.md`/`docs/USAGE.md` (for example compare `J` modes, compare basis/tag/hash meaning, useful command-line editing, and archive/compress format behavior).
 *   Shared operator topics such as filters, jump/list-jump behavior, wildcard/rename-pattern rules, search/fuzzy-matching semantics, command-line editing, `VI_KEYS=1`, `F10` config, theming/customization, and similar cross-cutting workflows are explained once and linked from local `F1` pages instead of being re-taught on every page.
 *   The `Contents` topic acts as a complete alphabetical link index for operator-facing help topics, so users can discover the owning topic for conceptual, procedural, and semantic questions without guessing which local page might contain it.
 *   In contextual command lists, every listed command term is a help popup link to a brief plain-English explainer page; the user must not be sent into a maze of recursive definitions.
 *   Help text paths are structured for gettext extraction/reuse and future deduplication (no duplicated ad-hoc strings per view path, and no translator-facing requirement to edit C literals just to keep cross-topic help prose aligned).
 *   Add regression checks that detect footer/F1 parity drift in covered contexts.
-*   Add a keybinding parity audit gate that verifies active runtime keybindings remain consistently documented across footer, `F1`, and `etc/ytnova.1.md`/`docs/USAGE.md`.
+*   Add a keybinding parity audit gate that verifies active runtime keybindings remain consistently documented across footer, `F1`, and `etc/help/man.en.md`/`docs/USAGE.md`.
 *   - [~] **Status:** In Progress.
 
 #### **Task 44.1: Add Contextual F1 Hyperlinks and Shared Explainer Pages**
@@ -1365,7 +1365,7 @@ Ordering policy (for all editors, including AI editors):
 *   Add `SEPARATE_DIR_FILE_VIEWS=0|1` profile setting (default `0`) to switch between shared and split `1..4` panel views.
 *   **Keybinding Policy:** Remove `^F` and `B` from runtime behavior and help/manpage docs. This task is the explicit keybinding-change exception referenced by Task 40 scope lock.
 *   **UX/Help Policy:** Footer stays concise (`1..9 dir view` / `1..9 file view`) and no longer carries a separate `Brief` item; stats name the active `5` state as `Compact`; full key semantics, including the active volume's `0` behavior, live in F1 help and the manpage.
-*   **Spec/Docs Sync Policy:** When delivered, update `docs/SPECIFICATION.md` and `etc/ytnova.1.md` (and regenerated `docs/USAGE.md`) with the same grouped ownership contract.
+*   **Spec/Docs Sync Policy:** When delivered, update `docs/SPECIFICATION.md` and `etc/help/man.en.md` (and regenerated `docs/USAGE.md`) with the same grouped ownership contract.
 *   - [x] **Status:** Completed.
 
 ### **Task 46: Add Case-Sensitive Sort Toggle + Profile Default**
@@ -1789,7 +1789,7 @@ Ordering policy (for all editors, including AI editors):
 *   **Rationale:** Task 61 made YtreeNova itself themeable, but external terminal helpers still break visual continuity when the main UI is blue-on-white and the launched helper falls back to unrelated defaults. Supported helpers should be able to follow the active theme without requiring users to hand-maintain per-theme shell startup hacks.
 *   **Scope Contract:** This is an adapter/preset task for known terminal helpers, not a promise to theme arbitrary external commands or GUI applications. Unsupported helpers must continue to launch normally with no theme injection rather than receiving brittle guessed arguments.
 *   **Launch Policy:** Prefer per-launch arguments, environment variables, temporary helper config files, or repo-managed wrapper/adaptor scripts that are selected by helper name/profile. Do **not** auto-edit persistent user shell startup files such as `.bashrc`, editor dotfiles, or pager rc files. Theme changes should apply on the next helper launch without a manual revert step because no persistent user config mutation occurred.
-*   **Documentation Policy:** If a helper cannot be themed well through transient launch-time inputs alone, document an optional user-managed setup path in `etc/ytnova.1.md` / generated `docs/USAGE.md`, but keep that as opt-in guidance rather than automatic mutation. The docs must clearly distinguish between built-in transient presets and user-owned persistent helper customization.
+*   **Documentation Policy:** If a helper cannot be themed well through transient launch-time inputs alone, document an optional user-managed setup path in `etc/help/man.en.md` / generated `docs/USAGE.md`, but keep that as opt-in guidance rather than automatic mutation. The docs must clearly distinguish between built-in transient presets and user-owned persistent helper customization.
 *   **Tagged Viewer Contract:** `TAGGEDVIEWER=external` participates in this task when the selected external pager/helper is one of the supported terminal helpers. Pager-native behaviors such as hit traversal and search highlighting remain helper-owned unless a supported preset explicitly maps them; YtreeNova must not fight helper-native search-hit semantics just to force visual parity.
 *   **Acceptance Criteria:**
 *   At least the shipped supported-helper set for one editor family and one pager family (for example vim-like and less-like helpers) can be launched with a theme preset that tracks the active YtreeNova theme.
@@ -1874,10 +1874,15 @@ Ordering policy (for all editors, including AI editors):
 *   **Excluded:** Do not modify third-party `uthash.h`.
 *   - [ ] **Status:** Not Started.
 
-### **Task 67: Final Consistency Sweep (Style, Docs, UX Wording)**
-*   **Goal:** Run a final consistency pass across style-sensitive surfaces (code style guardrails, docs wording, and help/footer terminology).
-*   **Rationale:** Multi-contributor consistency is enforced continuously via guardrails and review; this task is a final convergence pass.
-*   - [ ] **Status:** Not Started.
+### **Task 67: Bounded Consistency Audit (Docs and UX Terminology)**
+*   **Goal:** Correct concrete inconsistencies in root and `docs/` Markdown and in user-visible help/footer terminology, without preference-driven rewrites.
+*   **Scope:** Check for references to removed commands, features, files, or workflows; wording that contradicts current project behavior; and duplicated guidance that lacks one clear canonical home. Treat current help and manpage text as correct unless the audit finds a concrete current-behavior error.
+*   **Release wording:** Keep the current alpha warning until the project is explicitly declared beta; do not introduce a beta or interim release label by inference.
+*   **Completion:** Record an explicit audit inventory, correct every confirmed issue, and stop when no concrete inconsistency remains. Do not expand this task into broad copyediting, code modularization, or later roadmap work.
+*   **Rationale:** Multi-contributor consistency is enforced continuously via guardrails and review; this is a bounded final convergence pass.
+*   **Audit inventory:** Root contributor guidance and README, roadmap documentation-authoring workflows, authored man/reference content and generated projections, F1/footer key terminology, and current alpha-release wording.
+*   **Audit result:** Canonicalized help-authoring references to `etc/help/man.en.md` and `make help-assets`, removed a generated-reference self-description, and verified current enhanced/legacy tagged-move terminology against the footer inventory. The alpha warning remains unchanged.
+*   - [x] **Status:** Completed.
 
 ### **Task 68: Add Modal Window Shadows**
 *   **Goal:** Add a restrained lower/right shadow treatment to modal windows so dialogs read as layered popups rather than flat border boxes.
@@ -2061,7 +2066,7 @@ Ordering policy (for all editors, including AI editors):
 *   **UX/Help Direction:**
     *   Keep `FILTER:` prompt flow unchanged (`key -> Enter -> result`).
     *   Add lightweight inline hint text only (for example `glob(default) | re: | fz:`), without using `?` (reserved for backward search).
-    *   Put full syntax/examples in `F1` help and manpage source (`etc/ytnova.1.md`).
+    *   Put full syntax/examples in `F1` help and manpage source (`etc/help/man.en.md`).
 *   **Rationale:** Adds regex/fuzzy power in a Unix-style, scriptable format without breaking existing wildcard workflows or adding submenu friction.
 *   - [ ] **Status:** Not Started.
 
