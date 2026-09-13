@@ -1856,7 +1856,7 @@ Ordering policy (for all editors, including AI editors):
     *   A tracked shim inventory exists (file, symbol, owner task, removal condition).
     *   All shims owned by completed tasks are removed.
     *   CI/QA gate fails if orphaned/expired shim markers exist.
-*   - [ ] **Status:** Not Started.
+*   - [x] **Status:** Complete.
 
 ### **Task 65: UI/UX Snappiness Polish (Targeted Optimization)**
 *   **Goal:** Improve perceived responsiveness in high-frequency flows using profiling-driven optimizations.

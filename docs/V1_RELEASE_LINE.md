@@ -158,10 +158,9 @@ These items are still worth doing. They are simply not part of the smallest sane
 
 These are the next best candidates after the minimum line, or soon after v1 if energy is limited:
 
-1. Task 64, remove temporary compatibility shims.
-2. Task 67, final consistency sweep.
-3. Task 66, source comment hygiene pass.
-4. Task 69, multi-round adversarial security review, but keep it time-boxed and severity-driven.
+1. Task 67, final consistency sweep.
+2. Task 66, source comment hygiene pass.
+3. Task 69, multi-round adversarial security review, but keep it time-boxed and severity-driven.
 
 ### Pull these forward only if current use still feels fragile
 
