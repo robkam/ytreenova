@@ -3641,6 +3641,134 @@ int main(void) {
     subprocess.run([str(binary)], cwd=tmp_path, check=True)
 
 
+def test_color_pair_startup_reserves_storage_before_rebuild(tmp_path):
+    repo_root = Path(__file__).resolve().parents[1]
+    driver = tmp_path / "color_pair_reinit_driver.c"
+    binary = tmp_path / "color_pair_reinit_driver"
+
+    driver.write_text(
+        r'''
+#include "ytnova_ui.h"
+#include <limits.h>
+#include <stdio.h>
+#include <string.h>
+
+static int first_pair;
+static int highest_pair;
+static int init_pair_calls;
+
+static void observe_pair(int pair) {
+  if (init_pair_calls == 0)
+    first_pair = pair;
+  if (pair > highest_pair)
+    highest_pair = pair;
+  init_pair_calls++;
+}
+
+int __wrap_init_pair(short pair, short foreground, short background) {
+  (void)foreground;
+  (void)background;
+  observe_pair(pair);
+  return OK;
+}
+
+int __wrap_init_extended_pair(int pair, int foreground, int background) {
+  (void)foreground;
+  (void)background;
+  observe_pair(pair);
+  return OK;
+}
+
+int UI_Message(ViewContext *ctx, const char *fmt, ...) {
+  (void)ctx;
+  (void)fmt;
+  return 0;
+}
+
+int main(void) {
+  ViewContext ctx;
+  SCREEN *screen;
+  FILE *input;
+  FILE *output;
+  char pattern[16];
+  int foreground;
+  int background;
+  int expected_pair;
+  int startup_calls;
+
+  input = fopen("/dev/null", "r");
+  output = fopen("/dev/null", "w");
+  if (input == NULL || output == NULL)
+    return 1;
+
+  screen = newterm("xterm", output, input);
+  if (screen == NULL)
+    return 2;
+  set_term(screen);
+
+  memset(&ctx, 0, sizeof(ctx));
+  for (foreground = 0; foreground < 8; foreground++) {
+    for (background = 0; background < 8; background++) {
+      snprintf(pattern, sizeof(pattern), ".%d_%d", foreground, background);
+      AddFileColorRule(&ctx, pattern, foreground, background);
+    }
+  }
+
+  StartColors(&ctx);
+  expected_pair = COLOR_PAIRS - 1;
+  if (expected_pair > SHRT_MAX)
+    expected_pair = SHRT_MAX;
+  if (!ctx.color_enabled || init_pair_calls == 0 ||
+      first_pair != expected_pair || highest_pair != expected_pair) {
+    fprintf(stderr, "first pair %d did not reserve usable pair %d\n",
+            first_pair, expected_pair);
+    return 4;
+  }
+  startup_calls = init_pair_calls;
+
+  UpdateUIColor("dynamic_text", COLOR_RED, COLOR_BLUE);
+  first_pair = 0;
+  highest_pair = 0;
+  init_pair_calls = 0;
+  ReinitColorPairs(&ctx);
+  if (init_pair_calls == 0 || startup_calls != init_pair_calls + 1) {
+    fprintf(stderr, "rebuild call count changed from %d to %d\n",
+            startup_calls - 1, init_pair_calls);
+    return 5;
+  }
+
+  endwin();
+  delscreen(screen);
+  fclose(input);
+  fclose(output);
+  return 0;
+}
+''',
+        encoding="utf-8",
+    )
+
+    subprocess.run(
+        [
+            "cc",
+            "-D_GNU_SOURCE",
+            "-DCOLOR_SUPPORT",
+            "-Iinclude",
+            str(driver),
+            "src/ui/color.c",
+            "src/util/memory_utils.c",
+            "-Wl,--wrap=init_pair",
+            "-Wl,--wrap=init_extended_pair",
+            "-lncursesw",
+            "-ltinfo",
+            "-o",
+            str(binary),
+        ],
+        cwd=repo_root,
+        check=True,
+    )
+    subprocess.run([str(binary)], cwd=tmp_path, check=True)
+
+
 def test_picker_selection_role_can_override_picker_highlight(tmp_path):
     repo_root = Path(__file__).resolve().parents[1]
     theme = tmp_path / "sample.themes"

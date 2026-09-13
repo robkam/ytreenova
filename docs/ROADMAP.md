@@ -1894,6 +1894,28 @@ Ordering policy (for all editors, including AI editors):
 *   Focused rendering tests cover edge clipping and ensure shadow drawing does not bleed into non-modal surfaces.
 *   - [ ] **Status:** Not Started.
 
+### **Task 94: Release Gate Failure Remediation**
+*   **Goal:** Resolve the concrete failures reported by the 13 September 2026 `make qa-deep` release-gate run without weakening QA, sanitizer, coverage, or Valgrind coverage.
+*   **Scope:** Reproduce each finding on the candidate revision, identify its root cause, add or correct stable regression coverage, and rerun the affected gate before the final deep-gate confirmation.
+*   **Acceptance Criteria:** `make qa-all`, `make qa-pytest-coverage`, `make qa-sanitize`, and `make qa-valgrind-full` each complete successfully, followed by a successful `make qa-deep`. No test is skipped, relaxed, or made timing-dependent to hide a failure.
+
+#### **Task 94.1: Repair ncurses Color-Pair Reinitialization Memory Access**
+*   **Finding:** `qa-valgrind-full` reported three invalid reads in `ReinitColorPairs()` during startup. ncurses accesses colour-pair state after a prior reinitialization freed its backing allocation.
+*   **Fix:** Establish a safe, idempotent colour-pair initialization lifecycle that does not leave ncurses with stale colour-pair state. Add focused regression coverage and require a zero-error `qa-valgrind-full` result.
+*   - [x] **Status:** Completed. Color-pair storage is reserved before live pairs are defined, repeated theme application stays within that stable allocation, and focused coverage plus `qa-valgrind-full` verify the lifecycle.
+
+#### **Task 94.2: Triage Split-Panel Selection-Isolation Failures**
+*   **Finding:** `qa-all` failed `tests/test_panel_isolation.py::test_split_screen_memory_isolation`, and `qa-pytest-coverage` failed `tests/test_panel_isolation.py::test_split_from_file_keeps_inactive_file_selection_independent`.
+*   **Fix:** Reproduce both paths as one initial panel-state inventory. Correct their shared owner, state-restoration, or event-ordering defect when one exists; split implementation only if reproduction proves distinct owner boundaries. Preserve panel isolation and inactive-panel independence, with focused proof through both normal and coverage gates.
+*   - [ ] **Status:** Not Started.
+
+#### **Task 94.3: Classify and Repair Sanitizer-Mode Interactive Failures**
+*   **Finding:** `qa-sanitize` reported 29 interactive TUI failures across archive, copy/move, output, panel/volume selection, and stats workflows, without an AddressSanitizer or UndefinedBehaviorSanitizer diagnostic.
+*   **Fix:** Reproduce the failures and determine whether a shared sanitizer-mode cause exists before choosing repairs. Correct each proven runtime or event-driven synchronization cause without suppressing, skipping, relaxing, or making tests timing-dependent; prove every repaired family through focused sanitizer-mode regressions.
+*   - [ ] **Status:** Not Started.
+
+*   - [ ] **Status:** In Progress. Split-panel selection isolation and sanitizer-mode interactive failures remain open.
+
 ### **Task 69: Multi-Round Adversarial Security Review**
 *   **Goal:** Perform a pre-v1.0.0 multi-round security review using adversarial and AppSec perspectives.
 *   **Examples:** Senior AppSec reviewer, penetration-tester mindset, and insider-knowledge threat modeling.
