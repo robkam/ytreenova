@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ * src/ui/archive_payload.c
+ * Archive payload collection and traversal helpers
+ *
+ ***************************************************************************/
+
 #include "ytnova_ui.h"
 
 #include <dirent.h>

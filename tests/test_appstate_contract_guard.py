@@ -9627,7 +9627,7 @@ def test_directory_payload_reset_commits_route_through_appstate_helper() -> None
         r"->(?:file|total_bytes|matching_bytes|tagged_bytes|total_files|"
         r"matching_files|tagged_files|access_denied|log_flag)\s*=[^=]"
     )
-    tree_start = tree_read.index("/* Initialize dir_entry */")
+    tree_start = tree_read.index("if (!AppStateResetDirEntryPayloadCache(dir_entry))")
     tree_end = tree_read.index("if (S_ISBLK", tree_start)
     tree_init_body = tree_read[tree_start:tree_end]
     mkdir_start = mkdir.index("den_ptr = (DirEntry *)xcalloc")

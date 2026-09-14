@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ * src/core/sort.c
+ * File-entry sorting comparators and dispatch
+ *
+ ***************************************************************************/
+
 #define _GNU_SOURCE
 #include "sort.h"
 #include <stdlib.h>

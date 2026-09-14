@@ -118,9 +118,6 @@ int ReadTree(ViewContext *ctx, DirEntry *dir_entry, char *path, int depth,
       return (-1);
   }
 
-  /* Initialize dir_entry */
-  /*--------------------------*/
-
   if (!AppStateCommitDirEntrySubTree(dir_entry, NULL))
     return (-1);
   if (!AppStateResetDirEntryPayloadCache(dir_entry))
@@ -232,9 +229,6 @@ int ReadTree(ViewContext *ctx, DirEntry *dir_entry, char *path, int depth,
     }
 
     if (S_ISDIR(stat_struct.st_mode)) {
-      /* Directory Entry */
-      /*-----------------*/
-
       /* FIX: Added +1 to allocation for null terminator */
       den_ptr = (DirEntry *)xcalloc(1, sizeof(DirEntry) + entry_name_len + 1);
 
@@ -262,9 +256,6 @@ int ReadTree(ViewContext *ctx, DirEntry *dir_entry, char *path, int depth,
         return -1;
       }
 
-      /* Sort by direct insertion */
-      /*------------------------------------*/
-
       if (first_dir_entry.next == NULL ||
           strcmp(first_dir_entry.next->name, den_ptr->name) > 0) {
         den_ptr->next = first_dir_entry.next;
@@ -286,22 +277,13 @@ int ReadTree(ViewContext *ctx, DirEntry *dir_entry, char *path, int depth,
         }
       }
     } else {
-      /* File Entry */
-      /*------------*/
-
       char link_path[PATH_LENGTH + 1];
-
-      /* Check if entry is symbolic link */
-      /*----------------------------------------*/
 
       *link_path = '\0';
 
       if (S_ISLNK(stat_struct.st_mode)) {
         size_t link_len;
         ssize_t n;
-        /* Yes, append symbolic name to "real" name */
-        /*---------------------------------------------------------*/
-
         if ((n = readlink(new_path, link_path, sizeof(link_path) - 1)) == -1) {
           static const char unknown_link[] = "unknown";
           (void)memcpy(link_path, unknown_link, sizeof(unknown_link));

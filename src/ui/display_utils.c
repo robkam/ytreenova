@@ -18,9 +18,6 @@
 #define COMMAND_STRIP_MULTIBYTE_INVALID ((size_t)-1)
 #define COMMAND_STRIP_MULTIBYTE_INCOMPLETE ((size_t)-2)
 
-/*****************************************************************************
- *                              GetAttributes                                *
- *****************************************************************************/
 char *GetAttributes(unsigned short mode, char *buffer) {
   char *save_buffer = buffer;
 
@@ -98,10 +95,6 @@ char *GetAttributes(unsigned short mode, char *buffer) {
   return (save_buffer);
 }
 
-/*****************************************************************************
- *                                  CTime                                    *
- * Modernized to use ISO-like format: YYYY-MM-DD HH:MM (16 chars)            *
- *****************************************************************************/
 char *CTime(time_t f_time, char *buffer) {
   const struct tm *tm_ptr;
 
@@ -119,11 +112,6 @@ char *CTime(time_t f_time, char *buffer) {
   return (buffer);
 }
 
-/*****************************************************************************
- *                              FormFilename                                 *
- * Safely formats a filename, truncating with "..." if it exceeds max_len.   *
- * Prioritizes showing the end of the path (like CutPathname) for clarity.  *
- *****************************************************************************/
 char *FormFilename(char *dest, char *src, unsigned int max_len) {
   unsigned int l;
   char *src_copy = NULL;
@@ -159,10 +147,6 @@ char *FormFilename(char *dest, char *src, unsigned int max_len) {
   return dest;
 }
 
-/*****************************************************************************
- *                              CutFilename                                  *
- * Truncates a filename by keeping the prefix and appending "..." if too long.*
- *****************************************************************************/
 char *CutFilename(char *dest, const char *src, unsigned int max_len) {
   unsigned int l;
 
@@ -181,10 +165,6 @@ char *CutFilename(char *dest, const char *src, unsigned int max_len) {
   return dest;
 }
 
-/*****************************************************************************
- *                              CutPathname                                  *
- * Truncates a pathname by keeping the suffix and prepending "..." if too long.*
- *****************************************************************************/
 char *CutPathname(char *dest, const char *src, unsigned int max_len) {
   unsigned int l;
 
@@ -205,11 +185,6 @@ char *CutPathname(char *dest, const char *src, unsigned int max_len) {
   return (dest);
 }
 
-/*****************************************************************************
- *                              CutName                                      *
- * Truncates a name by keeping the prefix and appending "..." if too long.   *
- * (Identical to CutFilename in behavior, but uses strlen for length)        *
- *****************************************************************************/
 char *CutName(char *dest, const char *src, unsigned int max_len) {
   unsigned int l;
 
@@ -228,9 +203,6 @@ char *CutName(char *dest, const char *src, unsigned int max_len) {
   return dest;
 }
 
-/*****************************************************************************
- *                           BuildUserFileEntry                              *
- *****************************************************************************/
 int BuildUserFileEntry(FileEntry *fe_ptr, int filename_width,
                        int linkname_width, BOOL tagged, char *template,
                        int linelen, char *line) {
@@ -416,9 +388,6 @@ int GetVisualUserFileEntryLength(int max_visual_filename_len,
   return (len);
 }
 
-/*****************************************************************************
- *                                  GetMaxYX                                 *
- *****************************************************************************/
 void GetMaxYX(WINDOW *win, int *height, int *width) {
   if (win == NULL) {
     /* Cannot use UI_Error here without context - this is a fatal error anyway */
@@ -431,12 +400,6 @@ void GetMaxYX(WINDOW *win, int *height, int *width) {
   *height = MAXIMUM(*height, 1);
   *width = MAXIMUM(*width, 1);
 }
-
-/***************************************************************************
- *
- * Enhanced Curses Print Functions (from former print.c)
- *
- ***************************************************************************/
 
 int MvAddStr(int y, int x, char *str) {
 #ifdef WITH_UTF8
@@ -550,12 +513,6 @@ void PrintSpecialString(WINDOW *win, int y, int x, char *str, int color) {
   }
 }
 
-/*****************************************************************************
- *                                  PrintLine                                *
- * Generates a line of 'len' characters based on a 2-char pattern:           *
- * start_char, fill_char. The line will consist of start_char followed by    *
- * (len-1) fill_char characters.                                             *
- *****************************************************************************/
 void PrintLine(WINDOW *win, int y, int x, const char *line, int len) {
   char *buffer_content;
   int i;
