@@ -2,11 +2,7 @@
 
 **YtreeNova** is a keyboard-first file manager for Linux and BSD with fast multi-volume logging and navigation.
 
-> [!IMPORTANT]
-> **STATUS: ALPHA (v1.0.0-alpha)**
-> `ytnova` is in active alpha development. It is stable and usable, but expect rough edges, incomplete behaviour, and occasional regressions. Interfaces, key bindings, and configuration details may change before the first stable release.
->
-> Before opening an issue or suggesting a feature, please check [BUGS.md](docs/BUGS.md) and [ROADMAP.md](docs/ROADMAP.md) first, so as not to create a duplicate if it is already listed.
+Before opening an issue or suggesting a feature, please check [BUGS.md](docs/BUGS.md) and [ROADMAP.md](docs/ROADMAP.md) first, so as not to create a duplicate if it is already listed.
 
 ## Quick links
 
@@ -41,11 +37,7 @@ Quality claims are backed by repository-visible gates and documentation:
 - [TRUST.md](docs/TRUST.md): safety posture, limits, and code-level evidence pointers.
 - [PR_GATE.md](docs/PR_GATE.md): governance and merge-readiness checks.
 
-## Why release alpha now?
-
-v1.0.0-alpha is being published early so people can use the program, inspect the code, and evaluate the direction before beta. It is usable today, but still in active development: expect rough edges, occasional UX/workflow bugs, and ongoing refinement of some features.
-
-## Features (v1.0.0-alpha)
+## Features
 
 *   **Classic XTree Interface:** Directory Tree + File List layout.
 *   **Split Screen Mode (F8):** Manage two independent file panels side-by-side.
