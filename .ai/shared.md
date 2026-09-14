@@ -12,6 +12,12 @@ These instructions apply to all AI agents used in this repository.
 - For GitHub work, use the GitHub connector as the primary source for PR/issue metadata, comments, reviews, reactions, and check state; use `gh` only when the connector does not expose the needed Actions log/run detail.
 - The GitHub connector is mainly for remote PR/issue review and discussion inside ChatGPT/Codex; use the local checkout for editing and testing.
 
+## Release Versioning
+
+- The AI owns release-version selection and must state the proposed version before preparing a release.
+- Until the first stable release, keep every beta release at `1.0.0-beta`; do not create beta point versions for intervening changes.
+- After `1.0.0`, use semantic versioning: patch for compatible fixes, minor for compatible features, and major for incompatible changes.
+
 ## Persona Routing
 
 - Start every assistant response with: `<name>:`.
