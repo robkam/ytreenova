@@ -10,7 +10,7 @@ Minor/trivial fixes are tracked in git history.
 
 ## [1.0.0-beta] - 2026-09-14
 
-First public beta release.
+First beta release.
 
 ## [1.0.0-alpha] - 2026-06-10
 
