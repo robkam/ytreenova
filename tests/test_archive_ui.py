@@ -110,9 +110,10 @@ def test_archive_output_flow_writes_selected_entry_to_file(ytnova_binary, tmp_pa
         out_path = root / "archive_output.txt"
         tui.send_keystroke(f"{out_path}\r", wait=0.1)
         assert tui.wait_for_condition(
-            lambda _lines: out_path.exists(),
+            lambda _lines: out_path.exists()
+            and out_path.read_text(encoding="utf-8") == "inside payload\n",
             timeout=2.0,
-            description="archive output file creation",
+            description="completed archive output file",
         )
         assert out_path.read_text(encoding="utf-8") == "inside payload\n"
     finally:
@@ -1322,22 +1323,22 @@ def test_filesystem_copy_promotes_to_live_determinate_progress(
             poll_interval=0.02,
             description="filesystem progress promotion threshold",
         )
-        frames = []
         marker = 1
+        frames = []
         for expected in (101, 501):
-            render_deadline = time.monotonic() + 0.12
-            assert tui.wait_for_condition(
-                lambda _lines: time.monotonic() >= render_deadline,
-                timeout=1.0,
-                poll_interval=0.01,
-                description=f"filesystem render interval before block {expected}",
-            )
             os.write(gate_fd, b"x" * (expected - marker))
             assert tui.wait_for_condition(
                 marker_reached(expected),
                 timeout=3.0,
                 description=f"gated filesystem read {expected}",
             )
+            if frames:
+                previous_spinner = _footer_spinner(frames[-1].splitlines())
+                assert tui.wait_for_condition(
+                    lambda lines: _footer_spinner(lines) != previous_spinner,
+                    timeout=1.0,
+                    description="advanced filesystem progress footer spinner",
+                ), tui.last_wait_diagnostic
             frames.append("\n".join(tui.get_screen_dump()))
             marker = expected
 
