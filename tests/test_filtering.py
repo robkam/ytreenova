@@ -34,7 +34,9 @@ def test_filter_stats_recalculation(filter_env):
     # Verify Global Mode (S) works
     assert tui.send_and_wait_for_condition(
         Keys.SHOWALL,
-        lambda lines: lines if any("file1.c" in line for line in lines) else False,
+        lambda lines: lines
+        if all(any(name in line for line in lines) for name in ("FILE", "file1.c", "file2.c"))
+        else False,
         timeout=1.5,
     )
     
