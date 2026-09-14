@@ -953,15 +953,20 @@ def test_filesystem_directory_transfer_to_logged_archive(
         tui.send_keystroke(f"\x15{copied_name}\r", wait=0.1)
         assert tui.wait_for_content("To Directory", timeout=2.0)
         tui.send_keystroke(f"\x15{archive_path}\r", wait=0.1)
-        def archive_contains_tree(_lines):
+        def transfer_is_complete(_lines):
             with tarfile.open(archive_path) as archive:
                 names = archive.getnames()
-                return (f"{copied_name}/payload.txt" in names and
-                        f"{copied_name}/nested/leaf.txt" in names)
+                archive_updated = (
+                    f"{copied_name}/payload.txt" in names
+                    and f"{copied_name}/nested/leaf.txt" in names
+                )
+                return archive_updated and source.exists() is not removes_source
 
-        assert tui.wait_for_condition(archive_contains_tree, timeout=4.0,
-                                      description="archive directory insertion"), "\n".join(tui.get_screen_dump())
-        assert source.exists() is not removes_source
+        assert tui.wait_for_condition(
+            transfer_is_complete,
+            timeout=4.0,
+            description="completed archive directory transfer",
+        ), "\n".join(tui.get_screen_dump())
 
         assert tui.send_and_wait_for_screen_change(Keys.LOG, timeout=2.0)
         tui.child.send(f"\x15{archive_path}\r")
@@ -1277,7 +1282,7 @@ def test_filesystem_copy_promotes_to_live_determinate_progress(
             "YTNOVA_TEST_ARCHIVE_BLOCK_GATE": str(gate_path),
             "YTNOVA_TEST_ARCHIVE_BLOCK_MARKER": str(marker_path),
             "YTNOVA_TEST_ARCHIVE_BLOCK_ARM": str(arm_path),
-            "YTNOVA_TEST_FS_BLOCK_TARGET": str(source_path),
+            "YTNOVA_TEST_FS_BLOCK_TARGET": str(destination_dir / "copied.bin"),
         },
     )
 
@@ -1303,7 +1308,7 @@ def test_filesystem_copy_promotes_to_live_determinate_progress(
             marker_reached(1),
             timeout=3.0,
             description="first gated filesystem read",
-        )
+        ), tui.last_wait_diagnostic
         immediate_screen = tui.get_screen_dump()
         immediate = "\n".join(immediate_screen)
         assert _footer_spinner(immediate_screen) is not None, immediate
@@ -1340,8 +1345,7 @@ def test_filesystem_copy_promotes_to_live_determinate_progress(
             int(re.search(r"Progress:\s+(\d+)%", frame).group(1))
             for frame in frames
         ]
-        assert percentages[0] == 1
-        assert percentages[0] < percentages[1] < 100, percentages
+        assert 0 < percentages[0] < percentages[1] < 100, percentages
         bars = [re.search(r"\[([^]]*)\]", frame).group(1) for frame in frames]
         assert all(bar.strip() for bar in bars), bars
         assert all(

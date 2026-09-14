@@ -313,10 +313,10 @@ int LogDisk(ViewContext *ctx, YtreeNovaPanel *panel, char *path) {
         if (!AppStateCommitPanelVolume(panel, found_vol))
           return -1;
         s = &panel->vol->vol_stats;
-        if (!AppStateCommitPanelFocus(ctx, panel,
-                                      (ViewFocus)panel->vol->saved_focus))
-          return -1;
         state = FindPanelVolumeFileState(panel, panel->vol->id);
+        if (!AppStateCommitPanelFocus(
+                ctx, panel, state ? state->saved_focus : FOCUS_TREE))
+          return -1;
         if (state && !AppStateRestorePanelGeneration(
                          panel, state->saved_tree_panel_generation))
           return -1;

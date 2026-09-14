@@ -10404,8 +10404,10 @@ def test_focus_restore_commits_use_appstate_helper() -> None:
                 log_body,
             )
         )
-        >= 2
+        == 1
     )
+    assert "state = FindPanelVolumeFileState(panel, panel->vol->id)" in log_body
+    assert "state ? state->saved_focus : FOCUS_TREE" in log_body
 
 
 def test_split_seeded_focus_commits_use_appstate_helper() -> None:

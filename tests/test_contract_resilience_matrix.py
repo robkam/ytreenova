@@ -98,7 +98,11 @@ def test_contract_resilience_matrix_preserves_interactive_capabilities(
             timeout=1.5,
         ), screen_text(tui)
         _return_to(
-            tui, lambda lines: lines if any("alpha.txt" in line for line in lines) else False
+            tui,
+            lambda lines: lines
+            if any("alpha.txt" in line for line in lines)
+            and all(origin["title"] not in line for line in lines)
+            else False,
         )
 
         assert complete_modal_round_trip(tui, Keys.F9, Keys.ESC), screen_text(tui)

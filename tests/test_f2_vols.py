@@ -364,8 +364,15 @@ def test_f2_picker_preserves_visible_selection_index_when_hidden_rows_exist(tmp_
         tui.send_keystroke(Keys.ENTER, wait=0.3)
         assert tui.wait_for_content(str(root / "Cline"), timeout=1.0), get_screen_text(tui)
 
-        tui.send_keystroke(Keys.ESC, wait=0.4)
-        current_path = _panel_path_header(tui.get_screen_dump()) or ""
+        lines = tui.send_and_wait_for_condition(
+            Keys.ESC,
+            lambda screen: screen
+            if (_path_label(_panel_path_header(screen) or "") == "Cline")
+            else False,
+            timeout=1.5,
+        )
+        assert lines, get_screen_text(tui)
+        current_path = _panel_path_header(lines) or ""
         assert _path_label(current_path) == "Cline", get_screen_text(tui)
         assert _path_label(current_path) != "00", get_screen_text(tui)
         assert ".UnixTree" not in current_path, get_screen_text(tui)

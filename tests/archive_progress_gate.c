@@ -156,3 +156,30 @@ ssize_t read(int fd, void *buffer, size_t size) {
     GateArchiveRead();
   return result;
 }
+
+ssize_t write(int fd, const void *buffer, size_t size) {
+  static ssize_t (*real_write)(int, const void *, size_t);
+  const char *target;
+  char fd_path[64];
+  char resolved[4097];
+  ssize_t result;
+  ssize_t resolved_len;
+
+  if (!real_write)
+    real_write = dlsym(RTLD_NEXT, "write");
+  if (!real_write)
+    return -1;
+  result = real_write(fd, buffer, size);
+  target = getenv("YTNOVA_TEST_FS_BLOCK_TARGET");
+  if (result <= 0 || !target || !target[0])
+    return result;
+  if (snprintf(fd_path, sizeof(fd_path), "/proc/self/fd/%d", fd) < 0)
+    return result;
+  resolved_len = readlink(fd_path, resolved, sizeof(resolved) - 1);
+  if (resolved_len < 0)
+    return result;
+  resolved[resolved_len] = '\0';
+  if (strcmp(resolved, target) == 0)
+    GateArchiveRead();
+  return result;
+}
