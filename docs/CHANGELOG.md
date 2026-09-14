@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Scope policy: `docs/CHANGELOG.md` records shipped, already implemented, major user-visible or project-level milestones only.
 Minor/trivial fixes are tracked in git history.
 
+## [1.0.0-beta] - 2026-09-14
+
+First public beta release.
+
 ## [1.0.0-alpha] - 2026-06-10
 
 *YtreeNova release history starts here after the rebrand. The codebase began from Ytree v2.10 on 30 Oct 2025 and has since been developed as a separate Unix-like XTreeGold tribute with broader workflows, stronger QA, and contemporary POSIX-focused internals.*
@@ -20,6 +24,7 @@ Minor/trivial fixes are tracked in git history.
 - **Context-Passing Architecture**: Replaced implicit cross-module state access with explicit context parameters and ownership boundaries.
 - **Global State Removal**: Drove major mutable application state out of file-scope globals and into structured runtime state.
 - **Volume Architecture**: Reworked logged roots, physical directories, and archive contexts into explicit volume contexts so multi-volume and archive workflows share a common model.
+- **XDG Configuration Support**: Honors standard XDG configuration locations.
 - **AppState Contracts**: Documented and enforced AppState transition boundaries so controller and UI code can preserve selected-panel, viewport, and active-volume invariants.
 - **State-Machine Transition Core**: Reframed `AppState` around one explicit transition machine with validated state changes and rendering as projection only, reducing split/focus/restore regressions.
 - **SRP & SoC Enforcement**: Deep-dive refactor to decouple the Filesystem Model (Model) from the UI (View), replacing implicit state access with explicit ownership and context passing.
@@ -37,6 +42,7 @@ Minor/trivial fixes are tracked in git history.
 - **Universal Archive Engine**: Fully integrated `libarchive` as the primary engine for robust browsing and extraction (ZIP, TAR, 7Z, ISO, etc.).
 - **Full Archive Creation**: Added the `O` action to the TUI flow for creating new archives, with automatic format inference from extensions (ZIP, TAR, GZ, BZ2, XZ).
 - **Atomic Archive Modification**: Implemented a "Stream Rewrite" engine allowing for atomic entry addition, deletion, and renaming within compressed containers.
+- **Archive Filesystem Parity**: Made archive browsing and operations follow the same selection, tagging, navigation, progress, and mutation rules as filesystem content.
 - **Transparent Navigation**: Seamlessly traverse nested archives and exit archive contexts back to the physical filesystem using intuitive navigation logic.
 - **Archive Search & Execute**: Support for searching (`^S`) and executing (`X`) files directly within compressed archive containers.
 - **UDF/ISO Bridge Support**: Enhanced detection logic to correctly handle multi-format bridge media (e.g., modern Windows ISOs).
@@ -50,6 +56,8 @@ Minor/trivial fixes are tracked in git history.
 - **Incremental "To" Jump**: Integrated high-speed list navigation (`/`) and "To Dir"/"To File" selection jumps with sticky-cursor logic.
 - **Comprehensive Filtering**: Unified filter stack supporting complex Regex patterns, Date ranges, File Attributes, and Size suffixes.
 - **Internal File Preview (F7)**: Integrated file inspection mode that seamlessly toggles the statistics panel.
+- **Contextual F1 Help**: Reworked help into authored inline pages with direct contextual guidance and linked navigation.
+- **Kitty Keyboard Protocol**: Distinguishes `Ctrl-M` from Enter for tagged move when supported, while preserving the `Ctrl-N` fallback.
 - **Unified Numeric FileInfo Band**: Replaced legacy display-mode cycling with direct `1..9` panel display controls for Name, Attributes, Owner, Times, Compact, size units, Mini preview, File detail, Git.
 - **Vi-Keys Profile**: Runtime toggle for `h/j/k/l` navigation with automatic remapping of conflicting legacy keybindings.
 - **Attributes Menu Consolidation**: Unified separate Date, Mode, Owner, and Group modification commands under a single `A` (Attributes) action menu.
