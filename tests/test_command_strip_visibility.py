@@ -40,10 +40,20 @@ def test_directory_and_file_surfaces_accept_their_actions_at_narrow_width(tmp_pa
     tui = _spawn(_root(tmp_path), cols=48)
     try:
         assert tui.wait_for_content("file1.txt", timeout=1.5), screen_text(tui)
-        assert tui.send_and_wait_for_screen_change(Keys.ENTER, timeout=1.5), screen_text(tui)
-        assert tui.wait_for_content("file1.txt", timeout=1.0), screen_text(tui)
-        assert tui.send_and_wait_for_screen_change(Keys.ESC, timeout=1.5), screen_text(tui)
-        assert tui.wait_for_content("file1.txt", timeout=1.0), screen_text(tui)
+        assert tui.send_and_wait_for_condition(
+            Keys.ENTER,
+            lambda lines: lines
+            if any("FILE" in line and "file view" in line for line in lines)
+            else False,
+            timeout=1.5,
+        ), screen_text(tui)
+        assert tui.send_and_wait_for_condition(
+            Keys.ESC,
+            lambda lines: lines
+            if any("DIR" in line and "dir view" in line for line in lines)
+            else False,
+            timeout=1.5,
+        ), screen_text(tui)
     finally:
         tui.quit()
 

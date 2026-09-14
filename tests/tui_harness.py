@@ -20,8 +20,17 @@ class YtreeNovaTUI:
             "LC_ALL": "C.UTF-8",
             "HOME": cwd if cwd else "/tmp",
         }
+        for name in ("ASAN_OPTIONS", "UBSAN_OPTIONS"):
+            if name in os.environ:
+                env[name] = os.environ[name]
         if env_extra:
             env.update(env_extra)
+        if (
+            "LD_PRELOAD" in env
+            and "ASAN_OPTIONS" in env
+            and "verify_asan_link_order=" not in env["ASAN_OPTIONS"]
+        ):
+            env["ASAN_OPTIONS"] += ":verify_asan_link_order=0"
         
         # Launch ytnova in a headless PTY with specific dimensions
         self.child = pexpect.spawn(
@@ -45,10 +54,20 @@ class YtreeNovaTUI:
         
         self.last_wait_diagnostic = None
 
-        # Wait for the main UI tree to be ready (handles startup scan + any error dialogs)
-        # The tree pane shows box-drawing like "tq" or "mq" once the dir is scanned.
-        if not self.wait_for_content("tq", timeout=8.0) and not self.wait_for_content("mq", timeout=1.0):
+        # Do not mistake the startup notice border for the completed tree paint.
+        if not self.wait_for_condition(self._startup_screen_ready, timeout=8.0):
             self._read_output(timeout=2.0)
+
+    @staticmethod
+    def _startup_screen_ready(screen_lines):
+        screen_text = "\n".join(screen_lines)
+        if "Scanning..." in screen_text:
+            return False
+        return any(
+            "Path:" in line
+            or "COMMANDS" in line
+            for line in screen_lines
+        )
 
     @staticmethod
     def _read_time_scale():

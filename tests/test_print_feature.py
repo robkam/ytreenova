@@ -37,6 +37,17 @@ def _wait_for_screen_text(ytnova: YtreeNovaController, text: str, timeout: float
     return lines
 
 
+def _wait_for_output_file(ytnova: YtreeNovaController, path: str):
+    assert ytnova.wait_for_condition(
+        lambda lines: lines
+        if os.path.exists(path)
+        and any("Path:" in line or "COMMANDS" in line for line in lines)
+        else False,
+        timeout=2.0,
+        description=f"completed output to {path!r}",
+    )
+
+
 def _assert_directory_frame_restored(lines):
     dump = "\n".join(lines)
     assert any(line.startswith("l") and "FILTER" in line for line in lines), dump
@@ -96,7 +107,7 @@ def test_output_flow_uses_o_key_and_explicit_file_and_hardcopy_prompts():
 
             output_path = os.path.join(td, "prompt_check.txt")
             ytnova.input_text(output_path)
-            assert os.path.exists(output_path)
+            _wait_for_output_file(ytnova, output_path)
 
             _open_output_flow(ytnova, "o")
             _choose_output_route(ytnova, "H", "Printer command:")
@@ -193,7 +204,7 @@ def test_output_plain_path_defaults_to_file_destination():
             _choose_output_route(ytnova, "F", "Output file [Raw]")
             ytnova.input_text(out_path)
 
-            assert os.path.exists(out_path)
+            _wait_for_output_file(ytnova, out_path)
             with open(out_path, "r", encoding="utf-8") as handle:
                 assert "plain-path-default" in handle.read()
 
@@ -202,7 +213,7 @@ def test_output_plain_path_defaults_to_file_destination():
             _choose_output_route(ytnova, "H", "Printer command:")
             ytnova.input_text(f">{alias_out_path}")
 
-            assert os.path.exists(alias_out_path)
+            _wait_for_output_file(ytnova, alias_out_path)
             with open(alias_out_path, "r", encoding="utf-8") as handle:
                 assert "plain-path-default" in handle.read()
         finally:
@@ -227,6 +238,7 @@ def test_framed_output_uses_multiline_fence_around_file_content():
             _wait_for_screen_text(ytnova, "Output file [Framed]")
             ytnova.input_text(output_path)
 
+            _wait_for_output_file(ytnova, output_path)
             with open(output_path, "r", encoding="utf-8") as handle:
                 assert handle.read() == "source.txt\n```\n\nhello\n\n```\n\n"
         finally:
@@ -283,7 +295,7 @@ def test_tagged_output_shortcut_reuses_output_flow():
             _choose_output_route(ytnova, "F", "Output file [Raw]")
             ytnova.input_text(output_path)
 
-            assert os.path.exists(output_path)
+            _wait_for_output_file(ytnova, output_path)
             with open(output_path, "r", encoding="utf-8") as handle:
                 output_text = handle.read()
             assert "alpha-tagged-output" in output_text
@@ -308,7 +320,9 @@ def test_preview_output_refreshes_file_list_with_new_destination():
             _choose_output_route(ytnova, "F", "Output file [Raw]")
             ytnova.input_text("preview_export.txt")
 
-            assert os.path.exists(os.path.join(td, "preview_export.txt"))
+            _wait_for_output_file(
+                ytnova, os.path.join(td, "preview_export.txt")
+            )
             _wait_for_screen_text(ytnova, "preview_export.txt", timeout=3.0)
         finally:
             ytnova.quit()
@@ -357,6 +371,6 @@ def test_page_break_prompt_still_uses_distinct_separator_prompt():
 
             output_path = os.path.join(td, "page_break_output.txt")
             ytnova.input_text(output_path)
-            assert os.path.exists(output_path)
+            _wait_for_output_file(ytnova, output_path)
         finally:
             ytnova.quit()

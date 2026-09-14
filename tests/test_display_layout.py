@@ -272,8 +272,16 @@ def test_backslash_to_dir_in_showall_and_global(ytnova_binary, tmp_path, mode_ke
     screen = "\n".join(tui.get_screen_dump())
     assert target_name in screen, "Target file should be selected in global file list"
 
-    tui.send_keystroke("\\", wait=0.7)
-    lines = tui.get_screen_dump()
+    lines = tui.send_and_wait_for_condition(
+        "\\",
+        lambda current: current
+        if "DIR" in "\n".join(current)
+        and owner_dir.name in "\n".join(current)
+        and target_name in "\n".join(current)
+        else False,
+        timeout=2.0,
+    )
+    assert lines, "Expected to return to the selected file's directory"
     screen = "\n".join(lines)
     split_x = _detect_stats_split_x(lines)
     jumped_current = _current_file_from_stats(lines, split_x)

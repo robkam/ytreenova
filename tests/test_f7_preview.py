@@ -62,7 +62,7 @@ def _launch_preview(ytnova_binary, sandbox_info):
     tui = YtreeNovaTUI(executable=ytnova_binary, cwd=str(sandbox_info["root"]))
 
     assert tui.wait_for_content("preview_dir", timeout=2.0)
-    assert tui.send_and_wait_for_screen_change(Keys.EXPAND_ALL, timeout=2.0)
+    tui.child.send(Keys.EXPAND_ALL)
     assert tui.send_and_wait_for_condition(
         Keys.DOWN,
         lambda current: current

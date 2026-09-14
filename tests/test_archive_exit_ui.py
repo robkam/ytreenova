@@ -110,7 +110,7 @@ def _open_config_and_wait_for_effect(tui, effect, description):
     assert result, f"F10 configuration edit did not complete {description}."
 
 
-def _cell_style_for_text(tui, needle, *, exclude_substrings=()):
+def _find_cell_style_for_text(tui, needle, *, exclude_substrings=()):
     screen_rows = tui.get_screen_dump()
 
     for y, line in enumerate(screen_rows):
@@ -121,6 +121,16 @@ def _cell_style_for_text(tui, needle, *, exclude_substrings=()):
         x = line.index(needle)
         cell = tui.screen.buffer[y][x]
         return cell.fg, cell.bg, cell.bold, cell.reverse
+
+    return None
+
+
+def _cell_style_for_text(tui, needle, *, exclude_substrings=()):
+    style = _find_cell_style_for_text(
+        tui, needle, exclude_substrings=exclude_substrings
+    )
+    if style is not None:
+        return style
 
     raise AssertionError(
         f"Could not find screen cell for {needle!r}.\nScreen:\n{_screen_text(tui)}"
@@ -134,11 +144,11 @@ def _wait_for_style_change(
         lambda _: (
             current_style
             if (
-                current_style := _cell_style_for_text(
+                current_style := _find_cell_style_for_text(
                     tui, needle, exclude_substrings=exclude_substrings
                 )
-            )
-            != before_style
+            ) is not None
+            and current_style != before_style
             else False
         ),
         timeout=timeout,

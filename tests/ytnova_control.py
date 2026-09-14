@@ -16,12 +16,16 @@ class YtreeNovaController:
             self.log_file = open(log_target, "w", encoding="utf-8")
         else:
             self.log_file = open(os.devnull, "w", encoding="utf-8")
+        env = {'TERM': 'xterm', 'LC_ALL': 'C.UTF-8', 'HOME': cwd}
+        for name in ("ASAN_OPTIONS", "UBSAN_OPTIONS"):
+            if name in os.environ:
+                env[name] = os.environ[name]
         self.child = pexpect.spawn(
             binary_path,
             cwd=cwd,
             dimensions=(24, 160),
             encoding='utf-8',
-            env={'TERM': 'xterm', 'LC_ALL': 'C.UTF-8', 'HOME': cwd},
+            env=env,
             timeout=max(5.0 * self.time_scale, 5.0),
         )
         self.child.logfile = self.log_file

@@ -74,7 +74,12 @@ def test_simple_copy(controller, sandbox):
     yt.input_text("") # Accept current directory
 
     # 5. Verify
-    assert (sandbox / "source" / "copy.txt").exists()
+    copied_path = sandbox / "source" / "copy.txt"
+    assert yt.wait_for_condition(
+        lambda _lines: copied_path.exists(),
+        timeout=2.0,
+        description="completed file copy",
+    )
 
     yt.quit()
 
@@ -99,8 +104,13 @@ def test_rename(controller, sandbox):
     yt.input_text("renamed.txt")
 
     # 4. Verify
-    assert (sandbox / "source" / "renamed.txt").exists()
-    assert not (sandbox / "source" / "root_file.txt").exists()
+    renamed_path = sandbox / "source" / "renamed.txt"
+    source_path = sandbox / "source" / "root_file.txt"
+    assert yt.wait_for_condition(
+        lambda _lines: renamed_path.exists() and not source_path.exists(),
+        timeout=2.0,
+        description="completed file rename",
+    )
 
     yt.quit()
 
@@ -127,8 +137,13 @@ def test_move(controller, sandbox):
     yt.input_text("../dest")
 
     # 5. Verify
-    assert (sandbox / "dest" / "moved.txt").exists()
-    assert not (sandbox / "source" / "root_file.txt").exists()
+    moved_path = sandbox / "dest" / "moved.txt"
+    source_path = sandbox / "source" / "root_file.txt"
+    assert yt.wait_for_condition(
+        lambda _lines: moved_path.exists() and not source_path.exists(),
+        timeout=2.0,
+        description="completed file move",
+    )
 
     yt.quit()
 
@@ -153,7 +168,6 @@ def test_tagged_copy_overwrite_all_applies_to_remaining_conflicts(controller, sa
         yt.wait_for_refresh()
 
         yt.child.send("\x14")  # Ctrl+T (tag all)
-        yt.wait_for_refresh()
 
         yt.child.send("\x03")  # Ctrl+C (copy tagged)
         yt.child.expect("COPY: TAGGED FILES")
@@ -213,7 +227,6 @@ def test_tagged_move_overwrite_all_applies_to_remaining_conflicts(controller, sa
         yt.wait_for_refresh()
 
         yt.child.send("\x14")  # Ctrl+T (tag all)
-        yt.wait_for_refresh()
 
         yt.child.send("\x0e")  # Ctrl+N (move tagged)
         yt.child.expect("MOVE: TAGGED FILES")

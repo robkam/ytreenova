@@ -259,9 +259,29 @@ def test_archive_copy_rewrite_updates_member_hashes_deterministically(ytnova_bin
         controller.wait_for_startup()
         assert controller.send_and_wait_for_screen_change(Keys.LOG, timeout=1.0)
         controller.input_text(str(archive_path))
-        controller.child.expect("ARCHIVE")
-        assert controller.send_and_wait_for_screen_change("\\", timeout=1.5)
-        assert controller.send_and_wait_for_screen_change(Keys.ESC, timeout=1.0)
+        assert controller.wait_for_condition(
+            lambda lines: lines
+            if any("ARCHIVE" in line for line in lines)
+            and any("\\ exit" in line for line in lines)
+            else False,
+            timeout=2.0,
+            description="logged archive tree",
+        )
+        assert controller.send_and_wait_for_condition(
+            "\\",
+            lambda lines: lines
+            if any("archive_source.txt" in line for line in lines)
+            and any("FILE" in line and "file view" in line for line in lines)
+            else False,
+            timeout=1.5,
+        )
+        assert controller.send_and_wait_for_condition(
+            Keys.ESC,
+            lambda lines: lines
+            if any("DIR" in line and "dir view" in line for line in lines)
+            else False,
+            timeout=2.0,
+        ), controller.last_wait_diagnostic
 
         _copy_selected_file(controller, "archive_source.txt", "copied_into_archive.txt", archive_path)
     finally:

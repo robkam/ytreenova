@@ -367,7 +367,16 @@ def test_archive_create_rename_parity(ytnova_binary, tmp_path):
     yt.child.expect("RENAME")
     yt.input_text("renamed.txt")
 
-    names = _archive_names(archive_path)
+    names = _wait_for_archive_names(
+        yt,
+        archive_path,
+        lambda current: (
+            "newdir" in current
+            and "old.txt" not in current
+            and "renamed.txt" in current
+        ),
+        "completed archive member rename",
+    )
     assert "newdir" in names
     assert "old.txt" not in names
     assert "renamed.txt" in names

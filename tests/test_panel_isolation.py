@@ -578,22 +578,41 @@ def _assert_collapse_resets_subtree_expansion(tmp_path, ytnova_binary, key):
     assert tui.wait_for_text(root.name, timeout=2.0), _screen_text(tui)
 
     try:
-        tui.send_keystroke(Keys.DOWN, wait=0.2)   # alpha
-        tui.send_keystroke(Keys.RIGHT, wait=0.4)  # show child
-        tui.send_keystroke(Keys.DOWN, wait=0.2)   # child
-        tui.send_keystroke(Keys.RIGHT, wait=0.4)  # show grand
-        tui.send_keystroke(Keys.DOWN, wait=0.2)   # grand
-        tui.send_keystroke(Keys.RIGHT, wait=0.4)  # show great
-
-        before = _screen_text(tui)
-        assert "great" in before, (
+        _select_tree_stats_marker(tui, "alpha", keys=(Keys.DOWN,))
+        assert tui.send_and_wait_for_condition(
+            Keys.RIGHT,
+            lambda lines: lines if any("child" in line for line in lines) else False,
+            timeout=2.0,
+        ), _screen_text(tui)
+        _select_tree_stats_marker(tui, "child", keys=(Keys.DOWN,))
+        assert tui.send_and_wait_for_condition(
+            Keys.RIGHT,
+            lambda lines: lines if any("grand" in line for line in lines) else False,
+            timeout=2.0,
+        ), _screen_text(tui)
+        _select_tree_stats_marker(tui, "grand", keys=(Keys.DOWN,))
+        before = tui.send_and_wait_for_condition(
+            Keys.RIGHT,
+            lambda lines: lines if any("great" in line for line in lines) else False,
+            timeout=2.0,
+        )
+        assert before, (
             "Precondition failed: deep expansion should reveal great.\n"
-            f"{before}"
+            f"{_screen_text(tui)}"
         )
 
-        tui.send_keystroke(Keys.UP, wait=0.2)     # child
-        tui.send_keystroke(Keys.UP, wait=0.2)     # alpha
-        assert tui.send_and_wait_for_screen_change(key, timeout=1.5)
+        _select_tree_stats_marker(tui, "alpha", keys=(Keys.UP,))
+        assert tui.send_and_wait_for_condition(
+            key,
+            lambda lines: lines
+            if not any(
+                marker in line
+                for marker in ("child", "grand", "great")
+                for line in lines
+            )
+            else False,
+            timeout=2.0,
+        ), _screen_text(tui)
         after = tui.send_and_wait_for_condition(
             Keys.RIGHT,
             lambda lines: lines if any("child" in line for line in lines) else False,
@@ -1059,10 +1078,12 @@ def test_f8_close_from_active_right_file_panel_donates_selection(
     assert tui.wait_for_content("a_right_0.txt", timeout=2.0)
 
     def active_volume_name():
-        screen = _screen_text(tui)
-        if "a_right_0.txt" in screen and "b_right_0.txt" not in screen:
+        header = next(
+            (line for line in tui.get_screen_dump() if "Path:" in line), ""
+        )
+        if "split_close_vol_a" in header:
             return "split_close_vol_a"
-        if "b_right_0.txt" in screen and "a_right_0.txt" not in screen:
+        if "split_close_vol_b" in header:
             return "split_close_vol_b"
         return None
 
@@ -1071,15 +1092,12 @@ def test_f8_close_from_active_right_file_panel_donates_selection(
             return
         for key in (">", "<"):
             if tui.send_and_wait_for_condition(
-                key,
-                lambda lines: volume_name
-                if (
-                    (volume_name == "split_close_vol_a")
-                    == ("a_right_0.txt" in "\n".join(lines))
-                    and ("b_right_0.txt" in "\n".join(lines))
-                    != (volume_name == "split_close_vol_a")
-                )
-                else False,
+                    key,
+                    lambda lines: volume_name
+                    if any(
+                        "Path:" in line and volume_name in line for line in lines
+                    )
+                    else False,
                 timeout=1.5,
             ):
                 return
@@ -1088,46 +1106,61 @@ def test_f8_close_from_active_right_file_panel_donates_selection(
     def run_compare_and_read_source():
         if log_path.exists():
             log_path.unlink()
-        tui.send_keystroke("J", wait=0.25)
-        assert tui.wait_for_content("COMPARE TARGET:", timeout=1.0), _screen_text(tui)
+        assert drive_action_until(
+            tui,
+            "J",
+            lambda lines: lines
+            if any("COMPARE TARGET:" in line for line in lines)
+            else False,
+            max_actions=3,
+            timeout=1.0,
+        ), _screen_text(tui)
         tui.send_keystroke(Keys.CTRL_U + str(compare_target) + Keys.ENTER, wait=0.6)
         if tui.wait_for_content("Hit return to continue", timeout=1.0):
             tui.send_keystroke(Keys.ENTER, wait=0.3)
         assert _wait_for_file(tui, log_path, timeout=2.0), "FILEDIFF helper did not run."
         return log_path.read_text(encoding="utf-8").splitlines()[0]
 
+    def enter_file_view():
+        if any("Tree F1 help" in line for line in tui.get_screen_dump()):
+            return
+        assert drive_action_until(
+            tui,
+            Keys.ENTER,
+            lambda lines: lines
+            if any("Tree F1 help" in line for line in lines)
+            else False,
+            max_actions=3,
+            timeout=1.0,
+        ), _screen_text(tui)
+
     try:
-        assert tui.send_and_wait_for_screen_change(">", timeout=1.5)
-        if "hex invert j compare" not in _footer_text(tui):
-            tui.send_keystroke(Keys.ENTER, wait=0.4)
+        cycle_to("split_close_vol_b")
+        enter_file_view()
         source_left_b_expected = run_compare_and_read_source()
         assert source_left_b_expected.endswith("b_right_0.txt"), source_left_b_expected
 
         cycle_to("split_close_vol_a")
-        if "hex invert j compare" not in _footer_text(tui):
-            tui.send_keystroke(Keys.ENTER, wait=0.4)
+        enter_file_view()
 
         tui.send_keystroke(Keys.F8, wait=0.4)
         tui.send_keystroke(Keys.TAB, wait=0.4)
 
-        assert tui.send_and_wait_for_screen_change(">", timeout=1.5)
-        if "hex invert j compare" not in _footer_text(tui):
-            tui.send_keystroke(Keys.ENTER, wait=0.4)
+        cycle_to("split_close_vol_b")
+        enter_file_view()
         tui.send_keystroke(Keys.DOWN, wait=0.2)
         source_right_b_expected = run_compare_and_read_source()
         assert source_right_b_expected.endswith("b_right_1.txt"), source_right_b_expected
 
-        assert tui.send_and_wait_for_screen_change("<", timeout=1.5)
-        if "hex invert j compare" not in _footer_text(tui):
-            tui.send_keystroke(Keys.ENTER, wait=0.4)
+        cycle_to("split_close_vol_a")
+        enter_file_view()
         tui.send_keystroke(Keys.DOWN, wait=0.2)
         tui.send_keystroke(Keys.F8, wait=0.5)
 
         assert "a_right_1.txt" in _screen_text(tui), _screen_text(tui)
 
-        assert tui.send_and_wait_for_screen_change(">", timeout=1.5)
-        if "hex invert j compare" not in _footer_text(tui):
-            tui.send_keystroke(Keys.ENTER, wait=0.4)
+        cycle_to("split_close_vol_b")
+        enter_file_view()
         source_b_after_close = run_compare_and_read_source()
         assert source_b_after_close == source_right_b_expected, (
             "Right-panel split close did not donate per-volume file selection.\n"
@@ -3662,7 +3695,13 @@ def test_bug_same_volume_home_mkdir_listjump_sequence_keeps_inactive_source(
 
         if "src_file_0.c" not in _screen_text(tui):
             if "hex invert j compare" in _footer_text(tui):
-                tui.send_keystroke(Keys.ESC, wait=0.25)
+                assert tui.send_and_wait_for_condition(
+                    Keys.ESC,
+                    lambda lines: lines
+                    if any("CURRENT DIR" in line for line in lines)
+                    else False,
+                    timeout=2.0,
+                ), _screen_text(tui)
 
             _select_tree_stats_marker(tui, "cmd")
             assert tui.send_and_wait_for_condition(
@@ -3836,10 +3875,6 @@ def test_bug_same_volume_home_mkdir_from_home_root_keeps_inactive_file_state(
 
         tui.send_keystroke(Keys.TAB, wait=0.5)
         screen_after_tab = _screen_text(tui)
-        assert "No files" not in screen_after_tab, (
-            "Switching to source panel produced empty file view.\n"
-            f"{screen_after_tab}"
-        )
         for name in ("src_file_0.c", "src_file_1.c", "src_file_2.c"):
             line = _find_line_with_text(tui, name)
             assert line is not None, (

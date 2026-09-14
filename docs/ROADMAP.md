@@ -1912,9 +1912,9 @@ Ordering policy (for all editors, including AI editors):
 #### **Task 94.3: Classify and Repair Sanitizer-Mode Interactive Failures**
 *   **Finding:** `qa-sanitize` reported 29 interactive TUI failures across archive, copy/move, output, panel/volume selection, and stats workflows, without an AddressSanitizer or UndefinedBehaviorSanitizer diagnostic.
 *   **Fix:** Reproduce the failures and determine whether a shared sanitizer-mode cause exists before choosing repairs. Correct each proven runtime or event-driven synchronization cause without suppressing, skipping, relaxing, or making tests timing-dependent; prove every repaired family through focused sanitizer-mode regressions.
-*   - [ ] **Status:** Not Started.
+*   - [x] **Status:** Completed. Interactive sanitizer runs now inherit sanitizer diagnostics, wait for stable rendered or filesystem state across archive, copy/move, output, panel/volume selection, display, and stats workflows, and restore panel-local focus when revisiting volumes; focused normal, coverage, and sanitizer regressions plus `make qa-deep` verify every classified failure family.
 
-*   - [ ] **Status:** In Progress. Split-panel selection isolation and sanitizer-mode interactive failures remain open.
+*   - [x] **Status:** Completed. All release-gate failure families are repaired, and `make qa-all`, `make qa-pytest-coverage`, `make qa-sanitize`, `make qa-valgrind-full`, and `make qa-deep` complete successfully without weakened coverage.
 
 ### **Task 69: Multi-Round Adversarial Security Review**
 *   **Goal:** Perform a pre-v1.0.0 multi-round security review using adversarial and AppSec perspectives.
