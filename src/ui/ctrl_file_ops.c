@@ -39,10 +39,6 @@ static void ResetPreviewAfterNavigation(
 
 static void DebugLogFilePanelState(const char *label, const YtreeNovaPanel *panel);
 
-/* =========================================================================
- * Shared UI Helpers for Post-Action Refresh, Sync, and Render
- * ========================================================================= */
-
 void UI_RefreshSyncPanels(ViewContext *ctx, DirEntry *dir_entry) {
   RefreshDirWindow(ctx, ctx->active);
   if (ctx->is_split_screen) {

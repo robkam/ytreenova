@@ -9,9 +9,6 @@
 #include <unistd.h>
 
 
-/* Volume-Name und freien Plattenplatz ermitteln */
-/*-----------------------------------------------*/
-
 int GetDiskParameter(char *path, char *volume_name, long long *avail_bytes,
                      long long *capacity, Statistic *s) {
 
@@ -36,9 +33,6 @@ int GetDiskParameter(char *path, char *volume_name, long long *avail_bytes,
 #endif /* WIN32 */
   {
     if (volume_name) {
-      /* Name ermitteln */
-      /*----------------*/
-
       /* Renamed usage: s->mode -> s->log_mode */
       if (s->log_mode == DISK_MODE || s->log_mode == USER_MODE) {
 
@@ -85,9 +79,6 @@ int GetDiskParameter(char *path, char *volume_name, long long *avail_bytes,
                       MINIMUM(DISK_NAME_LENGTH, strlen(fname)));
         volume_name[MINIMUM(DISK_NAME_LENGTH, strlen(fname))] = '\0';
       } else {
-        /* ARCHIVE_MODE */
-        /*--------------*/
-
         if ((p = strrchr(s->log_path, FILE_SEPARATOR_CHAR)) == NULL)
           p = s->log_path;
         else

@@ -1872,7 +1872,7 @@ Ordering policy (for all editors, including AI editors):
 *   **A (Add):** Missing top-of-file purpose banners in `src/ui/archive_payload.c` and `src/core/sort.c`.
 *   **R (Remove):** Purely decorative in-body separator banners in `src/ui/display_utils.c`, `src/ui/ctrl_file_ops.c`, `src/fs/freesp.c`, and `src/fs/tree_read.c` when they do not state design/invariant context.
 *   **Excluded:** Do not modify third-party `uthash.h`.
-*   - [ ] **Status:** Not Started.
+*   - [x] **Status:** Complete.
 
 ### **Task 67: Bounded Consistency Audit (Docs and UX Terminology)**
 *   **Goal:** Correct concrete inconsistencies in root and `docs/` Markdown and in user-visible help/footer terminology, without preference-driven rewrites.
