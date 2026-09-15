@@ -2,7 +2,7 @@
 
 Use this doc when a session invokes `code-quality` explicitly or when a code-quality / clean-code remediation request auto-loads that skill.
 
-This file is the canonical Task 6 policy for recurring burn-down work:
+This file is the canonical code-quality policy for recurring burn-down work:
 
 - smell classes and prioritization,
 - the lean simplicity contract,

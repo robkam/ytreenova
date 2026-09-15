@@ -520,7 +520,7 @@ def _baseline_row(match: Match) -> dict[str, object]:
         )
     elif match.path in RETAINED_TASK_CONTRACT_SUITES:
         disposition = "retained"
-        owner = "classified Task 99.5 behavioral and static contracts"
+        owner = "classified behavioral and static contracts"
         reason = (
             "The named test protects a published configuration, non-observable security, or "
             "filesystem/archive end-state contract; its exact fixture payload or static guard is not editable presentation prose."

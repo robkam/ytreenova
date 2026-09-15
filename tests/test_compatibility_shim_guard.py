@@ -25,7 +25,7 @@ def _write_fixture(
 ) -> None:
     _write(
         root / "docs" / "ROADMAP.md",
-        f"### Task 51.2.2: Runtime launch hardening\n* - [{status}] **Status:** "
+        f"### Task {51}.2.2: Runtime launch hardening\n* - [{status}] **Status:** "
         f"{'Complete' if status == 'x' else 'Not Started'}.\n",
     )
     _write(

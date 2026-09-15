@@ -17,7 +17,7 @@
 - Ensure your PR addresses an existing issue or a well-defined new feature.
 - Keep PRs focused on a single issue or feature.
 - Provide a clear PR description and link any relevant issues.
-- PR title/summary should describe the concrete behavior/problem fixed; do not rely on volatile tracker IDs alone (for example `BUG-14`) as the primary description.
+- PR title/summary should describe the concrete behavior/problem fixed; do not rely on a volatile task or bug number as the primary description.
 - Ensure your code passes all quality checks.
 - Include or update tests for your changes. New features require tests; bug fixes should include a regression test when possible.
 - Be responsive to review feedback and follow-up comments.

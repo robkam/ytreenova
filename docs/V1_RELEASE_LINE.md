@@ -19,12 +19,12 @@ It is acceptable to skip beta and go straight to v1.0.0.
 
 A credible beta line is:
 
-- Task 44.5 done
-- Task 44.6 done
-- Task 62 done, if you want the i18n foundation in beta
-- the Task 52 family done
-- Task 64 done
-- Task 67 done
+- Make Contextual F1 Help Accurate, Direct, and Task-Focused done
+- Bring Manpage/Usage Reference Prose in Line with Unix Manpage Conventions done
+- Externalize UI Strings with GNU gettext (i18n Foundation) done, if you want the i18n foundation in beta
+- the Security Risk Gate (Audit + Detect + Block) family done
+- Remove Temporary Compatibility Shims (Global Cleanup Gate) done
+- Bounded Consistency Audit (Docs and UX Terminology) done
 - one bounded adversarial pass done
 - no known high-severity trust or corruption issues
 
@@ -76,17 +76,9 @@ Call it v1 when these things are true:
 
 Minimum order from the current state:
 
-1. Finish Task 44.5.
-2. Finish Task 44.6.
-3. Finish Task 62.
-4. Do the Task 52 family in this order:
-   1. Task 52.1 baseline security audit/classification
-   2. Task 52.2.1 expand guard coverage
-   3. Task 52.2.2 standardise runtime process launch hardening
-   4. Task 52.3 make it part of CI/merge workflow
-5. Run `make qa-valgrind-full` as the documented deep Valgrind release check.
-6. Run one bounded blocker-only adversarial audit.
-7. Release v1 unless those release-depth checks find something truly bad.
+1. Run `make qa-valgrind-full` as the documented deep Valgrind release check.
+2. Run one bounded blocker-only adversarial audit.
+3. Release v1 unless those release-depth checks find something truly bad.
 
 What this line does not require:
 
@@ -156,22 +148,17 @@ These items are still worth doing. They are simply not part of the smallest sane
 
 ### Strongly worth doing soon
 
-These are the next best candidates after the minimum line, or soon after v1 if energy is limited:
-
-1. Task 67, final consistency sweep.
-2. Task 66, source comment hygiene pass.
-3. Task 69, multi-round adversarial security review, but keep it time-boxed and severity-driven.
+The strongest remaining candidate after the minimum line, or soon after v1 if energy is limited, is Task 39, the multi-round adversarial security review. Keep it time-boxed and severity-driven.
 
 ### Pull these forward only if current use still feels fragile
 
 Do these sooner only if day-to-day use still exposes real trust problems in the current build:
 
-- Task 47.1, input loop determinism and event-priority contract
-- Task 47.2, non-blocking FD multiplexing implementation
-- Task 22.1, unify stats and main-pane frame redraw contract
-- Task 22.2, footer-aware redraw synchronization contract
-- Task 21.1, keep progress indicators from clobbering footer, prompt, or F1 guidance
-- Task 14, path message formatting audit
+- Task 23.1, input loop determinism and event-priority contract
+- Task 23.2, non-blocking FD multiplexing implementation
+- Task 6.1, unify stats and main-pane frame redraw contract
+- Task 6.2, footer-aware redraw synchronization contract
+- Task 5.1, keep progress indicators from clobbering footer, prompt, or F1 guidance
 
 ### Safe to defer without cutting
 
@@ -179,27 +166,25 @@ These are real tasks. They just are not good reasons to delay v1 by themselves.
 
 #### Feature expansion
 
-- Task 54, advanced batch rename
-- Task 55, unify copy semantics and add directory sync
-- Task 57, extension surface contract
-- Task 58, shared provider registry
-- Task 59, optional background app execution
-- Task 60, F7 preview helper pipeline
+- Task 29, advanced batch rename
+- Task 30, unify copy semantics and add directory sync
+- Task 31, extension surface contract
+- Task 32, shared provider registry
+- Task 33, optional background app execution
+- Task 34, F7 preview helper pipeline
 
 #### Configurability and later polish
 
-- Task 61.1, propagate active theme to terminal helpers
-- Task 63, configurable keymap
-- Task 65, UI or UX snappiness polish
-- Task 68, modal window shadows
+- Task 35, propagate active theme to terminal helpers
+- Task 36, configurable keymap
+- Task 37, UI or UX snappiness polish
+- Task 38, modal window shadows
 
 #### UI nice-to-haves
 
-- Task 18, F7 top path line must preserve full filename
-- Task 19, manual file-column width controls
-- Task 20, adjustable list or preview width in F7 mode
-- Task 23, clarify internal `^V` navigation
-- Task 48, configurable bypass for external viewers
-- Task 49, auto-execute on command termination
-- Task 50, standardize internal viewer layout
-- Task 51, nested archive traversal
+- Task 3, manual file-column width controls
+- Task 4, adjustable list or preview width in F7 mode
+- Task 24, configurable bypass for external viewers
+- Task 25, auto-execute on command termination
+- Task 26, standardize internal viewer layout
+- Task 27, nested archive traversal
