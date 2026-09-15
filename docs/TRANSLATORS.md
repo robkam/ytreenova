@@ -18,7 +18,7 @@ ytnova currently has two different documentation/help families plus future runti
    - Audience: users reading the fuller reference/manual
 
 3. **Runtime UI strings**
-   - Tracked separately under roadmap Task 61 (`gettext`/`po4a`)
+   - Maintained through the `gettext`/`po4a` localization workflow
    - Includes footer labels, prompts, status text, and other non-generated runtime strings
 
 The important rule is that these families do different jobs. Do not try to force one translation to sound like the other.
@@ -350,7 +350,7 @@ LANG=<locale>.UTF-8 LC_ALL=<locale>.UTF-8 ytnova
 ## Canonical references
 
 - `docs/SPECIFICATION.md` — help structure and runtime contract
-- `docs/ROADMAP.md` — Task 43 / Task 61 planning
+- `docs/ROADMAP.md` — contextual-help and localization planning
 - `etc/help/f1.en.md` — contextual F1 source
 - `etc/help/man.en.md` — reference/man source
 - `scripts/generate_help_assets.py` — generator and schema enforcement

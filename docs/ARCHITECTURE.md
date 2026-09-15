@@ -137,7 +137,7 @@ The Split-Screen architecture treats each panel as an independent instance of a 
 *   **State Persistence (Tab-Switch):** The `Tab` key is the bridge. Switching panels restores the exact state held when that panel last had focus.
 *   **Panel vs. Volume Rule:** Sharing a `Volume` only shares logged tree topology and file payload cache. It never shares panel-local tags, file-window anchors, cursor identity, or focus/mode state.
 
-#### 4.2.1 Split-Panel Ownership Map (Task 1 Guardrail)
+#### 4.2.1 Split-Panel Ownership Map (Ownership Guardrail)
 Split-transfer/switch code must classify each field before copying or restoring:
 
 | State Class | Owned By | Examples | Forbidden Cross-Panel Behavior |

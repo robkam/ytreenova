@@ -322,7 +322,7 @@ make qa-fuzz
     *   commit only code/doc files (no relay/runtime artifacts),
     *   use maintainer-approved commit message describing durable behavior (no task numbering),
     *   PR title/summary, commit wording, tracker-status prose, and other durable repo text must describe concrete behavior/problem and must not rely on volatile tracker IDs alone,
-    *   when durable text needs a noun phrase, use the work item's actual title or the concrete defect family/behavior; do not write temporary workflow phrasing such as `Task 1`, `Bug 216`, `this PR`, `remaining audit family`, `next slice`, or `until the rest lands`,
+    *   when durable text needs a noun phrase, use the work item's actual title or the concrete defect family/behavior; do not write temporary workflow phrasing such as `a tracker number`, `a bug number`,  `this PR`, `remaining audit family`, `next slice`, or `until the rest lands`,
     *   include explicit work-item status text in the same commit (for example `Status: Confirmed.`, `Status: In Progress.`, or `Status: Fixed.`) so no status transition is left ambiguous, but keep any accompanying explanation durable rather than tracker-numbered,
     *   first push: `git push-fast-up`; tracked branch: `git push-fast`.
 8.  If correction is needed for the same logical change set, amend and repush:

@@ -258,7 +258,7 @@ void HandleReadSubTree(ViewContext *ctx, DirEntry *dir_entry,
   }
   DisplayTree(ctx, p->vol, p->pan_dir_window, p->disp_begin_pos,
               p->disp_begin_pos + p->cursor_pos, TRUE);
-  RecalculateSysStats(ctx, s); /* Fix for Bug 10: Force full recalculation */
+  RecalculateSysStats(ctx, s); /* Tree reads invalidate aggregate statistics. */
   DisplayDiskStatistic(ctx, s);
   UpdateStatsPanel(ctx, dir_entry, s);
   DisplayAvailBytes(ctx, s);

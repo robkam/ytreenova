@@ -87,7 +87,7 @@ def test_main_retries_failed_branch_until_green(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     handoff_dir = tmp_path / ".agent" / "handoffs"
-    handoff_path = handoff_dir / "task-11.5.current.md"
+    handoff_path = handoff_dir / "preview-helper-boundary.current.md"
     _write(handoff_path, "# task\n")
 
     repo_root = tmp_path / "repo"
@@ -202,7 +202,7 @@ def test_main_blocks_when_same_failed_run_set_stays_red(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     handoff_dir = tmp_path / ".agent" / "handoffs"
-    _write(handoff_dir / "task-11.5.current.md", "# task\n")
+    _write(handoff_dir / "preview-helper-boundary.current.md", "# task\n")
     repo_root = tmp_path / "repo"
     repo_root.mkdir()
 
@@ -284,7 +284,7 @@ def test_main_detach_prints_started_message(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     handoff_dir = tmp_path / ".agent" / "handoffs"
-    handoff_path = handoff_dir / "task-11.5.current.md"
+    handoff_path = handoff_dir / "preview-helper-boundary.current.md"
     _write(handoff_path, "# task\n")
     repo_root = tmp_path / "repo"
     repo_root.mkdir()

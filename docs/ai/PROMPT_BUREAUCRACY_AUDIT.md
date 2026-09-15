@@ -4,7 +4,7 @@ This checklist is reusable internal guidance for auditing prompt necessity, redu
 
 ## Source of truth
 
-- `docs/ROADMAP.md` Task 26 prompt-bureaucracy family
+- the roadmap prompt-bureaucracy family
 - `docs/SPECIFICATION.md` §§ 4.6 and 10
 - `docs/ARCHITECTURE.md` command-surface and runtime-help ownership boundaries
 

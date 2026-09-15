@@ -2182,7 +2182,7 @@ def test_split_file_selection_preserves_panel_local_volume_cycle_state(
 
 def test_navigation_does_not_expand(tmp_path, ytnova_binary):
     """
-    BUG 2: Verifies that pressing DOWN arrow merely moves the cursor,
+    volume-state isolation regression: Verifies that pressing DOWN arrow merely moves the cursor,
     and does NOT automatically scan/expand subdirectories.
     """
     # Create nested structure: test_root/parent/child/file.txt
@@ -2685,7 +2685,7 @@ def test_delete_first_visible_dir_keeps_visible_selection(
 
 
 def test_dialog_screen_wiping(dual_panel_sandbox, ytnova_binary):
-    """BUG 4: Returning from a dialog leaves the screen missing separator lines."""
+    """dotfile-isolation regression: Returning from a dialog leaves the screen missing separator lines."""
     tui = YtreeNovaTUI(executable=ytnova_binary, cwd=str(dual_panel_sandbox))
     assert tui.wait_for_content("left_dir", timeout=2.0), _screen_text(tui)
 
@@ -2703,7 +2703,7 @@ def test_dialog_screen_wiping(dual_panel_sandbox, ytnova_binary):
     assert "qqq" in screen, "Separator lines were wiped from the background!"
 
 def test_negative_filter_logic(dual_panel_sandbox, ytnova_binary):
-    """BUG 5: Negative filter (-*.o) hides everything instead of just .o files."""
+    """inactive-selection stability regression: Negative filter (-*.o) hides everything instead of just .o files."""
     # Create a mixed directory
     (dual_panel_sandbox / "code.c").touch()
     (dual_panel_sandbox / "code.o").touch()
@@ -2720,7 +2720,7 @@ def test_negative_filter_logic(dual_panel_sandbox, ytnova_binary):
     assert "code.o" not in screen, "Negative filter failed to hide the target file!"
 
 def test_split_screen_memory_isolation(dual_panel_sandbox, ytnova_binary):
-    """BUG 1: Inactive panel displays garbage/forgets state when active panel scrolls."""
+    """volume-cycling state-isolation regression: Inactive panel displays garbage/forgets state when active panel scrolls."""
     (dual_panel_sandbox / "left_dir" / "target_file.txt").touch()
 
     tui = YtreeNovaTUI(executable=ytnova_binary, cwd=str(dual_panel_sandbox))

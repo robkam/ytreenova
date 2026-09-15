@@ -197,7 +197,7 @@ FUZZ_BINS := $(FUZZ_STRING_UTILS_BIN) $(FUZZ_PATH_UTILS_BIN) $(FUZZ_FILTER_CORE_
 		fuzz fuzz-smoke fuzz-string-utils fuzz-path-utils fuzz-filter-core qa-fuzz \
 		test-v qa-clang qa-cppcheck qa-scan qa-valgrind qa-valgrind-interactive qa-valgrind-full \
 		qa-pytest qa-fileops-integrity qa-split-panel-gates qa-pytest-coverage qa-sanitize qa-unsafe-apis qa-dead-history-comments qa-compatibility-shims qa-module-boundaries qa-clean-code qa-appstate-contract qa-ai-config qa-theme-catalog qa-profile-template qa-commands-catalog qa-applications-catalog qa-command-presets-catalog qa-help-assets qa-code-quality qa-all \
-		qa-test-contract-resilience \
+		qa-test-contract-resilience qa-tracker-id-leaks \
 		ci-baseline mcp-doctor py-requirements \
 		qa-all-log qa-deep theme-catalog profile-template commands-catalog applications-catalog command-presets-catalog \
 		help-assets locale-catalogs update-gettext-pot \
@@ -591,7 +591,10 @@ qa-help-assets:
 qa-test-contract-resilience:
 	$(PYTHON) scripts/check_test_contract_resilience.py
 
-qa-code-quality: qa-unsafe-apis qa-dead-history-comments qa-compatibility-shims qa-clean-code qa-appstate-contract qa-ai-config qa-theme-catalog qa-profile-template qa-commands-catalog qa-applications-catalog qa-command-presets-catalog qa-help-assets qa-test-contract-resilience
+qa-tracker-id-leaks:
+	$(PYTHON) scripts/check_tracker_id_leaks.py
+
+qa-code-quality: qa-unsafe-apis qa-dead-history-comments qa-compatibility-shims qa-clean-code qa-appstate-contract qa-ai-config qa-theme-catalog qa-profile-template qa-commands-catalog qa-applications-catalog qa-command-presets-catalog qa-help-assets qa-test-contract-resilience qa-tracker-id-leaks
 
 ci-baseline: qa-code-quality qa-fileops-integrity qa-pytest-coverage qa-fuzz
 

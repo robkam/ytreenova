@@ -289,7 +289,7 @@ The split panels share one logged tree topology contract for a given logged volu
 *   **Implicit Exit:** Pressing a key associated with a file operation (Copy, Delete, Move) confirms the current search match and immediately executes that command.
 
 ### 5.5 Canonical Panel Restore Contract
-Task 31 must follow this section. If implementation needs behavior that is not covered here, this specification must be updated before the implementation is considered complete.
+Split-panel implementations must follow this section. If implementation needs behavior that is not covered here, this specification must be updated before the implementation is considered complete.
 
 #### 5.5.1 Canonical Panel State Record
 Each window or panel must own one canonical frozen UI state record. The record must contain:
