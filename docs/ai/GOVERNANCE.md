@@ -49,7 +49,7 @@ For common governance edits, use these canonical targets:
 ## Prompt Template Map
 
 Prompt templates live in `docs/ai/` and are maintained as copy/paste entrypoints:
-- `TASK_PROMPT_TEMPLATE.md`: architect-supervised implementation workflow for one tracked task or bugfix. The maintainer edits only the applicable `Work item:` selector line; the AI derives scope from that selector and auto-consumes matching failed-audit relay files if present.
+- `PROMPT_TEMPLATE.md`: architect-supervised implementation workflow for one tracked task or bugfix. The maintainer edits only the applicable `Work item:` selector line; the AI derives scope from that selector and auto-consumes matching failed-audit relay files if present.
 - `AUDIT_PROMPT_TEMPLATE.md`: scope-locked adversarial audit workflow for one completed task or bugfix surface. The maintainer edits only the applicable `Audit target:` selector line; the AI derives scope from that selector, writes failed-audit relay files only when follow-up work is needed, and leaves `.agent/handoffs/` empty again after a clean PASS closeout.
 - Both prompt templates enforce facts-first visibility updates (completed evidence before planned next action).
 

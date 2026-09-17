@@ -1,6 +1,6 @@
 ---
 name: manpage-sync
-description: Keep ytnova manpage and usage docs synchronized by editing etc/ytnova.1.md as source and regenerating derived outputs.
+description: Keep ytnova manpage, usage, and runtime help synchronized from their authored help sources.
 ---
 
 # Manpage Sync
@@ -9,21 +9,22 @@ Use this skill when commands, options, keybindings, or user-facing behavior docs
 
 ## Source of Truth
 
-- Edit `etc/ytnova.1.md`.
-- Treat `docs/USAGE.md` as generated output.
+- Edit `etc/help/man.en.md` for manpage and usage-reference prose.
+- Edit `etc/help/f1.en.md` for runtime contextual-help prose.
+- Treat `etc/ytnova.1.md`, `docs/USAGE.md`, `src/core/generated_help_topics.h`, and the build manpage as generated outputs.
 
 ## Sync Workflow
 
-1. Apply documentation edits in `etc/ytnova.1.md`.
-2. Regenerate usage doc:
-   - `make docs`
-3. If needed, regenerate man page artifact:
-   - `make build/ytnova.1`
-4. Verify generated docs reflect current behavior.
+1. Apply documentation edits in the applicable authored source under `etc/help/`.
+2. Regenerate the help assets:
+   - `make help-assets`
+3. Verify generated assets are in sync:
+   - `make qa-help-assets`
+4. Verify generated docs and runtime help reflect current behavior.
 
 ## Checks
 
-- No direct manual edits to `docs/USAGE.md` without regenerating.
+- Do not edit generated help outputs independently of their authored sources.
 - Options/commands in docs match implemented behavior.
 - Prompt/menu labels are consistent with current UI text.
 - Documentation placement MUST be audience-relevant and non-duplicative; you MUST NOT scatter the same guidance across unrelated sections.

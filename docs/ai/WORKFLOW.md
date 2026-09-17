@@ -171,7 +171,7 @@ If procedural instructions appear in persona files, move them into skills and le
 
 Use this workflow when a tracked bug or task needs architect-supervised implementation.
 Prompt templates:
-- **[TASK_PROMPT_TEMPLATE.md](TASK_PROMPT_TEMPLATE.md)**: architect-led implementation entrypoint for one tracked task or bugfix. The maintainer edits only the applicable `Work item:` selector line, and the AI derives title/scope from that selector, auto-consumes matching failed-audit relay files if present, and drives coherent batching plus completion-proof coverage.
+- **[PROMPT_TEMPLATE.md](PROMPT_TEMPLATE.md)**: architect-led implementation entrypoint for one tracked task or bugfix. The maintainer edits only the applicable `Work item:` selector line, and the AI derives title/scope from that selector, auto-consumes matching failed-audit relay files if present, and drives coherent batching plus completion-proof coverage.
 - **[AUDIT_PROMPT_TEMPLATE.md](AUDIT_PROMPT_TEMPLATE.md)**: adversarial post-implementation audit entrypoint for one locked task or bugfix scope. The maintainer edits only the applicable `Audit target:` selector line, and the AI derives scope from that selector, writes failed-audit relay files only when follow-up work is needed, and may return PASS when the work is already satisfactory.
 
 ##### 3.1.0.1 MCP Config Bootstrap (Recommended)
@@ -239,7 +239,7 @@ make qa-fuzz
 4.  Failed-audit relay files live under `.agent/handoffs/` only until the next follow-up task consumes them:
     *   `audit.current.txt`: latest failed audit verdict for the most recently audited work item,
     *   `audit.task-<number>.txt` / `audit.bug-<number>.txt`: latest failed audit verdict for that specific roadmap task or bug.
-    *   When a task prompt resumes from a failed audit, the AI must read the matching audit handoff automatically and choose the next coherent defect family itself rather than requiring maintainer triage.
+    *   When the implementation prompt resumes from a failed audit, the AI must read the matching audit handoff automatically and choose the next coherent defect family itself rather than requiring maintainer triage.
 5.  If `.agent/handoffs/` is absent or empty, the next mission must reconstruct from current repo state, git/GitHub state, and the selected tracker item rather than treating the missing relay as a blocker.
 
 #### 3.1.2 Mission Definition Pass (Stateless Planning)

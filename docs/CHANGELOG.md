@@ -78,7 +78,7 @@ First beta release.
 - **Controller Hotspot Decomposition**: Broke up high-risk controller "god function" paths into smaller, cohesive units to reduce regression blast radius and improve maintainability.
 - **Permanent Security Regression Gates**: Added durable security/file-operation integrity checks so previously fixed exploitability classes are continuously guarded in QA/CI.
 - **QA Cadence Optimization**: Reorganized QA gate cadence and overlap to improve iteration feedback speed while preserving strict pre-merge and release assurance depth.
-- **Build System**: Updated Makefile for dependency tracking and unified documentation sourcing (`docs/USAGE.md` and `ytnova.1.md` are now generated from a single `etc/ytnova.1.md` source).
+- **Build System**: Updated Makefile for dependency tracking and unified documentation sourcing (`docs/USAGE.md` and `etc/ytnova.1.md` are generated from `etc/help/man.en.md`, while runtime contextual help is generated from `etc/help/f1.en.md`).
 - **Silent Refresh-Scan Handling**: Suppressed transient `stat` errors during directory refreshes to prevent non-fatal race conditions.
 - **Overwrite-All Conflict Hardening**: Unified COPY/MOVE overwrite-all behavior so selecting `A` on the first conflict suppresses repeated prompts across remaining tagged-file conflicts.
 - **AI Governance framework**: Established a formal AI orchestration system using persona routing and automation "skills" to maintain architectural consistency.

@@ -1,23 +1,23 @@
 # V1 release line
 
-The roadmap stays intact.
+The `1.0.0-beta` release shipped on 2026-09-14. The roadmap stays intact while this document describes the remaining path to stable v1.
 
 This file exists only to answer two practical questions:
 
-1. What is the smallest honest line to a v1 release?
+1. What is the smallest honest line from the current beta to a stable v1 release?
 2. What is still worth doing later, without pretending it all has to happen first?
 
 It does not replace `docs/ROADMAP.md`, and it does not change the roadmap.
 
 Deferring work here means "keep it on the roadmap and do it later", not "cut it".
 
-## At what point can you do a release version?
+## At what point can you do the stable release?
 
-It is acceptable to skip beta and go straight to v1.0.0.
+The next release decision is when the project is ready to move from `1.0.0-beta` to stable `1.0.0`.
 
-### A beta release
+### Beta release baseline
 
-A credible beta line is:
+The beta milestone used this credibility line:
 
 - Make Contextual F1 Help Accurate, Direct, and Task-Focused done
 - Bring Manpage/Usage Reference Prose in Line with Unix Manpage Conventions done

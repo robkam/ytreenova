@@ -1,4 +1,4 @@
-# Task Prompt Template
+# Implementation Prompt Template
 
 Maintainer instructions:
 - Delete the `Work item:` line that does not apply, then fill in the missing number on the line you keep.
