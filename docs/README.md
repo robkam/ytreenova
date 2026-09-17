@@ -8,6 +8,7 @@ This directory is for `ytnova` product and project documentation.
 - **Canonical implementation and ownership contract**: `ARCHITECTURE.md`
 - **User-facing reference and guidance**: `USAGE.md`, `FAQ.md`, `quickstart.md`
 - **Project planning and tracking**: `ROADMAP.md`, `BUGS.md`
+- **Recurring engineering obligations**: `MAINTENANCE.md`
 - **Project QA/reference docs**: `AUDIT.md`, `PR_GATE.md`, `TRUST.md`
 
 ## What does not belong here
@@ -34,6 +35,7 @@ Those belong under `docs/ai/` when they are reusable internal guidance, or under
 - `CODE_OF_CONDUCT.md` — community conduct expectations.
 - `CONTRIBUTING.md` — contributor setup and contribution rules.
 - `FAQ.md` — short answers to recurring user/contributor questions.
+- `MAINTENANCE.md` — active recurring engineering obligations and their triggers.
 - `PR_GATE.md` — pull-request merge/readiness gate reference.
 - `README.md` — documentation ownership map for this directory.
 - `ROADMAP.md` — planned feature and remediation backlog.
