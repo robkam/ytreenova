@@ -10,7 +10,7 @@ Before opening an issue or suggesting a feature, please check [BUGS.md](docs/BUG
 - [USAGE.md](docs/USAGE.md) — user guide and key reference
 - [quickstart.md](docs/quickstart.md) — developer setup
 - [CONTRIBUTING.md](docs/CONTRIBUTING.md) — contribution guidelines
-- See the [Documentation Guide](#documentation-guide) below for the full project documentation set
+- [Documentation Map](docs/README.md) — complete project documentation index
 
 <p align="center">
   <img src="docs/screenshots/split_archive_home.png" alt="YtreeNova F8 split screen: left panel browsing /home/rob/scripts.tar.gz, right panel showing the ~ tree with scripts inactive and its files in a small window." width="84%">
@@ -94,22 +94,7 @@ sudo make uninstall
 
 ## Documentation Guide
 
-The project documentation lives under `docs/` and is split into focused user, developer, governance, and AI workflow references.
-
-| Document | Purpose |
-| :--- | :--- |
-| **[USAGE.md](docs/USAGE.md)** | **User Guide**: How to navigate, tag, and use command keys. (Generated from `etc/help/man.en.md`). |
-| **[quickstart.md](docs/quickstart.md)** | **Developer Setup**: How to set up the environment, run tests, and work on the codebase. |
-| **[BUGS.md](docs/BUGS.md)** | **Known Issues**: Current defects, reproductions, and fix status. |
-| **[CONTRIBUTING.md](docs/CONTRIBUTING.md)** | **Developer Setup**: How to set up the environment, run tests, and submit code. |
-| **[PR_GATE.md](docs/PR_GATE.md)** | **PR Governance**: Required PR gate checks and triage rules needed for merge readiness. |
-| **[AUDIT.md](docs/AUDIT.md)** | **QA Workflow**: The mandatory safety/integrity checks for every PR (Valgrind, ASan, etc). |
-| **[SPECIFICATION.md](docs/SPECIFICATION.md)** | **Behavioral Contract**: UI layout, navigation protocols, and design philosophy. |
-| **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** | **System Design**: Core technical principles (DRY, SRP, Context-passing) and data hierarchy. |
-| **[TRUST.md](docs/TRUST.md)** | **Trust & Safety**: Safety claims and where to verify them in the codebase. |
-| **[ROADMAP.md](docs/ROADMAP.md)** | **Future Plans**: Pending milestones and prioritized delivery backlog. |
-| **[CHANGELOG.md](docs/CHANGELOG.md)** | **Changelog**: Detailed history of YtreeNova feature delivery, architecture work, and updates. |
-| **[ai/WORKFLOW.md](docs/ai/WORKFLOW.md)** | **AI Workflow**: Persona routing, agent workflow, semantic-tool usage, and maintainer prompts. |
+Start with the **[Documentation Map](docs/README.md)** for the complete user, contributor, governance, and internal-development documentation set. The quick links above remain the shortest route to common landing-page destinations.
 
 ## Project Structure
 

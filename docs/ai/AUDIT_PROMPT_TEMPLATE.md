@@ -50,7 +50,7 @@ Pre-audit inventory rule:
   - adjacent failure surfaces that could share the same root cause,
   - any stale workaround or duplicate behavior path that may have survived the fix.
 - Do not start emitting final conclusions until this audit inventory is explicit enough to prove scope coverage.
-- If the audit FAILS, create `/home/rob/ytreenova/.agent/handoffs/` if needed and write the final audit result into both of these handoff files so the next task prompt can consume it without maintainer triage:
+- If the audit FAILS, create `/home/rob/ytreenova/.agent/handoffs/` if needed and write the final audit result into both of these handoff files so the next implementation prompt can consume it without maintainer triage:
   - `/home/rob/ytreenova/.agent/handoffs/audit.current.txt`
   - `/home/rob/ytreenova/.agent/handoffs/audit.task-<number>.txt` for roadmap tasks or `/home/rob/ytreenova/.agent/handoffs/audit.bug-<number>.txt` for bugs.
 - Overwrite those files with the latest failed audit for the selected work item; repeated FAIL audits of the same task/bug must be able to replace an older verdict cleanly.
@@ -85,7 +85,7 @@ Anti-premature-pass rule:
 Output format:
 - The maintainer-facing final response must be exactly one of:
   - `PASS`
-  - `FAIL saved to <handoff-path>; next use docs/ai/TASK_PROMPT_TEMPLATE.md with Work item: <same target>`
+  - `FAIL saved to <handoff-path>; next use docs/ai/PROMPT_TEMPLATE.md with Work item: <same target>`
 - Write the detailed audit record into failed-audit handoff files, not into the maintainer-facing final response, unless the maintainer explicitly asks to see the findings.
 - Findings first.
 - Severity-ranked.

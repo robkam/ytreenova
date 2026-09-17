@@ -8,7 +8,7 @@ In Cline, treat those files as authoritative even when they mention Codex-specif
 - Read `AGENTS.md` first.
 - Then read `.ai/shared.md`.
 - Load only the relevant parts of `docs/ai/*` for the current task.
-- Treat `docs/ai/TASK_PROMPT_TEMPLATE.md` as the reference for manual implementation/remediation workflow prompts and `docs/ai/AUDIT_PROMPT_TEMPLATE.md` as the reference for scope-locked audit prompts.
+- Treat `docs/ai/PROMPT_TEMPLATE.md` as the reference for manual implementation/remediation workflow prompts and `docs/ai/AUDIT_PROMPT_TEMPLATE.md` as the reference for scope-locked audit prompts.
 
 ## Codex-to-Cline translation
 

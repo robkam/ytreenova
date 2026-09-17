@@ -22,26 +22,26 @@ No file manager is zero-risk.
    CI and local QA tests and safety guards must all be green before changes are merged and before release.
 
 ## Evidence in this repository
-- Delete confirmation flow: `ytreenova/src/ui/ctrl_file_ops.c`
-- Overwrite prompt flow: `ytreenova/src/ui/key_engine.c`
-- Self-target guards: `ytreenova/src/cmd/copy.c`, `ytreenova/src/cmd/move.c`, `ytreenova/src/cmd/rename.c`
-- Move/copy failure handling: `ytreenova/src/cmd/move.c`, `ytreenova/src/cmd/copy.c`
-- Archive rewrite safety flow: `ytreenova/src/fs/archive_write.c`
-- Safe command/path quoting: `ytreenova/src/util/path_utils.c`
-- Security path-handling tests: `ytreenova/tests/test_security_shell_paths.py`
-- Archive write parity tests: `ytreenova/tests/test_archive_write_parity.py`
-- Temp file/dir handling: `ytreenova/src/util/path_utils.c`, `ytreenova/src/ui/interactions.c`, `ytreenova/src/ui/view_preview.c`
-- Temp handling tests: `ytreenova/tests/test_security_tempfiles.py`
-- QA gates: `ytreenova/Makefile`, `ytreenova/docs/AUDIT.md`
+- Delete confirmation flow: [`src/ui/ctrl_file_ops.c`](../src/ui/ctrl_file_ops.c)
+- Overwrite prompt flow: [`src/ui/key_engine.c`](../src/ui/key_engine.c)
+- Self-target guards: [`src/cmd/copy.c`](../src/cmd/copy.c), [`src/cmd/move.c`](../src/cmd/move.c), [`src/cmd/rename.c`](../src/cmd/rename.c)
+- Move/copy failure handling: [`src/cmd/move.c`](../src/cmd/move.c), [`src/cmd/copy.c`](../src/cmd/copy.c)
+- Archive rewrite safety flow: [`src/fs/archive_write.c`](../src/fs/archive_write.c)
+- Safe command/path quoting: [`src/util/path_utils.c`](../src/util/path_utils.c)
+- Security path-handling tests: [`tests/test_security_shell_paths.py`](../tests/test_security_shell_paths.py)
+- Archive write parity tests: [`tests/test_archive_write_parity.py`](../tests/test_archive_write_parity.py)
+- Temp file/dir handling: [`src/util/path_utils.c`](../src/util/path_utils.c), [`src/ui/interactions.c`](../src/ui/interactions.c), [`src/ui/view_preview.c`](../src/ui/view_preview.c)
+- Temp handling tests: [`tests/test_security_tempfiles.py`](../tests/test_security_tempfiles.py)
+- QA gates: [`Makefile`](../Makefile), [`AUDIT.md`](AUDIT.md)
 
 ## Limits
-- `ytnova` is currently alpha. See `ytreenova/README.md`.
+- The current release is `1.0.0-beta`. See [CHANGELOG.md](CHANGELOG.md).
 - There is no promise of zero risk.
 - `ytnova` does not try to override user intent for destructive operations.
   If you choose to delete, overwrite, or move the wrong target, that is still your risk.
-- During alpha, most changes are minor UI/UX and bug-fix work.
+- During beta, most changes are minor UI/UX and bug-fix work.
   Core file-operation paths are treated as high-stability and kept under strict QA gates.
 
 ## Reporting
 - Wrong behavior and non-security bugs: [GitHub Issues](https://github.com/robkam/ytreenova/issues)
-- Security issues: private reporting via `ytreenova/SECURITY.md`
+- Security issues: private reporting via [SECURITY.md](../SECURITY.md)
