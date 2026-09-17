@@ -43,6 +43,7 @@ For pull-request governance and conflict triage policy, see **[PR_GATE.md](PR_GA
 
 - `docs/ROADMAP.md` and `docs/BUGS.md` are forward-looking (`planned`/`in-progress`).
 - Completed items may be removed from those active planning docs after landing/fix.
+- Continuing obligations belong in `docs/MAINTENANCE.md`.
 - `docs/CHANGELOG.md` is milestone-level only; do not add every trivial fix.
 - Git history is the complete detailed archive of all changes.
 

@@ -2,6 +2,7 @@
 
 This file tracks fix-required bugs, architectural violations, and naming inconsistencies that require remediation.
 Buglist is forward-looking (`planned`/`in-progress`). Completed items will be removed after fixed.
+Continuing obligations belong in [MAINTENANCE.md](MAINTENANCE.md).
 
 Ordering policy (for all editors, including AI editors):
 - Put bugs that are high-impact first after that order remaining bugs by ease of implementation.
@@ -171,7 +172,13 @@ Ordering policy (for all editors, including AI editors):
 
 ## **Correctness, Consistency, and Naming Defects (Priority Ordered)**
 
-### **BUG-17: Configuration Template Drift (`VI_KEYS`)**
+### **BUG-17: Archive Copy Tempfiles Bypass Shared TMPDIR Policy**
+*   **Description**: Archive-copy extraction in `src/cmd/copy.c` hardcodes `/tmp/ytnova_copy_XXXXXX` and calls `mkstemp()` directly instead of using the shared tempfile helper and its `TMPDIR`-aware policy.
+*   **Impact**: One production path can drift from the repository's authoritative tempfile location, cleanup, and guard contracts.
+*   **Remediation**: Route archive-copy extraction through the shared tempfile API, preserve cleanup invariants on every exit path, and extend the tempfile regression and guard coverage to include archive copy.
+*   **Status**: Confirmed.
+
+### **BUG-18: Configuration Template Drift (`VI_KEYS`)**
 *   **Description**: Discrepancy in default visibility and documentation for `VI_KEYS`.
 *   **Findings**:
     *   `default_profile_template.h` uses `VI_KEYS=0`.
@@ -181,7 +188,7 @@ Ordering policy (for all editors, including AI editors):
 *   **Remediation**: Ensure the `ytnova --init` generation path strictly matches the `etc/ytnova.conf` provided in the distribution.
 *   **Status**: Confirmed.
 
-### **BUG-18: VI Mode Key Ambiguity and Collisions**
+### **BUG-19: VI Mode Key Ambiguity and Collisions**
 *   **Description**: When `VI_KEYS=1` is enabled, lowercase navigation keys (`h/j/k/l`) collide with primary command keys without clear UI signaling.
 *   **Findings**:
     *   `j` maps to both `ACTION_MOVE_DOWN` (via `VI_KEY_DOWN`) and historically to `ACTION_LOG_VOLUME` (though currently `l/L` is the log volume key, older documentation/muscle memory remains confused).
@@ -190,14 +197,14 @@ Ordering policy (for all editors, including AI editors):
 *   **Remediation**: Audit all `VI_KEY` remappings in `key_engine.c` and ensure the footer keybinding lines (`display.c`) dynamically update to show the uppercase variants when `VI_KEYS=1`.
 *   **Status**: Confirmed.
 
-### **BUG-19: Incremental Search Legacy Mapping (`F12`)**
+### **BUG-20: Incremental Search Legacy Mapping (`F12`)**
 *   **Description**: `F12` is used as an alias for `/` (Incremental Search/Jump), but its presence is inconsistent in help strings and documentation.
 *   **Impact**: Confuses users about "hidden" keys.
 *   **Remediation**: Explicitly document `F12` as a legacy alias or deprecate it in favor of standard `/`.
 *   **Parity Principle:** Treat this as a documentation-parity defect class: no active keybinding may exist in runtime without consistent footer, `F1`, and manpage/USAGE coverage.
 *   **Status**: Confirmed.
 
-### **BUG-20: Misleading Tree Expansion Action Names**
+### **BUG-21: Misleading Tree Expansion Action Names**
 *   **Description**: The internal `YtreeNovaAction` names for tree expansion are swapped relative to their behavior and documentation.
 *   **Findings**:
     *   `+` key maps to `ACTION_TREE_EXPAND_ALL`, but only expands **one level**.
@@ -208,14 +215,14 @@ Ordering policy (for all editors, including AI editors):
     *   Rename `ACTION_ASTERISK` -> `ACTION_TREE_EXPAND_RECURSIVE`.
 *   **Status**: Confirmed.
 
-### **BUG-21: Intermittent Split-Brain Redraw Between Stats Box and Main Panes**
+### **BUG-22: Intermittent Split-Brain Redraw Between Stats Box and Main Panes**
 *   **Description**: Intermittently, the stats box redraw state can diverge from the main UI surfaces (`path`, `dir`, and `file` windows), leaving one surface fresh while the other appears stale/corrupted.
 *   **Impact**: Creates a visibly broken UI state and undermines trust in navigation context during active workflows.
 *   **Remediation**: Unify frame redraw ownership so stats and main panes are rendered from one layout snapshot in one update cycle, and force full-surface invalidation/redraw on resize/recovery/error paths.
 *   **Related**: `ROADMAP` Task 6 (unified frame redraw contract).
 *   **Status**: Confirmed (intermittent; no deterministic repro sequence yet).
 
-### **BUG-22: Directory Copy/Move Can Blank or Partially Drop the Main Frame During In-Session Refresh**
+### **BUG-23: Directory Copy/Move Can Blank or Partially Drop the Main Frame During In-Session Refresh**
 *   **Description**: After accepting a directory copy or move target, the live view can blank or lose parts of the main frame while the tree updates. The tree content may remain or reappear, but header/path, border lines, stats, or footer can disappear temporarily, making the operation look visually broken even when the filesystem mutation succeeds.
 *   **Repro (manual, 2026-08-11)**:
     *   Copy or move a directory in the logged tree.
@@ -226,14 +233,14 @@ Ordering policy (for all editors, including AI editors):
 *   **Actual**: The directory tree can update while the surrounding frame drops out or goes blank long enough to look broken.
 *   **Impact**: High-trust workflow damage in copy/move paths because successful filesystem mutations still look like a rendering failure.
 *   **Remediation**: Treat directory copy/move refresh as a deterministic redraw/invalidation bug, not as prompt-flow work. Rebuild one authoritative frame update path for header/path, tree, file pane, stats, and footer so in-session directory mutations cannot leave partial surfaces behind.
-*   **Related**: `BUG-21` (split-brain redraw), `BUG-23` (stats owner split), `ROADMAP` Task 6 (unified frame redraw contract).
+*   **Related**: `BUG-22` (split-brain redraw), `BUG-24` (stats owner split), `ROADMAP` Task 6 (unified frame redraw contract).
 *   **Status**: Confirmed.
 
-### **BUG-23: Stats Panel Lacks a Single Coherent State/Render Owner**
+### **BUG-24: Stats Panel Lacks a Single Coherent State/Render Owner**
 *   **Description**: The stats area does not behave like one consolidated UI component with one authoritative state/render path. In broken states, one subsection (for example `ATTRIBUTES`) can remain visible while the rest of the stats surface is blank or stale, which makes the panel look like multiple historical fragments glued together instead of one coherent unit.
 *   **Example symptom**: During prompt-driven flows such as `Write`, the right-side panel can show only the lower `ATTRIBUTES` subsection while upper stats sections disappear, even though the outer frame and surrounding panes remain on screen.
 *   **Expected**: Stats must be one complete component in the appstate architecture: one explicit owner for its projection, one layout contract, one redraw/invalidation path, and deterministic all-or-nothing rendering of its subsections.
 *   **Impact**: Breaks trust in the appstate architecture, makes redraw bugs harder to reason about, and creates a visibly kludged UI impression because users can see that different stats subsections are not being treated as one unit.
 *   **Remediation**: Define stats as a first-class appstate/render component with one authoritative projection boundary. Consolidate subsection visibility, titles, values, and borders under one render contract so prompt/modal flows cannot partially orphan or preserve only one subsection. Regression coverage should verify that stats either renders as one complete valid unit or is intentionally hidden as one unit.
-*   **Related**: `BUG-21` (split-brain redraw), `BUG-22` (directory copy/move frame drop), `docs/ARCHITECTURE.md` §4.2.3 (`AppState` transition contract), `ROADMAP` Task 6.1 (unified stats + main-pane redraw contract).
+*   **Related**: `BUG-22` (split-brain redraw), `BUG-23` (directory copy/move frame drop), `docs/ARCHITECTURE.md` §4.2.3 (`AppState` transition contract), `ROADMAP` Task 6.1 (unified stats + main-pane redraw contract).
 *   **Status**: Confirmed.

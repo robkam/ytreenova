@@ -11,6 +11,7 @@ Ordering policy (for all editors, including AI editors):
 - IDs are unstable labels and are likely to change often due to reprioritization/renumbering.
 - `docs/ROADMAP.md` is forward-looking only (`planned`/`in-progress`).
 - Completed items are removed after landing.
+- Continuing obligations live in [docs/MAINTENANCE.md](MAINTENANCE.md).
 - For shipped outcomes, see [docs/CHANGELOG.md](CHANGELOG.md), which records only the most significant milestones, not every minor change.
 - Use git history as the full archive.
 
@@ -668,6 +669,7 @@ Ordering policy (for all editors, including AI editors):
 *   **Goal:** Perform a pre-v1.0.0 multi-round security review using adversarial and AppSec perspectives.
 *   **Examples:** Senior AppSec reviewer, penetration-tester mindset, and insider-knowledge threat modeling.
 *   **Rationale:** Final pre-release pressure test on top of continuous Phase 2 security gates.
+*   **Acceptance Criteria:** Add explicit regression coverage proving traversal rejection across archive extraction, preview, and tagged-view paths before expanding archive extraction behavior; reconcile every finite finding into `docs/BUGS.md` or `docs/ROADMAP.md` rather than leaving active debt only in audit evidence.
 *   - [ ] **Status:** Not Started.
 
 ---
