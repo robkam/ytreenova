@@ -809,12 +809,14 @@ static size_t BuildFooterCommands(RuntimeHelpPopupState *state) {
   const GeneratedHelpFooter *footer = ActiveGeneratedHelpFooter();
   size_t command_count = 0;
   BOOL show_index;
+  BOOL show_intro;
   BOOL show_navigation;
 
   if (state == NULL || state->topic == NULL || footer == NULL)
     return 0;
 
   show_index = !TopicIdEquals(state->topic, "index");
+  show_intro = !TopicIdEquals(state->topic, "start-here");
   show_navigation = !TopicIdEquals(state->topic, "f1-navigation");
 
   state->link_command_count = 0;
@@ -826,6 +828,9 @@ static size_t BuildFooterCommands(RuntimeHelpPopupState *state) {
   if (show_index)
     AppendFooterCommand(state, &command_count, UI_COMMAND_LAYOUT_KEY_PREFIX,
                         footer->index_label, footer->index_key);
+  if (show_intro)
+    AppendFooterCommand(state, &command_count, UI_COMMAND_LAYOUT_KEY_PREFIX,
+                        footer->intro_label, footer->intro_key);
   if (show_navigation)
     AppendFooterCommand(state, &command_count, UI_COMMAND_LAYOUT_KEY_PREFIX,
                         footer->navigation_label, footer->navigation_key);
@@ -999,6 +1004,13 @@ static int HandleContextualListFooterKey(RuntimeHelpPopupState *state, int ch) {
       }
       return -1;
     }
+    if (FooterKeyMatches(ch, footer->intro_key)) {
+      if (!TopicIdEquals(state->topic, "start-here")) {
+        state->next_topic_id = "start-here";
+        return 1;
+      }
+      return -1;
+    }
     if (FooterKeyMatches(ch, footer->navigation_key)) {
       if (!TopicIdEquals(state->topic, "f1-navigation")) {
         state->next_topic_id = "f1-navigation";
@@ -1121,6 +1133,13 @@ static int HandleContextualListFooterKey(RuntimeHelpPopupState *state, int ch) {
     if (state->topic->topic_id != NULL &&
         strcmp(state->topic->topic_id, "index") != 0) {
       state->next_topic_id = "index";
+      return 1;
+    }
+    return -1;
+  }
+  if (FooterKeyMatches(ch, footer->intro_key)) {
+    if (!TopicIdEquals(state->topic, "start-here")) {
+      state->next_topic_id = "start-here";
       return 1;
     }
     return -1;
@@ -1248,6 +1267,14 @@ static int HandleGeneratedHelpFooterKey(ViewContext *ctx, int ch,
     return -1;
   }
 
+  if (FooterKeyMatches(ch, footer->intro_key)) {
+    if (!TopicIdEquals(state->topic, "start-here")) {
+      state->next_topic_id = "start-here";
+      return 1;
+    }
+    return -1;
+  }
+
   if (FooterKeyMatches(ch, footer->navigation_key)) {
     if (!TopicIdEquals(state->topic, "f1-navigation")) {
       state->next_topic_id = "f1-navigation";
@@ -1336,6 +1363,11 @@ static int GetGeneratedHelpActiveRow(const void *user_data) {
   }
 
   return (int)state->item_first_row[state->selected_item_index];
+}
+
+static void RefreshGeneratedHelpBackground(ViewContext *ctx) {
+  clearok(stdscr, TRUE);
+  RefreshView(ctx, GetSelectedDirEntry(ctx, ctx->active->vol));
 }
 
 int UI_ShowGeneratedContextHelpWithOverrides(
@@ -1433,11 +1465,13 @@ int UI_ShowGeneratedContextHelpWithOverrides(
 
     if (state.detail_back_requested) {
       current_view.current_detail_index = GENERATED_HELP_NO_SELECTION;
+      RefreshGeneratedHelpBackground(ctx);
       continue;
     }
 
     if (state.next_detail_index != GENERATED_HELP_NO_SELECTION) {
       current_view.current_detail_index = state.next_detail_index;
+      RefreshGeneratedHelpBackground(ctx);
       continue;
     }
 
@@ -1446,6 +1480,7 @@ int UI_ShowGeneratedContextHelpWithOverrides(
         break;
       current_view = history[history_count - 1];
       history_count--;
+      RefreshGeneratedHelpBackground(ctx);
       continue;
     }
 
@@ -1462,6 +1497,7 @@ int UI_ShowGeneratedContextHelpWithOverrides(
     current_view.active_inline_link_index = GENERATED_HELP_NO_SELECTION;
     current_view.scroll_line_offset = 0;
     current_view.contextual_origin = FALSE;
+    RefreshGeneratedHelpBackground(ctx);
   }
 
   RefreshView(ctx, GetSelectedDirEntry(ctx, ctx->active->vol));
