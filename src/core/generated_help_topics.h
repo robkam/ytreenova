@@ -12,6 +12,8 @@ typedef struct {
     const char *left_back_label;
     const char *index_label;
     const char *index_key;
+    const char *intro_label;
+    const char *intro_key;
     const char *navigation_label;
     const char *navigation_key;
     const char *follow_label;
@@ -37,6 +39,12 @@ static const GeneratedHelpTopic generated_help_topics_en[] = {
         "Help Navigation",
         NULL,
         "Use the `Up` and `Down` arrow keys to scroll help one line at a time.\nUse the `Up` and `Down` arrow keys to move between links.\n`Page Up` and `Page Down` move one help screen at a time.\n`Home` and `End` go to the top and bottom.\n`Enter` or the `Right` arrow key opens the selected link.\nThe `Left` arrow key returns to the previous help page.\nPress `I` to go to `Help Index`.\n`Esc` or `Q` closes help.",
+    },
+    {
+        "start-here",
+        "Start Here",
+        NULL,
+        "YtreeNova starts with the current directory. If you name directories or archives on the command line, it starts with those instead.\n\nUse the arrow keys to move through lists. Expand [directories](topic:directory) to see their subdirectories and files. The footer shows the commands available on the current screen or prompt.\n\nUse `Log` to add another directory or archive. [Tag](topic:tagged) files when you want a command to act on several files.\n\nPress `F1` for help with the current screen or prompt.",
     },
     {
         "ytnova-navigation",
@@ -286,7 +294,7 @@ static const GeneratedHelpTopic generated_help_topics_en[] = {
     },
 };
 
-static const size_t generated_help_topic_count_en = 43;
+static const size_t generated_help_topic_count_en = 44;
 
 static const GeneratedHelpTopic generated_help_topics_de[] = {
     {
@@ -300,6 +308,12 @@ static const GeneratedHelpTopic generated_help_topics_de[] = {
         "Hilfe-Navigation",
         NULL,
         "Mit den Pfeiltasten `Up` und `Down` scrollst du die Hilfe zeilenweise.\nMit den Pfeiltasten `Up` und `Down` wechselst du zwischen Links.\n`Page Up` und `Page Down` bewegen eine Hilfeseite.\n`Home` und `End` gehen zum Anfang und Ende.\n`Enter` oder die Pfeiltaste `Right` öffnet den gewählten Link.\nDie Pfeiltaste `Left` kehrt zur vorherigen Hilfeseite zurück.\nDrücke `H`, um zum `Hilfeindex` zu gehen.\n`Esc` oder `Q` schließt die Hilfe.",
+    },
+    {
+        "start-here",
+        "Erste Schritte",
+        NULL,
+        "YtreeNova startet im aktuellen Verzeichnis. Wenn du Verzeichnisse oder Archive auf der Kommandozeile angibst, startet es stattdessen dort.\n\nBenutze die Pfeiltasten, um dich durch Listen zu bewegen. Klappe [Verzeichnisse](topic:directory) auf, um ihre Unterverzeichnisse und Dateien zu sehen. Die Fußzeile zeigt die Befehle, die in der aktuellen Ansicht oder Eingabe verfügbar sind.\n\nBenutze `Log`, um ein weiteres Verzeichnis oder Archiv hinzuzufügen. [Markiere](topic:tagged) Dateien, wenn ein Befehl auf mehrere Dateien angewendet werden soll.\n\nDrücke `F1`, um Hilfe zur aktuellen Ansicht oder Eingabe zu öffnen.",
     },
     {
         "ytnova-navigation",
@@ -549,17 +563,19 @@ static const GeneratedHelpTopic generated_help_topics_de[] = {
     },
 };
 
-static const size_t generated_help_topic_count_de = 43;
+static const size_t generated_help_topic_count_de = 44;
 
 static const GeneratedHelpCatalog generated_help_catalogs[] = {
     {
         "en",
-        43,
+        44,
         generated_help_topics_en,
         {
             "Left back",
             "Index",
             "I",
+            "inTro",
+            "T",
             "Navigation",
             "N",
             "Enter/Right follow",
@@ -568,16 +584,18 @@ static const GeneratedHelpCatalog generated_help_catalogs[] = {
     },
     {
         "de",
-        43,
+        44,
         generated_help_topics_de,
         {
             "Links zurück",
             "Inhalt",
             "H",
+            "Start",
+            "S",
             "Navigation",
             "N",
             "Enter/Right folgen",
-            "Esc/Q schließen",
+            "Esc/Q Ende",
         },
     },
 };

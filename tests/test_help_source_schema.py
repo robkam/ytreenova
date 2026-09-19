@@ -30,6 +30,7 @@ RUNTIME_HELP_CONTEXT_SOURCES = (
 REQUIRED_TOPICS = {
     "index",
     "f1-navigation",
+    "start-here",
     "shared-commands",
     "tagged",
     "command-line-editing",
@@ -290,7 +291,7 @@ def test_f1_sources_keep_all_runtime_content_in_contextual_sections():
 
 def test_contents_topic_is_a_complete_alphabetical_operator_index():
     f1_source = _read_help_source(Path("etc/help/f1.en.md"))
-    help_strip_only_topics = {"f1-navigation"}
+    help_strip_only_topics = {"f1-navigation", "start-here"}
     expected_targets = {
         topic
         for topic in _topic_block_map(f1_source)
