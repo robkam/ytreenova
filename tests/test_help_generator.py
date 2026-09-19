@@ -31,9 +31,15 @@ def test_help_generator_preserves_catalog_context_and_locale_projection():
     assert len(f1_topics) > 0
     assert len(man_topics) > 0
     assert all(topic.contexts is not None for topic in f1_topics)
+    assert f1_topics[0].help_strip.intro_label == "inTro"
+    assert f1_topics[0].help_strip.intro_key == "T"
+    assert de_topics[0].help_strip.intro_label == "Start"
+    assert de_topics[0].help_strip.intro_key == "S"
     assert helpgen.generated_banner("etc/help/man.en.md") in helpgen.render_manpage_markdown(man_topics, usage_mode=False, source_path="etc/help/man.en.md")
     assert helpgen.generated_banner("etc/help/man.en.md") in helpgen.render_manpage_markdown(man_topics, usage_mode=True, source_path="etc/help/man.en.md")
     assert "generated_help_catalogs" in header
+    assert '"inTro"' in header
+    assert '"Start"' in header
     assert "manpage" not in header.lower()
 
 
@@ -62,6 +68,8 @@ def test_help_generator_rejects_invalid_or_duplicate_help_strip_keys():
 left-back-label: Left back
 index-label: Index
 index-key: I
+intro-label: inTro
+intro-key: T
 navigation-label: Navigation
 navigation-key: I
 follow-label: Right/Enter follow
@@ -86,6 +94,8 @@ def test_help_generator_requires_help_strip_keys_in_their_labels():
 left-back-label: Left back
 index-label: Index
 index-key: I
+intro-label: inTro
+intro-key: T
 navigation-label: Navigation
 navigation-key: W
 follow-label: Enter/Right follow
@@ -102,6 +112,42 @@ One line.
 """
 
     with pytest.raises(helpgen.HelpSourceError, match="must occur in navigation-label"):
+        helpgen.parse_help_source(source, require_help_strip=True)
+
+
+@pytest.mark.parametrize(
+    ("intro_metadata", "error"),
+    (
+        ("", "schema order"),
+        ("intro-label: inTro\nintro-label: inTro\nintro-key: T\n", "schema order"),
+        ("intro-label: inTro\nintro-key: 1\n", "one ASCII letter"),
+        ("intro-label: Welcome\nintro-key: T\n", "must occur in intro-label"),
+        ("intro-label: Intro\nintro-key: I\n", "must be distinct"),
+        ("intro-label: Navigation\nintro-key: N\n", "must be distinct"),
+        ("intro-label: Quick start\nintro-key: Q\n", "conflict with Q quit"),
+    ),
+)
+def test_help_generator_validates_intro_help_strip_metadata(intro_metadata, error):
+    source = f"""```ytnova-help-strip
+left-back-label: Left back
+index-label: Index
+index-key: I
+{intro_metadata}navigation-label: Navigation
+navigation-key: N
+follow-label: Enter/Right follow
+quit-label: Esc/Q quit
+```
+
+## topic:test
+```ytnova-help-meta
+title: Test
+contexts: none
+```
+### Contextual F1
+One line.
+"""
+
+    with pytest.raises(helpgen.HelpSourceError, match=error):
         helpgen.parse_help_source(source, require_help_strip=True)
 
 
@@ -304,6 +350,10 @@ One line.
             "- [Alpha](topic:alpha)\n- [Beta](topic:beta)\n- [Help Navigation](topic:f1-navigation)",
             "unexpected: f1-navigation",
         ),
+        (
+            "- [Alpha](topic:alpha)\n- [Beta](topic:beta)\n- [Start Here](topic:start-here)",
+            "unexpected: start-here",
+        ),
     ),
 )
 def test_help_generator_rejects_invalid_index_organization(links, error):
@@ -338,6 +388,14 @@ contexts: none
 ```
 ### Contextual F1
 Navigation.
+
+## topic:start-here
+```ytnova-help-meta
+title: Start Here
+contexts: none
+```
+### Contextual F1
+Start here.
 """
 
     with pytest.raises(helpgen.HelpSourceError, match=error):

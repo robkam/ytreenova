@@ -237,7 +237,11 @@ def test_every_topic_renders_and_returns_at_supported_narrow_size(tmp_path):
                 f"narrow help clipped its help strip for {target!r}\n{screen_text(tui)}"
             )
 
-        assert set(index_targets) == set(topics) - {"index", "f1-navigation"}
+        assert set(index_targets) == set(topics) - {
+            "index",
+            "f1-navigation",
+            "start-here",
+        }
         assert tui.send_and_wait_for_condition(
             navigation_key, _has_title(topics["f1-navigation"]), timeout=1.5
         ), screen_text(tui)
@@ -245,15 +249,58 @@ def test_every_topic_renders_and_returns_at_supported_narrow_size(tmp_path):
         tui.quit()
 
 
-def test_locale_owned_help_strip_key_opens_a_contextual_topic(tmp_path):
+def test_locale_owned_intro_opens_start_here_and_restores_each_origin(tmp_path):
     root = _root(tmp_path, "locale_help")
-    for locale, env in (("en", None), ("de", {"LC_ALL": "de_DE.UTF-8", "LANG": "de_DE.UTF-8", "LANGUAGE": "de"})):
-        tui = _spawn(root, env_extra=env)
-        try:
-            origin = _open(tui, "main.dir", locale=locale)
-            source = F1_SOURCES[locale].read_text(encoding="utf-8")
-            key = re.search(r"index-key: (?P<key>.)", source).group("key")
-            assert tui.send_and_wait_for_screen_change(key, timeout=1.5), screen_text(tui)
-            assert tui.send_and_wait_for_condition(Keys.LEFT, _has_title(origin), timeout=1.0), screen_text(tui)
-        finally:
-            tui.quit()
+    for locale, env, final_token in (
+        ("en", None, "help with the current screen"),
+        (
+            "de",
+            {"LC_ALL": "de_DE.UTF-8", "LANG": "de_DE.UTF-8", "LANGUAGE": "de"},
+            "Hilfe zur aktuellen Ansicht",
+        ),
+    ):
+        for dimensions in ((36, 120), (24, 80)):
+            tui = _spawn(root, env_extra=env, dimensions=dimensions)
+            try:
+                topics = _topics(locale)
+                origin = _open(tui, "main.dir", locale=locale)
+                source = F1_SOURCES[locale].read_text(encoding="utf-8")
+                intro_key = re.search(r"intro-key: (?P<key>.)", source).group("key")
+                intro_label = re.search(r"intro-label: (?P<label>[^\n]+)", source).group("label")
+                index_key = re.search(r"index-key: (?P<key>.)", source).group("key")
+                quit_label = re.search(r"quit-label: (?P<label>[^\n]+)", source).group("label")
+                assert any(
+                    intro_label in line and quit_label in line
+                    for line in tui.get_screen_dump()
+                )
+                assert tui.send_and_wait_for_condition(
+                    intro_key, _has_title(topics["start-here"]), timeout=1.5
+                ), screen_text(tui)
+                if not any(final_token in line for line in tui.get_screen_dump()):
+                    assert tui.send_and_wait_for_condition(
+                        Keys.END,
+                        lambda lines: lines
+                        if any(final_token in line for line in lines)
+                        else False,
+                        timeout=1.0,
+                    ), screen_text(tui)
+                start_here_footer = [
+                    line for line in tui.get_screen_dump() if quit_label in line
+                ]
+                assert start_here_footer
+                assert all(intro_label not in line for line in start_here_footer)
+                assert tui.send_and_wait_for_condition(
+                    Keys.LEFT, _has_title(origin), timeout=1.0
+                ), screen_text(tui)
+
+                assert tui.send_and_wait_for_condition(
+                    index_key, _has_title(topics["index"]), timeout=1.5
+                ), screen_text(tui)
+                assert tui.send_and_wait_for_condition(
+                    intro_key, _has_title(topics["start-here"]), timeout=1.5
+                ), screen_text(tui)
+                assert tui.send_and_wait_for_condition(
+                    Keys.LEFT, _has_title(topics["index"]), timeout=1.0
+                ), screen_text(tui)
+            finally:
+                tui.quit()
