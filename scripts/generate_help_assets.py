@@ -314,6 +314,8 @@ class HelpStrip:
     left_back_label: str
     index_label: str
     index_key: str
+    intro_label: str
+    intro_key: str
     navigation_label: str
     navigation_key: str
     follow_label: str
@@ -324,6 +326,8 @@ DEFAULT_HELP_STRIP = HelpStrip(
     left_back_label="Left back",
     index_label="Index",
     index_key="I",
+    intro_label="inTro",
+    intro_key="T",
     navigation_label="Navigation",
     navigation_key="N",
     follow_label="Right/Enter follow",
@@ -349,7 +353,7 @@ class HelpSourceError(ValueError):
 TOPIC_ID_RE = re.compile(r"^[a-z0-9-]+$")
 CONTEXTS_RE = re.compile(r"^[a-z0-9.-]+(?:,[a-z0-9.-]+)*$")
 INLINE_LINK_RE = re.compile(r"\[([^\]\n]+)\]\(topic:([a-z0-9-]+)\)")
-INDEX_EXCLUDED_TOPIC_IDS = {"f1-navigation"}
+INDEX_EXCLUDED_TOPIC_IDS = {"f1-navigation", "start-here"}
 HELP_STRIP_RE = re.compile(
     r"^```ytnova-help-strip\n(?P<body>.*?)^```$", re.MULTILINE | re.DOTALL
 )
@@ -357,6 +361,8 @@ HELP_STRIP_FIELDS = (
     "left-back-label",
     "index-label",
     "index-key",
+    "intro-label",
+    "intro-key",
     "navigation-label",
     "navigation-key",
     "follow-label",
@@ -386,7 +392,7 @@ def parse_help_strip(source_text: str, *, required: bool) -> HelpStrip:
         raise HelpSourceError("ytnova-help-strip metadata keys must be complete and in schema order")
 
     values = dict(fields)
-    for field in ("index-key", "navigation-key"):
+    for field in ("index-key", "intro-key", "navigation-key"):
         key = values[field]
         if not re.fullmatch(r"[A-Za-z]", key):
             raise HelpSourceError(f"ytnova-help-strip {field} must be one ASCII letter")
@@ -395,9 +401,15 @@ def parse_help_strip(source_text: str, *, required: bool) -> HelpStrip:
             raise HelpSourceError(
                 f"ytnova-help-strip {field} must occur in {label_field}"
             )
-    keys = {values["index-key"].upper(), values["navigation-key"].upper()}
-    if len(keys) != 2:
-        raise HelpSourceError("ytnova-help-strip Index and Navigation keys must be distinct")
+    keys = {
+        values["index-key"].upper(),
+        values["intro-key"].upper(),
+        values["navigation-key"].upper(),
+    }
+    if len(keys) != 3:
+        raise HelpSourceError(
+            "ytnova-help-strip Index, Intro, and Navigation keys must be distinct"
+        )
     if "Q" in keys:
         raise HelpSourceError("ytnova-help-strip keys must not conflict with Q quit")
 
@@ -405,6 +417,8 @@ def parse_help_strip(source_text: str, *, required: bool) -> HelpStrip:
         left_back_label=values["left-back-label"],
         index_label=values["index-label"],
         index_key=values["index-key"],
+        intro_label=values["intro-label"],
+        intro_key=values["intro-key"],
         navigation_label=values["navigation-label"],
         navigation_key=values["navigation-key"],
         follow_label=values["follow-label"],
@@ -655,6 +669,8 @@ def render_runtime_header(
         "    const char *left_back_label;",
         "    const char *index_label;",
         "    const char *index_key;",
+        "    const char *intro_label;",
+        "    const char *intro_key;",
         "    const char *navigation_label;",
         "    const char *navigation_key;",
         "    const char *follow_label;",
@@ -702,6 +718,8 @@ def render_runtime_header(
         lines.append(f"            {c_literal(help_strip.left_back_label)},")
         lines.append(f"            {c_literal(help_strip.index_label)},")
         lines.append(f"            {c_literal(help_strip.index_key)},")
+        lines.append(f"            {c_literal(help_strip.intro_label)},")
+        lines.append(f"            {c_literal(help_strip.intro_key)},")
         lines.append(f"            {c_literal(help_strip.navigation_label)},")
         lines.append(f"            {c_literal(help_strip.navigation_key)},")
         lines.append(f"            {c_literal(help_strip.follow_label)},")
