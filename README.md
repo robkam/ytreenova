@@ -1,5 +1,7 @@
 # **YtreeNova: A File Manager for Unix-like Systems**
 
+> **Pre-release:** version `1.0.0-beta`
+
 **YtreeNova** is a keyboard-first file manager for Linux and BSD with fast multi-volume logging and navigation.
 
 Before opening an issue or suggesting a feature, please check [BUGS.md](docs/BUGS.md) and [ROADMAP.md](docs/ROADMAP.md) first, so as not to create a duplicate if it is already listed.
